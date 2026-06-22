@@ -11,7 +11,7 @@ Prototype pédagogique d'IA médicale multimodale pour apprendre à construire u
 
 ---
 
->  **Position non clinique.** Ce dépôt n'est pas un dispositif médical. Il ne doit jamais être utilisé pour diagnostiquer, trier ou orienter un patient. Toute sortie doit rester un résultat expérimental, vérifié par un professionnel qualifié.
+> **Position non clinique.** Ce dépôt n'est pas un dispositif médical. Il ne doit jamais être utilisé pour diagnostiquer, trier ou orienter un patient. Toute sortie doit rester un résultat expérimental, vérifié par un professionnel qualifié.
 
 ---
 
@@ -30,7 +30,11 @@ Le bon rendu ne cherche pas à impressionner par un modèle spectaculaire. Il d�
 ## Démarrage rapide
 
 ```bash
-python -m venv .venv
+# Use Python 3.11 (recommended)
+# Unix/macOS:
+python3.11 -m venv .venv
+# Windows (PowerShell):
+py -3.11 -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 python eval/run_evaluation.py --mode toy

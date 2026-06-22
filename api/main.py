@@ -2,8 +2,13 @@ from __future__ import annotations
 
 import re
 import shutil
+import sys
 from pathlib import Path
 from fastapi import FastAPI, File, UploadFile
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.append(str(ROOT))
 
 from src.inference import toy_predict
 from src.guardrails import apply_safety_guardrails
