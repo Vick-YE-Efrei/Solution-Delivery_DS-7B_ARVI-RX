@@ -11,7 +11,7 @@ Prototype pédagogique d'IA médicale multimodale pour apprendre à construire u
 
 ---
 
->  **Position non clinique.** Ce dépôt n'est pas un dispositif médical. Il ne doit jamais être utilisé pour diagnostiquer, trier ou orienter un patient. Toute sortie doit rester un résultat expérimental, vérifié par un professionnel qualifié.
+> **Position non clinique.** Ce dépôt n'est pas un dispositif médical. Il ne doit jamais être utilisé pour diagnostiquer, trier ou orienter un patient. Toute sortie doit rester un résultat expérimental, vérifié par un professionnel qualifié.
 
 ---
 
@@ -34,7 +34,7 @@ python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 python eval/run_evaluation.py --mode toy
-streamlit run app/streamlit_app.py
+PYTHONPATH=. streamlit run app/streamlit_app.py # chercher les modules depuis le dossier courant (la racine du projet).
 ```
 
 ## Smoke test du dépôt
