@@ -38,7 +38,7 @@ py -3.11 -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 python eval/run_evaluation.py --mode toy
-streamlit run app/streamlit_app.py
+PYTHONPATH=. streamlit run app/streamlit_app.py # chercher les modules depuis le dossier courant (la racine du projet)
 ```
 
 ## Smoke test du dépôt

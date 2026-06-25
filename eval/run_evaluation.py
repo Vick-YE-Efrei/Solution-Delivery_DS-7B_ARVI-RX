@@ -9,11 +9,12 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.append(str(ROOT))
 
-from src.inference import toy_predict
+import src.inference as inference
 from src.guardrails import apply_safety_guardrails, validate_prediction
 from src.metrics import summarize_metrics
 from src.database import insert_run, init_db
 
+inference.USE_QLORA = True   # ← active QLoRA
 
 def read_cases(path: Path) -> list[dict]:
     with path.open(newline='', encoding='utf-8') as f:
@@ -29,13 +30,30 @@ def write_csv(path: Path, rows: list[dict]) -> None:
 
 
 def run(mode: str, db_path: Path) -> tuple[list[dict], dict]:
-    cases = read_cases(ROOT / 'data' / 'synthetic_cases.csv')
+    cases = read_cases(ROOT / 'docs' / 'data' / 'synthetic_cases.csv')
     rows = []
     init_db(db_path)
+    prompt_path = ROOT / "prompts" / "improved_prompt.txt"
+    MEDGEMMA_PROMPT = prompt_path.read_text(encoding="utf-8")
+
+    def predict_fn(img):
+        return inference.vlm_predict_medgemma(
+            img,
+            MEDGEMMA_PROMPT
+        )
+    
     for case in cases:
         image_path = ROOT / case['image_path']
-        pred = apply_safety_guardrails(toy_predict(image_path, mode=mode))
+
+        # prédiction MedGemma
+        pred = predict_fn(image_path)
+
+        # règles sécurité
+        pred = apply_safety_guardrails(pred)
+
+        # validation
         valid, errors = validate_prediction(pred)
+
         row = {
             'case_id': case['case_id'],
             'label': case['label'],
@@ -46,8 +64,10 @@ def run(mode: str, db_path: Path) -> tuple[list[dict], dict]:
             'latency_ms': pred.get('latency_ms', 0),
             'guardrail_errors': ';'.join(errors),
         }
+
         rows.append(row)
         insert_run(db_path, case['case_id'], str(image_path), pred)
+    
     metrics = summarize_metrics(rows)
     return rows, metrics
 
