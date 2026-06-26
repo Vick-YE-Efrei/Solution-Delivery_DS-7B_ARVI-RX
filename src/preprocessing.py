@@ -18,8 +18,8 @@ DEFAULT_SIZE = (512, 512)
 # Seuils de qualité (sur image en niveaux de gris, valeurs 0–255)
 MIN_MEAN_BRIGHTNESS = 20       # image trop sombre / rien n'est visible
 MAX_MEAN_BRIGHTNESS = 235      # image surexposée / saturée
-MIN_STD_DEV = 15               # image trop uniforme / blanc/noir pur, sans de contenu
-MIN_EDGE_DENSITY = 0.01        # ratio de pixels de bord détectés (Laplacien) — si trop faible, l'image est probablement floue ou vide.
+MIN_STD_DEV = 5                # image trop uniforme / blanc/noir pur, sans de contenu
+MIN_EDGE_DENSITY = 0.001       # ratio de pixels de bord détectés (Laplacien) — si trop faible, l'image est probablement floue ou vide.
 
 
 def load_image(path: str | Path, size: tuple[int, int] = DEFAULT_SIZE):
@@ -40,9 +40,8 @@ def _compute_image_stats(img: Image.Image):
     Calcule des statistiques simples sur l'image en niveaux de gris.
     """
     gray = img.convert("L") # Convertit l'image RGB en niveaux de gris.
-    pixels = list(gray.getdata()) # Récupère les valeurs de pixels en niveaux de gris (0-255).
- 
-    pixels_arr = np.array(pixels)
+    pixels_arr = np.array(gray)
+
     mean_val = float(pixels_arr.mean())
     std_val  = float(pixels_arr.std())
 
