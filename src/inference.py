@@ -5,13 +5,14 @@ import time
 from typing import Any
 from PIL import Image
 import torch
-from transformers import AutoProcessor, AutoModelForImageTextToText
+from transformers import AutoProcessor, AutoModelForImageTextToText, BitsAndBytesConfig
+from peft import PeftModel
 import random
 
 from .preprocessing import basic_quality_flag
 
 WARNING = "Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise."
-MODEL_ID = "google/medgemma-4b-it"
+MODEL_ID = "google/medgemma-4b-pt"
 USE_QLORA = True
 LORA_PATH = "./medgemma-qlora-adapter"
 
@@ -43,15 +44,6 @@ def toy_predict(image_path: str | Path, mode: str = "baseline") -> dict[str, Any
         evidence = ["limited synthetic image quality"]
         justification = "The image is treated as limited quality in the toy catalog. The safe output is uncertainty rather than a forced class."
 
-    # optional noise / robustness
-    if mode == "improved":
-        if quality != "good":
-            pred = "uncertain"
-            conf = min(conf, 0.55)
-
-        if random.random() < 0.05:
-            pred = "uncertain"
-
     latency_ms = int((time.perf_counter() - start) * 1000)
     return {
         "image_quality": quality,
@@ -69,37 +61,36 @@ def toy_predict(image_path: str | Path, mode: str = "baseline") -> dict[str, Any
 def load_medgemma():
     global processor, model
 
-    if processor is None or model is None:
-        processor = AutoProcessor.from_pretrained(MODEL_ID, use_fast=True)
+    if processor is None:
+        processor = AutoProcessor.from_pretrained(MODEL_ID)
 
+    if model is None:
         if USE_QLORA:
-            from peft import PeftModel
-            from transformers import BitsAndBytesConfig
-
             bnb_config = BitsAndBytesConfig(
                 load_in_4bit=True,
                 bnb_4bit_quant_type="nf4",
                 bnb_4bit_use_double_quant=True,
-                bnb_4bit_compute_dtype=torch.bfloat16
+                bnb_4bit_compute_dtype=torch.bfloat16,
             )
 
             base_model = AutoModelForImageTextToText.from_pretrained(
                 MODEL_ID,
                 quantization_config=bnb_config,
-                device_map="cpu",
-                dtype=torch.float16,
-                low_cpu_mem_usage=True
+                torch_dtype=torch.bfloat16,
+                device_map="auto",
+                low_cpu_mem_usage=True,
             )
 
             model = PeftModel.from_pretrained(base_model, LORA_PATH)
-
         else:
             model = AutoModelForImageTextToText.from_pretrained(
                 MODEL_ID,
-                device_map="cpu",
-                dtype=torch.float16,
+                torch_dtype=torch.bfloat16,
+                device_map="auto",
                 low_cpu_mem_usage=True,
             )
+
+        model.eval()
 
 def vlm_predict_medgemma(image_path: str | Path, prompt: str) -> dict[str, Any]:
     load_medgemma()
@@ -125,15 +116,16 @@ def vlm_predict_medgemma(image_path: str | Path, prompt: str) -> dict[str, Any]:
         return_dict=True,
     )
 
+    device = next(model.parameters()).device
     inputs = {k: v.to(model.device) for k, v in inputs.items()}
 
     with torch.no_grad():
         outputs = model.generate(
             **inputs,
-            max_new_tokens=100
+            max_new_tokens=100,
+            do_sample=False
         )
 
-    input_len = inputs["input_ids"].shape[-1]
     text = processor.batch_decode(outputs, skip_special_tokens=True)[0].lower()
 
     if "suspected_opacity" in text:
@@ -157,5 +149,6 @@ def vlm_predict_medgemma(image_path: str | Path, prompt: str) -> dict[str, Any]:
         ],
         "warning": WARNING,
         "model_name": "medgemma-vlm",
+        "prompt_version": "improved_prompt.txt",
         "latency_ms": latency_ms,
     }
