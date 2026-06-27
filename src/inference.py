@@ -12,7 +12,7 @@ from .preprocessing import basic_quality_flag
 
 WARNING = "Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise."
 MODEL_ID = "google/medgemma-4b-it"
-USE_QLORA = False
+USE_QLORA = True
 LORA_PATH = "./medgemma-qlora-adapter"
 
 processor = None
@@ -70,9 +70,7 @@ def load_medgemma():
     global processor, model
 
     if processor is None or model is None:
-        MODEL_ID = "google/medgemma-4b-it"
-
-        processor = AutoProcessor.from_pretrained(MODEL_ID)
+        processor = AutoProcessor.from_pretrained(MODEL_ID, use_fast=True)
 
         if USE_QLORA:
             from peft import PeftModel
@@ -87,21 +85,20 @@ def load_medgemma():
 
             base_model = AutoModelForImageTextToText.from_pretrained(
                 MODEL_ID,
-                device_map="auto",
-                torch_dtype=torch.float16
+                quantization_config=bnb_config,
+                device_map="cpu",
+                dtype=torch.float16,
+                low_cpu_mem_usage=True
             )
 
-            model = PeftModel.from_pretrained(
-                base_model,
-                LORA_PATH,
-                device_map="auto"
-            )
+            model = PeftModel.from_pretrained(base_model, LORA_PATH)
 
         else:
             model = AutoModelForImageTextToText.from_pretrained(
                 MODEL_ID,
-                device_map="auto",
-                torch_dtype=torch.bfloat16 if torch.cuda.is_available() else torch.float32
+                device_map="cpu",
+                dtype=torch.float16,
+                low_cpu_mem_usage=True,
             )
 
 def vlm_predict_medgemma(image_path: str | Path, prompt: str) -> dict[str, Any]:
@@ -110,10 +107,22 @@ def vlm_predict_medgemma(image_path: str | Path, prompt: str) -> dict[str, Any]:
     start = time.perf_counter()
     image = Image.open(image_path).convert("RGB")
 
-    inputs = processor(
-        text=prompt,
-        images=image,
-        return_tensors="pt"
+    messages = [
+        {
+            "role": "user",
+            "content": [
+                {"type": "image", "image": image},
+                {"type": "text", "text": prompt},
+            ]
+        }
+    ]
+
+    inputs = processor.apply_chat_template(
+        messages,
+        add_generation_prompt=True,
+        tokenize=True,
+        return_tensors="pt",
+        return_dict=True,
     )
 
     inputs = {k: v.to(model.device) for k, v in inputs.items()}
@@ -124,6 +133,7 @@ def vlm_predict_medgemma(image_path: str | Path, prompt: str) -> dict[str, Any]:
             max_new_tokens=100
         )
 
+    input_len = inputs["input_ids"].shape[-1]
     text = processor.batch_decode(outputs, skip_special_tokens=True)[0].lower()
 
     if "suspected_opacity" in text:
