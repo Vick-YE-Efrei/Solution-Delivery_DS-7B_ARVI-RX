@@ -7,13 +7,12 @@ from PIL import Image
 import torch
 from transformers import AutoProcessor, AutoModelForImageTextToText, BitsAndBytesConfig
 from peft import PeftModel
-import random
 
 from .preprocessing import basic_quality_flag
 
 WARNING = "Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise."
 MODEL_ID = "google/medgemma-4b-pt"
-USE_QLORA = True
+USE_QLORA = False
 LORA_PATH = "./medgemma-qlora-adapter"
 
 processor = None
