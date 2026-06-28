@@ -15,12 +15,12 @@ from src.metrics import summarize_metrics
 from src.database import insert_run, init_db
 
 
-def read_cases(path: Path) -> list[dict]:
+def read_cases(path: Path):
     with path.open(newline='', encoding='utf-8') as f:
         return list(csv.DictReader(f))
 
 
-def write_csv(path: Path, rows: list[dict]) -> None:
+def write_csv(path: Path, rows: list[dict]):
     if not rows:
         return
     with path.open('w', newline='', encoding='utf-8') as f:
@@ -28,8 +28,8 @@ def write_csv(path: Path, rows: list[dict]) -> None:
         w.writeheader(); w.writerows(rows)
 
 
-def run(mode: str, db_path: Path) -> tuple[list[dict], dict]:
-    cases = read_cases(ROOT / 'data' / 'synthetic_cases.csv')
+def run(mode: str, db_path: Path, cases_csv: Path = ROOT / 'data' / 'rsna_samples.csv'):
+    cases = read_cases(cases_csv)
     rows = []
     init_db(db_path)
     for case in cases:
@@ -57,13 +57,15 @@ def main() -> None:
     parser.add_argument('--mode', choices=['toy', 'baseline', 'improved'], default='toy')
     parser.add_argument('--out-dir', type=Path, default=ROOT / 'eval' / 'outputs')
     parser.add_argument('--db-path', type=Path, default=ROOT / 'medical_ai_evidence.sqlite')
+    # --cases-csv spécifie le fichier CSV contenant les cas à évaluer. Par défaut, il pointe vers le fichier de validation RSNA.
+    parser.add_argument('--cases-csv', type=Path, default=ROOT / 'data' / 'synthetic_cases.csv')
     args = parser.parse_args()
     out_dir = args.out_dir
     out_dir.mkdir(parents=True, exist_ok=True)
     modes = ['baseline', 'improved'] if args.mode == 'toy' else [args.mode]
     summary = []
     for mode in modes:
-        rows, metrics = run(mode, args.db_path)
+        rows, metrics = run(mode, args.db_path, args.cases_csv)
         write_csv(out_dir / f'{mode}_predictions.csv', rows)
         (out_dir / f'{mode}_metrics.json').write_text(json.dumps(metrics, indent=2), encoding='utf-8')
         summary.append({'mode': mode, **metrics})
