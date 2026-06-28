@@ -97,37 +97,24 @@ def vlm_predict_medgemma(image_path: str | Path, prompt: str) -> dict[str, Any]:
     start = time.perf_counter()
     image = Image.open(image_path).convert("RGB")
 
-    messages = [
-        {
-            "role": "user",
-            "content": [
-                {"type": "image", "image": image},
-                {"type": "text", "text": prompt},
-            ]
-        }
-    ]
-
-    inputs = processor.apply_chat_template(
-        messages,
-        add_generation_prompt=True,
-        tokenize=True,
+    # 4b-pt : pas de chat template — on construit l'input directement
+    inputs = processor(
+        images=image,
+        text=processor.tokenizer.boi_token + " " + prompt,
         return_tensors="pt",
-        return_dict=True,
-    )
-
-    device = next(model.parameters()).device
-    inputs = {k: v.to(model.device) for k, v in inputs.items()}
+    ).to(model.device)
 
     with torch.no_grad():
         outputs = model.generate(
             **inputs,
-            max_new_tokens=100,
-            do_sample=False
+            max_new_tokens=200,
+            do_sample=False,
         )
 
     text = processor.batch_decode(outputs, skip_special_tokens=True)[0].lower()
 
-    if "suspected_opacity" in text:
+    # Parsing de la sortie texte libre
+    if "suspected_opacity" in text or "opacity" in text or "pneumonia" in text:
         pred = "suspected_opacity"
     elif "normal" in text:
         pred = "normal"
@@ -137,17 +124,17 @@ def vlm_predict_medgemma(image_path: str | Path, prompt: str) -> dict[str, Any]:
     latency_ms = int((time.perf_counter() - start) * 1000)
 
     return {
-        "image_quality": "unknown",
+        "image_quality": basic_quality_flag(image_path),
         "predicted_class": pred,
         "confidence": 0.6 if pred != "uncertain" else 0.5,
         "visual_evidence": [],
-        "justification": text,
+        "justification": text[:300],
         "limitations": [
-            "external VLM (MedGemma)",
-            "not clinically validated"
+            "4b-pt is a pretrained base model — not instruction-tuned",
+            "output is free text, not structured JSON",
+            "not clinically validated",
         ],
         "warning": WARNING,
-        "model_name": "medgemma-vlm",
-        "prompt_version": "improved_prompt.txt",
+        "model_name": "medgemma-4b-pt",
         "latency_ms": latency_ms,
     }
