@@ -24,8 +24,7 @@ with METADATA_CSV.open(encoding='utf-8') as f:
             'case_id'   : patient_id,
             'image_path': str(image_path.relative_to(Path('.'))),
             'label'     : label,
-            'quality'   : '',
-            'split'     : 'RSNA',
+            'quality'   : ''
         })
         continue
 
