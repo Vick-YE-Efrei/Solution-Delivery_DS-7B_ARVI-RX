@@ -35,10 +35,24 @@ def run(mode: str, db_path: Path) -> tuple[list[dict], dict]:
 
     print("DEBUG mode:", mode)
 
+    # if mode == "toy":
+    #     def predict_fn(img):
+    #         return inference.toy_predict(img, mode="baseline")
+    # else:
+    #     prompt_path = ROOT / "prompts" / "improved_prompt.txt"
+    #     medgemma_prompt = prompt_path.read_text(encoding="utf-8")
+    #     def predict_fn(img):
+    #         return inference.vlm_predict_medgemma(img, medgemma_prompt)
+
     if mode == "toy":
         def predict_fn(img):
             return inference.toy_predict(img, mode="baseline")
-    else:
+    elif mode == "baseline":
+        prompt_path = ROOT / "prompts" / "baseline_prompt.txt"
+        medgemma_prompt = prompt_path.read_text(encoding="utf-8")
+        def predict_fn(img):
+            return inference.vlm_predict_medgemma(img, medgemma_prompt)
+    elif mode == "improved":
         prompt_path = ROOT / "prompts" / "improved_prompt.txt"
         medgemma_prompt = prompt_path.read_text(encoding="utf-8")
         def predict_fn(img):
