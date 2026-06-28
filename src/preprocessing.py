@@ -3,10 +3,6 @@ from __future__ import annotations
 from pathlib import Path
 from PIL import Image
 
-# Librairie pour manipuler les images médicales au format DICOM,
-# souvent utilisées pour les radiographies avec du windowing.
-from pydicom import pixels 
-
 import numpy as np
 
 # Liste des extensions de fichiers autorisées.
@@ -56,32 +52,19 @@ def _compute_image_stats(img: Image.Image):
     }
 
 def _laplacian_variance(gray: Image.Image):
-    """
-    Variance du Laplacien discret 3×3 — mesure de netteté/contenu.
-    """
- 
-    w, h = gray.size
-    pixels = gray.load()
- 
-    laplacian_vals = []
-    for y in range(1, h - 1):
-        for x in range(1, w - 1):
-            # lap = -voisins + 8 * pixel_central
-            lap = (
-                - pixels[x - 1, y - 1] - pixels[x, y - 1] - pixels[x + 1, y - 1]
-                - pixels[x - 1, y]    + 8 * pixels[x, y]  - pixels[x + 1, y]
-                - pixels[x - 1, y + 1] - pixels[x, y + 1] - pixels[x + 1, y + 1]
-            )
-            laplacian_vals.append(lap)
- 
-    # Si aucun pixel n'a été traité (image trop petite),
-    # on retourne 0.0 pour éviter une division par zéro.
-    if not laplacian_vals:
+    """Variance du Laplacien discret 3×3 — mesure de netteté/contenu."""
+    arr = np.array(gray, dtype=np.float32)
+    lap = (
+        - arr[:-2, :-2] - arr[:-2, 1:-1] - arr[:-2, 2:]
+        - arr[1:-1, :-2] + 8 * arr[1:-1, 1:-1] - arr[1:-1, 2:]
+        - arr[2:, :-2]  - arr[2:, 1:-1]  - arr[2:, 2:]
+    )
+
+    # On vérifie que le Laplacien n'est pas vide (image trop petite ou uniforme).
+    if lap.size == 0:
         return 0.0
-    mean_lap = sum(laplacian_vals) / len(laplacian_vals)
-    variance = sum((v - mean_lap) ** 2 for v in laplacian_vals) / len(laplacian_vals)
     
-    return variance
+    return float(lap.var())
 
 # def basic_quality_flag(path: str | Path) -> str:
 #     """Toy quality flag based on filename metadata.
