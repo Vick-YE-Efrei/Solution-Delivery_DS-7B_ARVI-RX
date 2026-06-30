@@ -57,8 +57,6 @@ pip install -r requirements.txt
 
 # Pipeline "jouet" (validation de la baseline)
 python eval/run_evaluation.py --mode toy
-
-# Interface web de la baseline.
 streamlit run app/streamlit_app.py
 ```
 
