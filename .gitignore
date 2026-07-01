@@ -20,3 +20,4 @@ data/Training
 /appel_offre.pdf
 
 data/assistant-radio-evidence.sqlite
+lora_adapters/adapter_model.safetensors
