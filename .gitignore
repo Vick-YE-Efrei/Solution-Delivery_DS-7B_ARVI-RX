@@ -9,8 +9,8 @@ eval/outputs/
 .env
 .DS_Store
 
-finetuning/lora_adapters/
-*.safetensors
+finetuning/lora_adapters/gemma_4_E4B
+finetuning/lora_adapters/medgemma_4b_pt
 
 # Chest X-Ray Images
 data/RSNA/Test
