@@ -9,9 +9,14 @@ eval/outputs/
 .env
 .DS_Store
 
-# Local/professor visual material
-data/Test
-data/Training
+finetuning/lora_adapters/
+*.safetensors
+
+# Chest X-Ray Images
+data/RSNA/Test
+data/RSNA/Training
+data/chest_xray/test
+data/chest_xray/train
 
 # Local review / rollback material
 .rollback*/

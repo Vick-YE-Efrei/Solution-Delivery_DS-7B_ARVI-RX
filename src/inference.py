@@ -11,9 +11,9 @@ from peft import PeftModel
 from .preprocessing import basic_quality_flag
 
 WARNING = "Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise."
-MODEL_ID = "google/medgemma-4b-pt"
-USE_QLORA = False
-LORA_PATH = "./medgemma-qlora-adapter"
+MODEL_ID = "google/gemma-4-E4B" # OU "google/medgemma-4b-pt" 
+USE_QLORA = True  # True pour QLoRA, False pour le modèle de base
+LORA_PATH = "./finetuning/lora_adapters/gemma_4_E4B"  # Chemin vers le modèle LoRA finetuné
 
 processor = None
 model = None
