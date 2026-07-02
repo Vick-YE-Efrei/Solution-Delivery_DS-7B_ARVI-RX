@@ -1,139 +1,229 @@
 <template>
-  <div class="layout">
+  <div class="flex min-h-screen">
 
-    <!-- Header -->
-    <header class="header">
-      <div class="header-inner">
-        <div class="header-brand">
-          <div class="brand-dot"></div>
-          <h1 class="brand-title">Assistant Radiologue Virtuel</h1>
-        </div>
-        <nav class="nav">
-          <router-link to="/" class="nav-link">Nouvelle analyse</router-link>
-          <router-link to="/history" class="nav-link active">Mon historique</router-link>
-          <button class="nav-logout" @click="logout">Déconnexion</button>
-        </nav>
+    <!-- ═══════════════════ SIDEBAR ═══════════════════ -->
+    <aside class="flex flex-col h-screen w-64 sticky left-0 top-0 bg-[#0f172a] py-6 z-50">
+      <div class="px-8 mb-8">
+        <h1 class="page-title-font text-2xl text-white font-extrabold tracking-tight">ARVI-RX</h1>
+        <p class="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold mt-1">Prototype Pédagogique</p>
       </div>
-    </header>
 
-    <main class="main">
+      <nav class="flex-1 px-4 space-y-1">
+        <router-link to="/"
+          class="text-slate-400 hover:text-white rounded-xl px-4 py-3 flex items-center gap-3.5 hover:bg-white/5 transition-colors">
+          <span class="material-symbols-outlined text-xl">radiology</span>
+          <span class="font-medium text-sm">Analyse RX Thorax</span>
+        </router-link>
+        <router-link to="/history"
+          class="rounded-xl px-4 py-3 flex items-center gap-3.5 border border-blue-500/20 bg-blue-600/10 text-blue-400">
+          <span class="material-symbols-outlined text-xl" style="font-variation-settings:'FILL' 1">history</span>
+          <span class="font-semibold text-sm">Historique</span>
+        </router-link>
+        <router-link v-if="auth.isAdmin" to="/admin"
+          class="text-slate-400 hover:text-white rounded-xl px-4 py-3 flex items-center gap-3.5 hover:bg-white/5 transition-colors">
+          <span class="material-symbols-outlined text-xl">assessment</span>
+          <span class="font-medium text-sm">Métriques</span>
+        </router-link>
+        <a href="#"
+          class="text-slate-400 hover:text-white rounded-xl px-4 py-3 flex items-center gap-3.5 hover:bg-white/5 transition-colors">
+          <span class="material-symbols-outlined text-xl">menu_book</span>
+          <span class="font-medium text-sm">Documentation</span>
+        </a>
+        <a href="#"
+          class="text-slate-400 hover:text-white rounded-xl px-4 py-3 flex items-center gap-3.5 hover:bg-white/5 transition-colors">
+          <span class="material-symbols-outlined text-xl">school</span>
+          <span class="font-medium text-sm">Guide Pédagogique</span>
+        </a>
+      </nav>
 
-      <div class="page-head">
-        <div>
-          <h2 class="page-title">Mes analyses</h2>
-          <p class="page-sub">{{ userName }} — {{ analyses.length }} analyses effectuées</p>
+      <div class="px-6 py-4 mt-auto border-t border-slate-800">
+        <div class="flex items-center gap-3.5 p-3 rounded-2xl bg-slate-900/50 border border-slate-800 mb-3">
+          <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+            {{ userInitials }}
+          </div>
+          <div class="overflow-hidden">
+            <p class="font-bold text-xs text-white truncate">{{ auth.user?.name ?? 'Projet EFREI' }}</p>
+            <p class="text-[9px] text-slate-500 font-semibold uppercase tracking-wider">Solution Delivery 2025-2026</p>
+          </div>
         </div>
-        <router-link to="/" class="btn-new">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-            <path d="M3 2.5l10 5.5-10 5.5V2.5z" fill="currentColor"/>
-          </svg>
+        <button @click="logout"
+          class="w-full text-[10px] font-bold text-slate-500 hover:text-slate-300 uppercase tracking-wider py-1 transition-colors">
+          Déconnexion
+        </button>
+      </div>
+    </aside>
+
+    <!-- ═══════════════════ MAIN ═══════════════════ -->
+    <main class="flex-1 flex flex-col bg-surface overflow-auto">
+
+      <!-- Top Bar -->
+      <header class="flex justify-between items-center px-8 h-16 glass-header sticky top-0 z-40 border-b border-outline-variant">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-on-surface-variant">history</span>
+          <h2 class="page-title-font text-lg font-extrabold text-on-surface">Mes analyses</h2>
+        </div>
+        <router-link to="/"
+          class="flex items-center gap-2 btn-primary-gradient text-white text-xs font-bold px-4 py-2 rounded-full hover:scale-[1.02] transition-all no-underline">
+          <span class="material-symbols-outlined text-sm">add</span>
           Nouvelle analyse
         </router-link>
-      </div>
+      </header>
 
-      <!-- Résumé rapide -->
-      <div class="summary-row">
-        <div class="summary-card">
-          <p class="s-label">Total</p>
-          <p class="s-val">{{ analyses.length }}</p>
-        </div>
-        <div class="summary-card">
-          <p class="s-label">Normal</p>
-          <p class="s-val green">{{ countByClass('normal') }}</p>
-        </div>
-        <div class="summary-card">
-          <p class="s-label">Opacité suspectée</p>
-          <p class="s-val orange">{{ countByClass('suspected_opacity') }}</p>
-        </div>
-        <div class="summary-card">
-          <p class="s-label">Incertain</p>
-          <p class="s-val amber">{{ countByClass('uncertain') }}</p>
-        </div>
-      </div>
+      <!-- Page Container -->
+      <div class="px-8 py-6 space-y-6 flex-1">
 
-      <!-- Filtres -->
-      <div class="filters">
-        <select v-model="filter" class="filter-select">
-          <option value="">Toutes les classes</option>
-          <option value="normal">Normal</option>
-          <option value="suspected_opacity">Opacité suspectée</option>
-          <option value="uncertain">Incertain</option>
-        </select>
-        <select v-model="modeFilter" class="filter-select">
-          <option value="">Tous les modes</option>
-          <option value="baseline">Baseline</option>
-          <option value="improved">Amélioré</option>
-        </select>
-      </div>
-
-      <!-- Liste des analyses -->
-      <div class="analyses-list">
-        <div v-if="filteredAnalyses.length === 0" class="empty-state">
-          Aucune analyse ne correspond aux filtres.
+        <!-- Résumé rapide -->
+        <div class="grid grid-cols-4 gap-4">
+          <div class="bg-white rounded-2xl border border-outline-variant premium-shadow p-5">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">Total</p>
+            <p class="page-title-font text-3xl font-extrabold text-on-surface">{{ analyses.length }}</p>
+          </div>
+          <div class="bg-white rounded-2xl border border-outline-variant premium-shadow p-5">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">Normal</p>
+            <p class="page-title-font text-3xl font-extrabold text-emerald-700">{{ countByClass('normal') }}</p>
+          </div>
+          <div class="bg-white rounded-2xl border border-outline-variant premium-shadow p-5">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">Opacité</p>
+            <p class="page-title-font text-3xl font-extrabold text-orange-700">{{ countByClass('suspected_opacity') }}</p>
+          </div>
+          <div class="bg-white rounded-2xl border border-outline-variant premium-shadow p-5">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">Incertain</p>
+            <p class="page-title-font text-3xl font-extrabold text-amber-700">{{ countByClass('uncertain') }}</p>
+          </div>
         </div>
 
-        <div v-for="a in filteredAnalyses" :key="a.id" class="analysis-card" @click="selected = selected?.id === a.id ? null : a">
+        <!-- Filtres -->
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-sm text-on-surface-variant">filter_list</span>
+          <select v-model="filter" class="filter-select">
+            <option value="">Toutes les classes</option>
+            <option value="normal">Normal</option>
+            <option value="suspected_opacity">Opacité suspectée</option>
+            <option value="uncertain">Incertain</option>
+          </select>
+          <select v-model="modeFilter" class="filter-select">
+            <option value="">Tous les modes</option>
+            <option value="baseline">Baseline</option>
+            <option value="improved">Amélioré</option>
+          </select>
+          <span class="text-xs text-on-surface-variant ml-auto">
+            {{ filteredAnalyses.length }} résultat{{ filteredAnalyses.length !== 1 ? 's' : '' }}
+          </span>
+        </div>
 
-          <div class="ac-left">
-            <div class="ac-index">#{{ a.id }}</div>
-            <div class="ac-thumb">
-              <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-                <rect width="28" height="28" rx="6" fill="#f4f3ef"/>
-                <path d="M5 14h5l3-6 4 12 3-7 2 4h1" stroke="#9ca3af" stroke-width="1.5"
-                      stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </div>
-            <div class="ac-meta">
-              <span :class="['ac-result', `res--${a.prediction}`]">{{ classLabel(a.prediction) }}</span>
-              <span class="ac-date">{{ a.date }}</span>
-            </div>
+        <!-- Liste des analyses -->
+        <div class="bg-white rounded-2xl border border-outline-variant premium-shadow overflow-hidden">
+
+          <div v-if="filteredAnalyses.length === 0"
+            class="flex flex-col items-center justify-center py-16 text-on-surface-variant gap-3">
+            <span class="material-symbols-outlined text-4xl">search_off</span>
+            <p class="text-sm">Aucune analyse ne correspond aux filtres.</p>
           </div>
 
-          <div class="ac-right">
-            <span class="mode-chip">{{ a.mode }}</span>
-            <div class="conf-wrap">
-              <div class="conf-bar" :style="{ width: (a.confidence * 100) + '%' }"></div>
-              <span class="conf-txt">{{ (a.confidence * 100).toFixed(0) }}%</span>
-            </div>
-            <svg class="chevron" :class="{ open: selected?.id === a.id }"
-                 width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
-          </div>
+          <div v-for="(a, idx) in filteredAnalyses" :key="a.id">
 
+            <!-- Ligne -->
+            <div
+              class="flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-slate-50 transition-colors border-b border-outline-variant last:border-b-0"
+              @click="selected = selected?.id === a.id ? null : a"
+            >
+              <div class="flex items-center gap-4 flex-1 min-w-0">
+                <!-- Numéro -->
+                <span class="text-xs font-bold text-slate-300 w-6 flex-shrink-0">#{{ a.id }}</span>
+
+                <!-- Icône -->
+                <div class="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center flex-shrink-0">
+                  <span class="material-symbols-outlined text-slate-400 text-lg">radiology</span>
+                </div>
+
+                <!-- Résultat + date -->
+                <div class="flex flex-col gap-0.5 min-w-0">
+                  <span :class="['text-sm font-bold', predClass(a.prediction)]">
+                    {{ classLabel(a.prediction) }}
+                  </span>
+                  <span class="text-xs text-on-surface-variant">{{ a.date }}</span>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-5 flex-shrink-0">
+                <!-- Mode -->
+                <span class="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full"
+                  :class="a.mode === 'improved'
+                    ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                    : 'bg-slate-100 text-slate-500'">
+                  {{ a.mode }}
+                </span>
+
+                <!-- Barre de confiance -->
+                <div class="flex items-center gap-2">
+                  <div class="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div class="h-full rounded-full confidence-bar"
+                      :style="{ width: (a.confidence * 100) + '%', background: confColor(a.confidence) }">
+                    </div>
+                  </div>
+                  <span class="text-xs font-semibold text-on-surface-variant w-8">
+                    {{ (a.confidence * 100).toFixed(0) }}%
+                  </span>
+                </div>
+
+                <!-- Chevron -->
+                <span class="material-symbols-outlined text-slate-400 text-xl transition-transform duration-200"
+                  :style="selected?.id === a.id ? 'transform:rotate(180deg)' : ''">
+                  expand_more
+                </span>
+              </div>
+            </div>
+
+            <!-- Détail expandable -->
+            <transition name="slide">
+              <div v-if="selected?.id === a.id"
+                class="px-6 py-5 bg-slate-50 border-b border-outline-variant last:border-b-0">
+                <div class="grid grid-cols-2 gap-4">
+
+                  <div class="flex flex-col gap-1">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Qualité image</p>
+                    <p class="text-sm text-on-surface leading-relaxed">{{ a.imageQuality }}</p>
+                  </div>
+
+                  <div class="flex flex-col gap-1">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Justification</p>
+                    <p class="text-sm text-on-surface leading-relaxed">{{ a.justification }}</p>
+                  </div>
+
+                  <div class="col-span-2 flex flex-col gap-2">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Observations visuelles</p>
+                    <ul class="flex flex-col gap-1.5">
+                      <li v-for="(o, i) in a.observations" :key="i"
+                        class="flex items-start gap-2 text-sm text-on-surface">
+                        <span class="material-symbols-outlined text-sm text-primary mt-0.5 flex-shrink-0">chevron_right</span>
+                        {{ o }}
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div class="col-span-2 flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+                    <span class="material-symbols-outlined text-amber-600 text-sm mt-0.5 flex-shrink-0">warning</span>
+                    <div>
+                      <p class="text-[10px] font-bold uppercase tracking-widest text-amber-700 mb-1">Limites</p>
+                      <p class="text-sm text-amber-900 leading-relaxed">{{ a.limitations }}</p>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </transition>
+
+          </div>
         </div>
 
-        <!-- Détail -->
-        <transition name="slide">
-          <div v-if="selected" class="detail-panel">
-            <div class="detail-grid">
-              <div class="detail-block">
-                <p class="detail-label">Qualité image</p>
-                <p class="detail-val">{{ selected.imageQuality }}</p>
-              </div>
-              <div class="detail-block">
-                <p class="detail-label">Justification</p>
-                <p class="detail-val">{{ selected.justification }}</p>
-              </div>
-              <div class="detail-block detail-block--full">
-                <p class="detail-label">Observations visuelles</p>
-                <ul class="detail-obs">
-                  <li v-for="(o, i) in selected.observations" :key="i">{{ o }}</li>
-                </ul>
-              </div>
-              <div class="detail-block detail-block--full detail-block--warn">
-                <p class="detail-label">Limites</p>
-                <p class="detail-val">{{ selected.limitations }}</p>
-              </div>
-            </div>
-          </div>
-        </transition>
       </div>
+
+      <!-- Footer -->
+      <footer class="px-8 py-4 border-t border-outline-variant text-xs text-on-surface-variant text-center">
+        Projet personnel · EFREI Paris · 2025-2026
+      </footer>
+
     </main>
-
-    <footer class="footer">
-      Projet personnel · EFREI Paris · 2025-2026
-    </footer>
   </div>
 </template>
 
@@ -142,11 +232,15 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { auth } from '../store/auth.js'
 
-const router   = useRouter()
-const filter   = ref('')
+const router     = useRouter()
+const filter     = ref('')
 const modeFilter = ref('')
-const selected = ref(null)
-const userName = auth.user?.name ?? 'Utilisateur'
+const selected   = ref(null)
+
+const userInitials = computed(() => {
+  const name = auth.user?.name ?? ''
+  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'U'
+})
 
 function logout() {
   auth.logout()
@@ -156,8 +250,19 @@ function logout() {
 function classLabel(pred) {
   return { normal: 'Normal', suspected_opacity: 'Opacité suspectée', uncertain: 'Incertain' }[pred] ?? pred
 }
+
+function predClass(pred) {
+  return { normal: 'text-emerald-700', suspected_opacity: 'text-orange-700', uncertain: 'text-amber-700' }[pred] ?? ''
+}
+
 function countByClass(cls) {
   return analyses.value.filter(a => a.prediction === cls).length
+}
+
+function confColor(c) {
+  if (c >= 0.75) return '#10b981'
+  if (c >= 0.55) return '#f59e0b'
+  return '#ef4444'
 }
 
 const analyses = ref([
@@ -204,265 +309,20 @@ const filteredAnalyses = computed(() => {
 </script>
 
 <style scoped>
-.layout {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background: #f4f3ef;
-  font-family: system-ui, sans-serif;
-  color: #0d0d0d;
-}
-
-/* ── Header ── */
-.header {
-  background: #111111;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-.header-inner {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 18px 28px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-.header-brand { display: flex; align-items: center; gap: 10px; }
-.brand-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: #7c3aed;
-  box-shadow: 0 0 8px rgba(124,58,237,0.7);
-}
-.brand-title {
-  font-family: 'Georgia', serif;
-  font-size: 15px;
-  font-weight: 700;
-  color: #f9fafb;
-}
-.nav { display: flex; align-items: center; gap: 4px; }
-.nav-link {
-  text-decoration: none;
-  font-size: 13.5px;
-  color: #9ca3af;
-  padding: 6px 12px;
-  border-radius: 6px;
-  transition: background 0.15s, color 0.15s;
-}
-.nav-link:hover, .nav-link.active {
-  color: #f9fafb;
-  background: rgba(255,255,255,0.08);
-}
-.nav-logout {
-  background: none;
-  border: none;
-  font-size: 13.5px;
-  color: #9ca3af;
-  cursor: pointer;
-  padding: 6px 12px;
-  border-radius: 6px;
-  transition: background 0.15s, color 0.15s;
-}
-.nav-logout:hover { color: #f9fafb; background: rgba(255,255,255,0.08); }
-
-/* ── Main ── */
-.main {
-  flex: 1;
-  max-width: 1000px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 36px 28px 48px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.page-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-}
-.page-title {
-  font-family: 'Georgia', serif;
-  font-size: 24px;
-  font-weight: 700;
-  color: #0d0d0d;
-  letter-spacing: -0.02em;
-}
-.page-sub { font-size: 13px; color: #6b7280; margin-top: 4px; }
-
-.btn-new {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 18px;
-  background: #111111;
-  color: white;
-  text-decoration: none;
-  border-radius: 8px;
-  font-size: 13.5px;
-  font-weight: 600;
-  transition: background 0.15s, transform 0.1s;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.btn-new:hover { background: #1f1f1f; transform: translateY(-1px); }
-
-/* ── Summary ── */
-.summary-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-}
-.summary-card {
-  background: white;
-  border: 1px solid #e5e2db;
-  border-radius: 10px;
-  padding: 16px 18px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-}
-.s-label { font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; }
-.s-val   { font-size: 26px; font-weight: 700; font-family: 'Georgia', serif; letter-spacing: -0.02em; color: #0d0d0d; }
-.s-val.green  { color: #065f46; }
-.s-val.orange { color: #9a3412; }
-.s-val.amber  { color: #78350f; }
-
-/* ── Filtres ── */
-.filters { display: flex; gap: 10px; }
 .filter-select {
-  padding: 9px 12px;
-  border: 1.5px solid #e5e2db;
+  padding: 8px 12px;
+  border: 1.5px solid #e2e8f0;
   border-radius: 8px;
   font-size: 13px;
   font-family: system-ui, sans-serif;
-  color: #0d0d0d;
+  color: #0f172a;
   background: white;
   outline: none;
   cursor: pointer;
   transition: border-color 0.15s;
 }
-.filter-select:focus { border-color: #5b21b6; }
+.filter-select:focus { border-color: #3b82f6; }
 
-/* ── Analyses list ── */
-.analyses-list { display: flex; flex-direction: column; gap: 0; }
-.empty-state {
-  text-align: center;
-  padding: 48px;
-  color: #9ca3af;
-  font-size: 14px;
-  background: white;
-  border: 1px solid #e5e2db;
-  border-radius: 12px;
-}
-
-.analysis-card {
-  background: white;
-  border: 1px solid #e5e2db;
-  border-bottom: none;
-  padding: 16px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.analysis-card:first-child { border-radius: 12px 12px 0 0; }
-.analysis-card:hover { background: #fafaf9; }
-
-.ac-left  { display: flex; align-items: center; gap: 14px; flex: 1; }
-.ac-right { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
-.ac-index { font-size: 12px; color: #d1d5db; font-weight: 700; min-width: 24px; }
-.ac-thumb { flex-shrink: 0; }
-.ac-meta  { display: flex; flex-direction: column; gap: 3px; }
-
-.ac-result {
-  font-size: 13.5px;
-  font-weight: 700;
-}
-.res--normal            { color: #065f46; }
-.res--suspected_opacity { color: #9a3412; }
-.res--uncertain         { color: #78350f; }
-.ac-date { font-size: 12px; color: #9ca3af; }
-
-.mode-chip {
-  font-size: 11px;
-  background: #f4f3ef;
-  color: #6b7280;
-  padding: 3px 9px;
-  border-radius: 4px;
-  font-weight: 600;
-}
-.conf-wrap { display: flex; align-items: center; gap: 8px; }
-.conf-bar {
-  height: 4px;
-  background: #5b21b6;
-  border-radius: 99px;
-  max-width: 60px;
-  min-width: 4px;
-}
-.conf-txt { font-size: 12px; color: #6b7280; min-width: 28px; }
-.chevron { color: #9ca3af; transition: transform 0.2s; }
-.chevron.open { transform: rotate(180deg); }
-
-/* ── Détail ── */
-.detail-panel {
-  background: #fafaf9;
-  border: 1px solid #e5e2db;
-  border-top: none;
-  border-radius: 0 0 12px 12px;
-  padding: 20px 24px;
-}
-.detail-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-.detail-block { display: flex; flex-direction: column; gap: 5px; }
-.detail-block--full { grid-column: 1 / -1; }
-.detail-block--warn {
-  background: #fffbeb;
-  border: 1px solid #fde68a;
-  border-radius: 8px;
-  padding: 12px 14px;
-}
-.detail-label {
-  font-size: 10.5px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #9ca3af;
-}
-.detail-val { font-size: 13.5px; color: #374151; line-height: 1.65; }
-.detail-obs { list-style: none; display: flex; flex-direction: column; gap: 4px; }
-.detail-obs li {
-  font-size: 13.5px;
-  color: #374151;
-  padding-left: 14px;
-  position: relative;
-  line-height: 1.6;
-}
-.detail-obs li::before { content: '–'; position: absolute; left: 0; color: #9ca3af; }
-
-/* ── Transition ── */
 .slide-enter-active, .slide-leave-active { transition: all 0.2s ease; }
 .slide-enter-from, .slide-leave-to { opacity: 0; transform: translateY(-6px); }
-
-/* ── Footer ── */
-.footer {
-  text-align: center;
-  padding: 20px;
-  font-size: 12px;
-  color: #9ca3af;
-  border-top: 1px solid #e5e2db;
-}
-
-@media (max-width: 700px) {
-  .summary-row { grid-template-columns: 1fr 1fr; }
-  .detail-grid  { grid-template-columns: 1fr; }
-  .page-head { flex-direction: column; }
-}
 </style>
