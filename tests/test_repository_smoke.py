@@ -160,3 +160,38 @@ def test_evaluation_command_runs_and_preserves_warning_contract(tmp_path: Path) 
     assert all(row["warning_rate"] == 1.0 for row in summary)
     assert (out_dir / "before_after_summary.csv").exists()
     assert db_path.exists()
+
+
+def test_compare_mode_writes_model_comparison_outputs(tmp_path: Path) -> None:
+    db_path = tmp_path / "medical_ai_evidence.sqlite"
+    out_dir = tmp_path / "outputs"
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(ROOT)
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "eval/run_evaluation.py",
+            "--mode",
+            "compare",
+            "--dataset",
+            "data/chest_xray/chest_xray_train.csv",
+            "--out-dir",
+            str(out_dir),
+            "--db-path",
+            str(db_path),
+        ],
+        cwd=ROOT,
+        env=env,
+        text=True,
+        capture_output=True,
+        timeout=300,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    payload = json.loads(result.stdout)
+    assert {row["model"] for row in payload["models"]} == {"gemma4_e4b", "medgemma_4b_pt"}
+    assert (out_dir / "gemma4_e4b_predictions.csv").exists()
+    assert (out_dir / "medgemma_4b_pt_predictions.csv").exists()
+    assert (out_dir / "model_comparison_metrics.json").exists()
+    assert db_path.exists()
