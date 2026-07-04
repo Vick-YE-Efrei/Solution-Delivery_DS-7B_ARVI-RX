@@ -71,41 +71,33 @@ curl -X POST "http://127.0.0.1:8000/predict" \
 
 La réponse doit contenir une classe, une confiance, des observations visuelles, une justification, des limites et l'avertissement non clinique.
 
-## Organisation
+## Structure du dépôt
 
-```text
-assistant-radiologue-virtuel/
-├── README.md
-├── docs/          # appel d'offre, architecture, éthique, évaluation
-├── data/          # cas synthétiques et images jouet
-├── prompts/       # prompt baseline, prompt amélioré, schéma JSON
-├── src/           # inférence jouet, garde-fous, métriques, SQLite
-├── api/           # FastAPI
-├── app/           # Streamlit / Gradio
-├── eval/          # évaluation, sorties CSV/JSON, registre d'erreurs
-├── tests/         # smoke tests et contrat minimal
-├── notebooks/     # notebooks de démarrage
-└── finetuning/    # stubs expérimentaux, non obligatoires
-```
+Le dépôt est organisé pour séparer clairement les responsabilités du pipeline :
 
-## Livrables attendus
+- [src](src) : cœur du système. Contient le prétraitement, l’inférence, les garde-fous, les métriques et la persistance SQLite.
+- [api](api) : point d’entrée HTTP minimal avec FastAPI pour faire tourner le pipeline sur une image uploadée.
+- [app](app) : interface de démonstration Streamlit pour tester l’application sans ligne de commande.
+- [prompts](prompts) : prompts versionnés pour la baseline et la version améliorée.
+- [eval](eval) : scripts d’évaluation, sorties CSV/JSON, rapports et artefacts de comparaison.
+- [tests](tests) : tests de smoke et de bout en bout pour verrouiller le comportement attendu.
+- [data](data) : images et cas synthétiques utilisés pour les validations et les démonstrations.
+- [docs](docs) : documents de cadrage, architecture, éthique et protocole d’évaluation.
+- [finetuning](finetuning) : stubs et pistes expérimentales, sans impact sur la chaîne de base.
 
-| Niveau | Attendu |
-|---|---|
-| **MUST** | Baseline reproductible, sortie JSON valide, warning obligatoire, logs, métriques, mini-rapport |
-| **SHOULD** | Prompt amélioré, règle d'incertitude, comparaison baseline/amélioration, analyse d'erreurs |
-| **COULD** | LoRA expérimental, MedGemma/PEFT, localisation visuelle, ablations de prompts |
+### Fichiers racine utiles
+
+- [README.md](README.md) : guide d’utilisation et cadrage du projet.
+- [requirements.txt](requirements.txt) : dépendances principales du pipeline.
+- [requirements-test.txt](requirements-test.txt) : dépendances de test.
+- [pyproject.toml](pyproject.toml) : configuration Python minimale du projet.
 
 ## Références techniques
-
-Les pistes avancées doivent rester expérimentales, traçables et justifiées. En particulier, un groupe qui mobilise Gemma, MedGemma, Unsloth, MIMIC-CXR ou CheXpert doit citer la source exacte, la version, les conditions d'accès et les limites d'usage.
 
 | Ressource | Usage possible | Référence à citer |
 |---|---|---|
 | Unsloth - Gemma 4 | Fine-tuning LoRA/QLoRA expérimental, uniquement après une baseline simple | [Guide Gemma 4](https://unsloth.ai/docs/models/gemma-4/train), [catalogue des modèles](https://unsloth.ai/docs/get-started/unsloth-model-catalog), [blog Unsloth](https://unsloth.ai/blog) |
 | MedGemma | Baseline ou adaptation médicale image-texte, avec prudence sur les conditions d'accès | [Model card Hugging Face](https://huggingface.co/google/medgemma-4b-pt) |
-| MIMIC-CXR / MIMIC-CXR-JPG | Jeu de données de radiographies thoraciques, accès contrôlé et non redistribuable | [MIMIC-CXR](https://physionet.org/content/mimic-cxr/2.1.0/), [MIMIC-CXR-JPG](https://physionet.org/content/mimic-cxr-jpg/2.1.0/) |
-| CheXpert | Jeu de données public de radiographies thoraciques avec rapports associés | [Stanford AIMI - CheXpert](https://aimi.stanford.edu/datasets/chexpert-chest-x-rays) |
 
 ## Points de vigilance
 

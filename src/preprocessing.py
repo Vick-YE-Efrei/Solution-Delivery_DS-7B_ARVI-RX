@@ -1,5 +1,12 @@
 from __future__ import annotations
 
+"""Utilities for loading and validating images before they enter the pipeline.
+
+This module keeps the preprocessing step intentionally simple for the educational
+prototype. It is the right place to add DICOM handling, windowing or quality
+checks in a more advanced version.
+"""
+
 from pathlib import Path
 from PIL import Image
 

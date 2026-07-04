@@ -13,7 +13,8 @@ pydicom>=2.4
 
 torch
 peft
-transformers==4.56.0
+transformers>=5.12.1,<6.0.0
 accelerate>=0.34
+bitsandbytes
 
 pytest>=8.0

@@ -1,5 +1,11 @@
 from __future__ import annotations
 
+"""Persistence helpers for saving structured prediction runs in SQLite.
+
+This module is responsible for creating the database schema and storing every
+run so the evaluation and demo flows remain traceable.
+"""
+
 import json
 import sqlite3
 from pathlib import Path

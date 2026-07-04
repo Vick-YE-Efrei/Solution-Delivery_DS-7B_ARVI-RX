@@ -1,5 +1,11 @@
 from __future__ import annotations
 
+"""Simple metrics helpers for evaluating the prototype predictions.
+
+These functions compute the core classification metrics required by the project
+contract: accuracy, macro-F1 and basic output-quality indicators.
+"""
+
 from collections import Counter
 from typing import Iterable
 

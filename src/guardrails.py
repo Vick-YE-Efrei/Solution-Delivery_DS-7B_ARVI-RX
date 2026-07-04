@@ -1,5 +1,11 @@
 from __future__ import annotations
 
+"""Guardrails for enforcing the expected prediction schema and safe defaults.
+
+The functions in this module validate the structured output from the model and
+force a conservative fallback when the output is malformed or too uncertain.
+"""
+
 from typing import Any
 
 ALLOWED_CLASSES = {"normal", "suspected_opacity", "uncertain"}
