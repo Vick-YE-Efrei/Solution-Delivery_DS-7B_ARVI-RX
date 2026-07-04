@@ -15,44 +15,75 @@ Prototype pédagogique d'IA médicale multimodalep à l'analyse de radiographies
 
 ---
 
-## Démarrage rapide
+## Installation et environnement
 
 ```bash
-# Use Python 3.11 (recommended)
+# Use Python 3.11
 # Unix/macOS:
 python3.11 -m venv .venv
 # Windows (PowerShell):
 py -3.11 -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
+python -m pip install --upgrade pip
 pip install -r requirements.txt
-python eval/run_evaluation.py --mode toy
-PYTHONPATH=. streamlit run app/streamlit_app.py # chercher les modules depuis le dossier courant (la racine du projet)
-```
-
-## Smoke test du dépôt
-
-```bash
 pip install -r requirements-test.txt
-PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -q
-python -m compileall -q src api app eval finetuning tests
-python eval/run_evaluation.py --mode toy \
-  --out-dir /tmp/assistant-radio-eval \
-  --db-path /tmp/assistant-radio-evidence.sqlite
 ```
 
-Ce smoke test vérifie la structure du dépôt, le contrat du dataset synthétique, le schéma de sortie, les garde-fous, l'API de démonstration, la compilation Python et l'évaluation jouet.
-
-## API de démonstration
+## Tests
 
 ```bash
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD="1"
+python -m pytest -q
+```
+
+## Interface Streamlit (UI interactive)
+```bash
+$env:PYTHONPATH="."
+streamlit run app/streamlit_app.py
+```
+
+## API FastAPI
+```bash
+# Lancer le serveur
 uvicorn api.main:app --reload
+
+# Dans un autre terminal, faire une requête
+curl -X POST "http://localhost:8000/predict" \
+  -F "file=@/chemin/vers/votre/image.png"
 ```
 
-Exemple :
+## Test Pipeline
+```bash
+python -m pytest tests/test_repository_smoke.py -v 2>&1 | Select-Object -Last 30
+```
+
+## Téléchargement du modèle VLM (requis une seule fois)
 
 ```bash
-curl -X POST "http://127.0.0.1:8000/predict" \
-  -F "file=@data/sample_images/CXR_SYN_002_suspected_opacity.png"
+# Télécharger et mettre en cache medgemma-4b-pt localement (~4 GB)
+python -c "from transformers import AutoProcessor, AutoModelForImageTextToText; \
+  AutoProcessor.from_pretrained('google/medgemma-4b-pt'); \
+  AutoModelForImageTextToText.from_pretrained('google/medgemma-4b-pt'); \
+  print('✓ Model cached')"
+```
+
+## Comparaison baseline / améliorée
+
+### Mode toy (rapide, déterministe, pas de VLM)
+```bash
+# ~2 secondes
+python eval/run_evaluation.py --mode toy --out-dir results_json
+# Sortie: eval/results_json/toy_metrics.json
+```
+
+### Modes baseline/improved (VLM medgemma-4b-pt - TRÈS LENT sur CPU)
+```bash
+# ⚠ Chaque image prend ~12 minutes sur CPU. --allow-remote-model-load charge depuis cache local.
+python eval/run_evaluation.py --mode baseline --dataset data/chest_xray/chest_xray_train.csv --out-dir results_json --allow-remote-model-load
+# Sortie: eval/results_json/baseline_predictions.csv, eval/results_json/baseline_metrics.json
+
+python eval/run_evaluation.py --mode improved --dataset data/chest_xray/chest_xray_train.csv --out-dir results_json --allow-remote-model-load
+# Sortie: eval/results_json/improved_predictions.csv, eval/results_json/improved_metrics.json
 ```
 
 ## Structure du dépôt
@@ -61,7 +92,9 @@ curl -X POST "http://127.0.0.1:8000/predict" \
 - [api](api) : point d’entrée HTTP minimal avec FastAPI pour faire tourner le pipeline sur une image uploadée.
 - [app](app) : interface de démonstration Streamlit pour tester l’application sans ligne de commande.
 - [prompts](prompts) : prompts versionnés pour la baseline et la version améliorée.
-- [eval](eval) : scripts d’évaluation, sorties CSV/JSON, rapports et artefacts de comparaison.
+- [eval](eval) : scripts d'évaluation batch (toy/baseline/improved), sorties CSV/JSON.
+  - `run_evaluation.py` : orchestration des modes toy/baseline/improved, agrégation des métriques.
+  - `comparison_outputs/` : résultats de référence (baseline_gemma4, medgemma, comparaisons).
 - [tests](tests) : tests de smoke et de bout en bout pour verrouiller le comportement attendu.
 - [data](data) : images et cas utilisés pour les validations et les démonstrations.
 - [docs](docs) : documents de cadrage, architecture, éthique et protocole d’évaluation.
@@ -69,13 +102,6 @@ curl -X POST "http://127.0.0.1:8000/predict" \
 - [requirements.txt](requirements.txt) : dépendances principales du pipeline.
 - [requirements-test.txt](requirements-test.txt) : dépendances de test.
 - [pyproject.toml](pyproject.toml) : configuration Python minimale du projet.
-
-## Références techniques
-
-| Ressource | Usage possible | Référence à citer |
-|---|---|---|
-| Unsloth - Gemma 4 | Fine-tuning LoRA/QLoRA expérimental, uniquement après une baseline simple | [Guide Gemma 4](https://unsloth.ai/docs/models/gemma-4/train), [catalogue des modèles](https://unsloth.ai/docs/get-started/unsloth-model-catalog), [blog Unsloth](https://unsloth.ai/blog) |
-| MedGemma | Baseline ou adaptation médicale image-texte, avec prudence sur les conditions d'accès | [Model card Hugging Face](https://huggingface.co/google/medgemma-4b-pt) |
 
 ## Références
 
@@ -87,7 +113,6 @@ curl -X POST "http://127.0.0.1:8000/predict" \
 ### Modèle utilisés comme backbones vision-langage multimodaux 
 
 - MedGemma 4B (modèle vision-langage pré-entraîné) — https://huggingface.co/google/medgemma-4b-pt  
-- Gemma 4 E2B (modèle fondation multimodal) — https://huggingface.co/google/gemma-4-E2B  
 
 ---
 

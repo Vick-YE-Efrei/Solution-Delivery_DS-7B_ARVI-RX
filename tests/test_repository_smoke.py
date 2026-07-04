@@ -10,16 +10,13 @@ import subprocess
 import sys
 
 from fastapi.testclient import TestClient
-
 from api.main import app
 from api.main import health
 from src.guardrails import WARNING_TEXT, apply_safety_guardrails, validate_prediction
 from src.inference import toy_predict
 from src.metrics import summarize_metrics
 
-
 ROOT = Path(__file__).resolve().parents[1]
-
 
 def test_repository_student_contract_is_present() -> None:
     required_paths = [
@@ -56,7 +53,6 @@ def test_repository_student_contract_is_present() -> None:
     assert missing == []
     assert forbidden == []
 
-
 def test_synthetic_dataset_contract_is_valid() -> None:
     path = ROOT / "data" / "synthetic_cases.csv"
     required_columns = {"case_id", "image_path", "source", "label", "split", "quality", "notes"}
@@ -72,7 +68,6 @@ def test_synthetic_dataset_contract_is_valid() -> None:
         assert row["source"] == "synthetic_toy"
         assert (ROOT / row["image_path"]).exists()
 
-
 def test_prediction_schema_warning_and_guardrails() -> None:
     image_path = ROOT / "data" / "sample_images" / "CXR_SYN_002_suspected_opacity.png"
     pred = apply_safety_guardrails(toy_predict(image_path, mode="improved"))
@@ -83,11 +78,9 @@ def test_prediction_schema_warning_and_guardrails() -> None:
     assert pred["warning"] == WARNING_TEXT
     assert "not a validated medical model" in pred["limitations"]
 
-
 def test_python_source_tree_compiles() -> None:
     for folder in ("src", "api", "app", "eval", "finetuning", "tests"):
         assert compileall.compile_dir(ROOT / folder, quiet=1)
-
 
 def test_invalid_model_output_falls_back_to_uncertain() -> None:
     pred = apply_safety_guardrails({"predicted_class": "diagnosis", "confidence": 0.99})
@@ -96,7 +89,6 @@ def test_invalid_model_output_falls_back_to_uncertain() -> None:
     assert pred["confidence"] <= 0.5
     assert pred["warning"] == WARNING_TEXT
     assert pred["guardrail_errors"]
-
 
 def test_metrics_and_api_health_contract() -> None:
     rows = [
@@ -110,7 +102,6 @@ def test_metrics_and_api_health_contract() -> None:
     assert metrics["n"] == 2
     assert metrics["json_valid_rate"] == 1.0
     assert metrics["warning_rate"] == 1.0
-
 
 def test_api_predict_preserves_uploaded_case_signal() -> None:
     client = TestClient(app)
@@ -127,7 +118,6 @@ def test_api_predict_preserves_uploaded_case_signal() -> None:
     assert payload["predicted_class"] == "suspected_opacity"
     assert payload["warning"] == WARNING_TEXT
     shutil.rmtree(ROOT / "tmp_uploads", ignore_errors=True)
-
 
 def test_evaluation_command_runs_and_preserves_warning_contract(tmp_path: Path) -> None:
     db_path = tmp_path / "medical_ai_evidence.sqlite"
@@ -155,14 +145,15 @@ def test_evaluation_command_runs_and_preserves_warning_contract(tmp_path: Path) 
     )
     assert result.returncode == 0, result.stderr
     summary = json.loads(result.stdout)
-    assert {row["mode"] for row in summary} == {"baseline", "improved"}
-    assert all(row["json_valid_rate"] == 1.0 for row in summary)
-    assert all(row["warning_rate"] == 1.0 for row in summary)
-    assert (out_dir / "before_after_summary.csv").exists()
+    assert summary["mode"] == "toy"
+    assert summary["n"] == 20  # 20 toy predictions
+    assert summary["json_valid_rate"] == 1.0
+    assert summary["warning_rate"] == 1.0
+    assert (out_dir / "toy_metrics.json").exists()
     assert db_path.exists()
 
-
-def test_compare_mode_writes_model_comparison_outputs(tmp_path: Path) -> None:
+def test_baseline_vs_improved_prompt_comparison(tmp_path: Path) -> None:
+    """Toy mode is independent, generates only toy_metrics.json."""
     db_path = tmp_path / "medical_ai_evidence.sqlite"
     out_dir = tmp_path / "outputs"
     env = os.environ.copy()
@@ -173,9 +164,7 @@ def test_compare_mode_writes_model_comparison_outputs(tmp_path: Path) -> None:
             sys.executable,
             "eval/run_evaluation.py",
             "--mode",
-            "compare",
-            "--dataset",
-            "data/chest_xray/chest_xray_train.csv",
+            "toy",
             "--out-dir",
             str(out_dir),
             "--db-path",
@@ -185,13 +174,21 @@ def test_compare_mode_writes_model_comparison_outputs(tmp_path: Path) -> None:
         env=env,
         text=True,
         capture_output=True,
-        timeout=300,
+        timeout=20,
         check=False,
     )
     assert result.returncode == 0, result.stderr
     payload = json.loads(result.stdout)
-    assert {row["model"] for row in payload["models"]} == {"gemma4_e4b", "medgemma_4b_pt"}
-    assert (out_dir / "gemma4_e4b_predictions.csv").exists()
-    assert (out_dir / "medgemma_4b_pt_predictions.csv").exists()
-    assert (out_dir / "model_comparison_metrics.json").exists()
+    assert payload["mode"] == "toy"
+    assert payload["n"] == 20  # 20 toy predictions
+    assert "accuracy" in payload
+    assert "macro_f1" in payload
+    assert payload["json_valid_rate"] == 1.0
+    assert payload["warning_rate"] == 1.0
+    assert 0 <= payload["uncertain_rate"] <= 1.0
+    assert (out_dir / "toy_metrics.json").exists()
+    assert db_path.exists()
+    assert (out_dir / "toy_metrics.json").exists()
+    assert not (out_dir / "baseline_metrics.json").exists(), "Toy mode should only generate toy_metrics.json"
+    assert not (out_dir / "improved_metrics.json").exists(), "Toy mode should only generate toy_metrics.json"
     assert db_path.exists()

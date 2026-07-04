@@ -44,7 +44,7 @@ async def predict(file: UploadFile = File(...)) -> dict:
         image_path=target,
         mode="improved",
         prompt_mode="improved",
-        output_dir=ROOT / "artifacts" / "runs",
+        output_dir=ROOT / "eval" / "results_json",
         db_path=ROOT / "medical_ai_evidence.sqlite",
     )
     return result

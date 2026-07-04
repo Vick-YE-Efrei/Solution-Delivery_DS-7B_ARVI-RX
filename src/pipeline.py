@@ -17,17 +17,14 @@ from .guardrails import apply_safety_guardrails
 from .inference import toy_predict
 from .preprocessing import basic_quality_flag, load_image
 
-
 class PipelineError(RuntimeError):
     pass
-
 
 def _load_prompt(prompt_mode: str) -> str:
     prompt_path = Path(__file__).resolve().parents[1] / "prompts" / f"{prompt_mode}_prompt.txt"
     if not prompt_path.exists():
         raise PipelineError(f"Prompt not found: {prompt_path}")
     return prompt_path.read_text(encoding="utf-8")
-
 
 def run_pipeline(
     image_path: str | Path,
@@ -42,7 +39,7 @@ def run_pipeline(
     if not image_path.exists():
         raise PipelineError(f"Image not found: {image_path}")
 
-    output_dir = Path(output_dir or Path("artifacts/runs"))
+    output_dir = Path(output_dir or Path("eval/results_json"))
     output_dir.mkdir(parents=True, exist_ok=True)
     db_path = Path(db_path or Path("medical_ai_evidence.sqlite"))
 

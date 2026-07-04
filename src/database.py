@@ -14,12 +14,10 @@ SCHEMA_PATH = Path(__file__).resolve().parents[1] / "sql" / "schema.sql"
 
 _DB_INIT_DONE: set[str] = set()
 
-
 def connect(db_path: str | Path = "medical_ai_evidence.sqlite") -> sqlite3.Connection:
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     return conn
-
 
 def init_db(db_path: str | Path = "medical_ai_evidence.sqlite") -> None:
     key = str(Path(db_path).resolve())
@@ -29,7 +27,6 @@ def init_db(db_path: str | Path = "medical_ai_evidence.sqlite") -> None:
     conn.executescript(SCHEMA_PATH.read_text(encoding="utf-8"))
     conn.commit(); conn.close()
     _DB_INIT_DONE.add(key)
-
 
 def insert_run(db_path: str | Path, case_id: str, image_path: str, prediction: dict) -> None:
     init_db(db_path)

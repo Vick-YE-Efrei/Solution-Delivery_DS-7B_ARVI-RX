@@ -12,7 +12,6 @@ from PIL import Image
 
 ALLOWED_SUFFIXES = {".png", ".jpg", ".jpeg", ".bmp"}
 
-
 def load_image(path: str | Path, size: tuple[int, int] = (512, 512)) -> Image.Image:
     """Load an image safely for the educational prototype.
 
@@ -25,7 +24,6 @@ def load_image(path: str | Path, size: tuple[int, int] = (512, 512)) -> Image.Im
         raise ValueError(f"Unsupported image format: {path.suffix}")
     img = Image.open(path).convert("RGB")
     return img.resize(size)
-
 
 def basic_quality_flag(path: str | Path) -> str:
     """Toy quality flag based on filename metadata.

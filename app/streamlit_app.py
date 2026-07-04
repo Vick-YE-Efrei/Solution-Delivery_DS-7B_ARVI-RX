@@ -34,7 +34,7 @@ if uploaded:
             image_path=tmp_path,
             mode=mode,
             prompt_mode=mode,
-            output_dir=Path("artifacts/runs"),
+            output_dir=Path("results_json"),
             db_path=Path("medical_ai_evidence.sqlite"),
         )
         st.metric("Classe", pred["predicted_class"])

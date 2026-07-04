@@ -12,7 +12,6 @@ ALLOWED_CLASSES = {"normal", "suspected_opacity", "uncertain"}
 REQUIRED_KEYS = {"image_quality", "predicted_class", "confidence", "visual_evidence", "justification", "limitations", "warning"}
 WARNING_TEXT = "Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise."
 
-
 def validate_prediction(pred: dict[str, Any]) -> tuple[bool, list[str]]:
     errors: list[str] = []
     missing = REQUIRED_KEYS - set(pred)
@@ -29,7 +28,6 @@ def validate_prediction(pred: dict[str, Any]) -> tuple[bool, list[str]]:
     if not pred.get("warning"):
         errors.append("warning missing")
     return not errors, errors
-
 
 def apply_safety_guardrails(pred: dict[str, Any]) -> dict[str, Any]:
     valid, errors = validate_prediction(pred)

@@ -1,0 +1,36 @@
+{
+  "run_id": "7003edf2-6dac-46f8-933c-c46a22c1d733",
+  "pipeline_status": "completed",
+  "image_path": "tmp_uploads\\uploaded_CXR_SYN_002_suspected_opacity.png",
+  "image_size": [
+    512,
+    512
+  ],
+  "mode": "improved",
+  "prompt_mode": "improved",
+  "metadata": {
+    "created_at": "2026-07-04T20:30:59Z",
+    "image_format": ".png",
+    "prompt_mode": "improved",
+    "model_name": "toy-rule-improved",
+    "prompt_version": "improved_v1"
+  },
+  "image_quality": "good",
+  "predicted_class": "suspected_opacity",
+  "confidence": 0.72,
+  "visual_evidence": [
+    "synthetic opacity-like area visible in the lung field"
+  ],
+  "justification": "The synthetic image contains a localized brighter region compatible with the toy opacity class.",
+  "limitations": [
+    "synthetic toy image",
+    "no clinical context",
+    "not a validated medical model"
+  ],
+  "warning": "Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise.",
+  "model_name": "toy-rule-improved",
+  "prompt_version": "improved_v1",
+  "latency_ms": 68,
+  "guardrail_errors": [],
+  "prompt_preview": "ROLE\nYou are an educational, non-diagnostic assistant that describes frontal chest radiographs in structured JSON. \nYou are NOT a medical device and NEVER produce a diagnosis.\nWhen in doubt, abstain ("
+}

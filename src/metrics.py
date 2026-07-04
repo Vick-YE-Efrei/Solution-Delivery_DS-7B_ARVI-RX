@@ -11,7 +11,6 @@ from typing import Iterable
 
 CLASSES = ["normal", "suspected_opacity", "uncertain"]
 
-
 def accuracy(y_true: Iterable[str], y_pred: Iterable[str]) -> float:
     y_true = list(y_true); y_pred = list(y_pred)
     if not y_true:
