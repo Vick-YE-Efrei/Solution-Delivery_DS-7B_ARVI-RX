@@ -114,10 +114,15 @@
         <!-- Liste des analyses -->
         <div class="bg-white rounded-2xl border border-outline-variant premium-shadow overflow-hidden">
 
-          <div v-if="filteredAnalyses.length === 0"
+          <div v-if="isLoading"
+            class="flex flex-col items-center justify-center py-16 text-on-surface-variant gap-3">
+            <span class="material-symbols-outlined text-4xl animate-spin">refresh</span>
+            <p class="text-sm">Chargement de l'historique...</p>
+          </div>
+          <div v-else-if="filteredAnalyses.length === 0"
             class="flex flex-col items-center justify-center py-16 text-on-surface-variant gap-3">
             <span class="material-symbols-outlined text-4xl">search_off</span>
-            <p class="text-sm">Aucune analyse ne correspond aux filtres.</p>
+            <p class="text-sm">{{ analyses.length === 0 ? 'Aucune analyse effectuée pour le moment.' : 'Aucune analyse ne correspond aux filtres.' }}</p>
           </div>
 
           <div v-for="(a, idx) in filteredAnalyses" :key="a.id">
@@ -228,77 +233,69 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import axios from 'axios'
 import { auth } from '../store/auth.js'
 
 const router     = useRouter()
 const filter     = ref('')
 const modeFilter = ref('')
 const selected   = ref(null)
+const isLoading  = ref(true)
 
 const userInitials = computed(() => {
   const name = auth.user?.name ?? ''
   return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'U'
 })
 
-function logout() {
-  auth.logout()
-  router.push('/login')
-}
+function logout() { auth.logout(); router.push('/login') }
 
 function classLabel(pred) {
   return { normal: 'Normal', suspected_opacity: 'Opacité suspectée', uncertain: 'Incertain' }[pred] ?? pred
 }
-
 function predClass(pred) {
   return { normal: 'text-emerald-700', suspected_opacity: 'text-orange-700', uncertain: 'text-amber-700' }[pred] ?? ''
 }
-
 function countByClass(cls) {
   return analyses.value.filter(a => a.prediction === cls).length
 }
-
 function confColor(c) {
   if (c >= 0.75) return '#10b981'
   if (c >= 0.55) return '#f59e0b'
   return '#ef4444'
 }
+function formatDate(iso) {
+  return new Date(iso).toLocaleString('fr-FR', {
+    day: '2-digit', month: 'long', year: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  })
+}
 
-const analyses = ref([
-  {
-    id: 7, date: '25 juin 2026 14:32', mode: 'improved',
-    prediction: 'normal', confidence: 0.87, threshold: 0.70,
-    imageQuality: 'Bonne qualité — exposition correcte, pas d\'artefact notable.',
-    justification: 'Les champs pulmonaires apparaissent clairs, sans opacité focale identifiable.',
-    observations: ['Champs pulmonaires symétriques', 'Silhouette cardiaque normale', 'Pas d\'épanchement pleural visible'],
-    limitations: 'Analyse limitée à une vue frontale. Toute anomalie subtile peut être manquée sans vue de profil.'
-  },
-  {
-    id: 6, date: '24 juin 2026 11:05', mode: 'baseline',
-    prediction: 'suspected_opacity', confidence: 0.74, threshold: 0.70,
-    imageQuality: 'Qualité satisfaisante — légère rotation du patient.',
-    justification: 'Zone de densification au lobe inférieur droit compatible avec une consolidation.',
-    observations: ['Opacité lobe inférieur droit', 'Bronchogramme aérique possible', 'Pas d\'épanchement majeur'],
-    limitations: 'Prototype pédagogique. Un scanner CT et avis radiologique sont indispensables.'
-  },
-  {
-    id: 5, date: '22 juin 2026 16:44', mode: 'improved',
-    prediction: 'uncertain', confidence: 0.61, threshold: 0.70,
-    imageQuality: 'Qualité limitée — sous-exposition partielle.',
-    justification: 'Confiance inférieure au seuil défini. Résultat non concluant.',
-    observations: ['Image partiellement sous-exposée', 'Structures médiastinales peu visibles', 'Champ droit difficile à évaluer'],
-    limitations: 'Image de qualité insuffisante pour une analyse fiable. Une nouvelle acquisition est recommandée.'
-  },
-  {
-    id: 4, date: '20 juin 2026 09:18', mode: 'baseline',
-    prediction: 'normal', confidence: 0.92, threshold: 0.70,
-    imageQuality: 'Excellente qualité — exposition optimale.',
-    justification: 'Aucune anomalie décelable sur les champs pulmonaires.',
-    observations: ['Poumons clairs', 'Index cardiothoracique dans les normes', 'Coupoles diaphragmatiques régulières'],
-    limitations: 'Prototype pédagogique. Résultat expérimental non validé cliniquement.'
+const analyses = ref([])
+
+onMounted(async () => {
+  try {
+    const { data } = await axios.get('/api/analyses/me')
+    analyses.value = data.map(a => ({
+      id:           a.id,
+      date:         formatDate(a.created_at),
+      mode:         a.mode,
+      prediction:   a.predicted_class,
+      confidence:   a.confidence,
+      threshold:    a.threshold ?? 0.70,
+      imageQuality: a.image_quality ?? 'good',
+      justification: a.justification ?? '',
+      observations: [],
+      limitations:  a.warning ?? '',
+      model_name:   a.model_name,
+    }))
+  } catch (e) {
+    console.error('Erreur chargement historique:', e.message)
+  } finally {
+    isLoading.value = false
   }
-])
+})
 
 const filteredAnalyses = computed(() => {
   let list = analyses.value

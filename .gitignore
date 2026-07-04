@@ -14,6 +14,9 @@ node_modules/
 frontend/dist/
 backend/node_modules/
 
+# Modèles LoRA (trop lourds pour GitHub, à garder localement)
+*.safetensors
+
 # Local/professor visual material
 assets/
 

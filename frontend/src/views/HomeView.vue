@@ -77,6 +77,12 @@
               Improved
             </button>
           </div>
+          <!-- Sélecteur modèle -->
+          <select v-model="currentModel"
+            class="text-[11px] font-bold text-slate-600 border border-outline-variant rounded-full px-3 py-1.5 bg-white outline-none cursor-pointer">
+            <option value="medgemma_4b_pt">MedGemma 4B PT</option>
+            <option value="gemma_4_E4B">Gemma 4E4B</option>
+          </select>
           <!-- API Status -->
           <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-100">
             <span class="w-2 h-2 rounded-full bg-emerald-500 status-pulse"></span>
@@ -123,6 +129,33 @@
               pour tester le flux.
             </p>
           </div>
+        </div>
+
+        <!-- STATE: ANALYZING -->
+        <div v-else-if="isAnalyzing" class="flex flex-col items-center justify-center flex-1 min-h-[500px] gap-6">
+          <div class="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center">
+            <span class="material-symbols-outlined text-primary text-4xl animate-spin">refresh</span>
+          </div>
+          <div class="text-center">
+            <p class="page-title-font text-lg font-extrabold text-on-surface">Analyse en cours...</p>
+            <p class="text-sm text-on-surface-variant mt-1">Le modèle analyse la radiographie. Cela peut prendre quelques secondes.</p>
+          </div>
+          <div class="flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-100 rounded-full">
+            <span class="w-2 h-2 rounded-full bg-blue-500 status-pulse"></span>
+            <span class="text-[11px] font-bold text-blue-700 uppercase tracking-wider">{{ currentModel }} actif</span>
+          </div>
+        </div>
+
+        <!-- STATE: ERROR -->
+        <div v-else-if="analyzeError && !currentResult" class="flex flex-col items-center justify-center flex-1 min-h-[400px] gap-4">
+          <div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center">
+            <span class="material-symbols-outlined text-red-500 text-3xl">error</span>
+          </div>
+          <p class="page-title-font text-base font-extrabold text-on-surface">Analyse échouée</p>
+          <p class="text-sm text-slate-600 max-w-md text-center">{{ analyzeError }}</p>
+          <button @click="resetUpload" class="btn-primary-gradient text-white font-bold px-6 py-2.5 rounded-full text-sm hover:scale-[1.02] transition-all">
+            Réessayer
+          </button>
         </div>
 
         <!-- STATE: RESULTS -->
@@ -330,33 +363,34 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import axios from 'axios'
 import { auth } from '../store/auth.js'
 
 const router = useRouter()
 
 // ── State ──
-const fileInput    = ref(null)
-const hasResults   = ref(false)
-const isDragging   = ref(false)
-const fileName     = ref('')
-const previewUrl   = ref('')
-const currentMode  = ref('baseline')
+const fileInput     = ref(null)
+const currentFile   = ref(null)
+const hasResults    = ref(false)
+const isDragging    = ref(false)
+const isAnalyzing   = ref(false)
+const analyzeError  = ref('')
+const fileName      = ref('')
+const previewUrl    = ref('')
+const currentMode   = ref('baseline')
+const currentModel  = ref('medgemma_4b_pt')
 const currentResult = ref(null)
-const history      = ref([])
-const showJson     = ref(false)
+const history       = ref([])
+const showJson      = ref(false)
 
 // ── Auth ──
 const userInitials = computed(() => {
   const name = auth.user?.name ?? 'EF'
   return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
 })
-
-function logout() {
-  auth.logout()
-  router.push('/login')
-}
+function logout() { auth.logout(); router.push('/login') }
 
 // ── Mode ──
 function setMode(mode) { currentMode.value = mode }
@@ -377,92 +411,88 @@ function processFile(file) {
     alert('Format non supporté. Utilisez PNG, JPG ou JPEG.')
     return
   }
-  fileName.value = file.name
+  currentFile.value = file
+  fileName.value    = file.name
   const reader = new FileReader()
   reader.onload = (e) => {
     previewUrl.value = e.target.result
     hasResults.value = true
-    runAnalysis(file.name)
+    runAnalysis(file)
   }
   reader.readAsDataURL(file)
 }
 
 function resetUpload() {
-  hasResults.value   = false
-  previewUrl.value   = ''
-  fileName.value     = ''
+  hasResults.value    = false
+  previewUrl.value    = ''
+  fileName.value      = ''
   currentResult.value = null
+  currentFile.value   = null
+  analyzeError.value  = ''
   if (fileInput.value) fileInput.value.value = ''
 }
 
-// ── Analyse jouet (miroir de src/inference.py) ──
-function runAnalysis(name) {
-  const n    = name.toLowerCase()
-  const mode = currentMode.value
-  let pred, conf, evidence, justification, quality
+// ── Analyse via API → FastAPI → MedGemma ──
+async function runAnalysis(file) {
+  isAnalyzing.value  = true
+  analyzeError.value = ''
+  currentResult.value = null
 
-  if (n.includes('suspected_opacity')) {
-    pred = 'suspected_opacity'
-    conf = mode === 'baseline' ? 0.78 : 0.72
-    evidence = ["Zone opaque synthétique visible dans le champ pulmonaire"]
-    justification = "L'image synthétique contient une région plus claire localisée, compatible avec la classe d'opacité du modèle jouet. Ceci est un résultat de validation du pipeline, pas une interprétation médicale."
-    quality = 'good'
-  } else if (n.includes('normal')) {
-    pred = 'normal'
-    conf = mode === 'baseline' ? 0.72 : 0.68
-    evidence = ["Aucun marqueur d'opacité synthétique détecté"]
-    justification = "L'image synthétique ne contient pas le marqueur d'opacité utilisé par le générateur jouet. Cette conclusion est limitée au cadre de validation synthétique."
-    quality = 'good'
-  } else {
-    pred = 'uncertain'
-    conf = 0.52
-    evidence = ["Qualité d'image synthétique limitée"]
-    justification = "L'image est traitée comme de qualité limitée dans le catalogue jouet. La sortie sûre est l'incertitude plutôt qu'une classe forcée."
-    quality = 'limited'
+  try {
+    const form = new FormData()
+    form.append('image', file)
+    form.append('mode', currentMode.value)
+    form.append('model_key', currentModel.value)
+
+    const { data } = await axios.post('/api/analyses/predict', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 180_000,
+    })
+
+    currentResult.value = data
+    addToHistory(file.name, data)
+  } catch (err) {
+    const msg = err.response?.data?.message ?? err.message
+    analyzeError.value = msg
+  } finally {
+    isAnalyzing.value = false
   }
-
-  if (mode === 'improved' && quality !== 'good') {
-    pred = 'uncertain'
-    conf = Math.min(conf, 0.55)
-  }
-
-  const result = {
-    image_quality:   quality,
-    predicted_class: pred,
-    confidence:      parseFloat(conf.toFixed(3)),
-    visual_evidence: evidence,
-    justification,
-    limitations:     ['Image synthétique jouet', 'Aucun contexte clinique', 'Modèle non validé médicalement'],
-    warning:         'Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise.',
-    model_name:      `toy-rule-${mode}`,
-    prompt_version:  `${mode}_v1`,
-    latency_ms:      Math.floor(Math.random() * 5) + 1
-  }
-
-  currentResult.value = result
-  addToHistory(name, result)
 }
 
 function addToHistory(name, r) {
-  const now = new Date()
-  const ts = now.toLocaleString('fr-FR', {
+  const ts = new Date().toLocaleString('fr-FR', {
     day: '2-digit', month: '2-digit', year: 'numeric',
-    hour: '2-digit', minute: '2-digit', second: '2-digit'
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
   })
   history.value.unshift({ ts, filename: name, ...r })
   if (history.value.length > 10) history.value.pop()
 }
 
+// Charger l'historique réel depuis MySQL au démarrage
+onMounted(async () => {
+  document.addEventListener('keydown', onKeydown)
+  try {
+    const { data } = await axios.get('/api/analyses/me')
+    history.value = data.map(a => ({
+      ts:              new Date(a.created_at).toLocaleString('fr-FR'),
+      filename:        a.filename,
+      predicted_class: a.predicted_class,
+      confidence:      a.confidence,
+      image_quality:   a.image_quality,
+      model_name:      a.model_name,
+    }))
+  } catch (_) {}
+})
+onUnmounted(() => document.removeEventListener('keydown', onKeydown))
+
 // ── Computed display ──
 const confidencePct = computed(() =>
   currentResult.value ? (currentResult.value.confidence * 100).toFixed(1) : '0'
 )
-
 const confBarColor = computed(() => {
   const c = currentResult.value?.confidence ?? 0
   return c > 0.7 ? 'bg-emerald-500' : c > 0.5 ? 'bg-amber-500' : 'bg-red-500'
 })
-
 const qualityBadgeClass = computed(() => {
   const q = currentResult.value?.image_quality
   if (q === 'good')    return 'bg-emerald-50 border-emerald-200 text-emerald-700'
@@ -475,7 +505,6 @@ const qualityBadgeHtml = computed(() => {
   if (q === 'limited') return '<span class="material-symbols-outlined text-sm">warning</span> Limitée'
   return '<span class="material-symbols-outlined text-sm">error</span> Insuffisante'
 })
-
 const classBadgeClass = computed(() => {
   const p = currentResult.value?.predicted_class
   if (p === 'normal')            return 'class-badge-normal'
@@ -507,9 +536,5 @@ const classLabelClass = computed(() => {
   return 'page-title-font text-xl font-extrabold text-slate-600'
 })
 
-// Fermer le modal avec Escape
-import { onMounted, onUnmounted } from 'vue'
 function onKeydown(e) { if (e.key === 'Escape') showJson.value = false }
-onMounted(() => document.addEventListener('keydown', onKeydown))
-onUnmounted(() => document.removeEventListener('keydown', onKeydown))
 </script>
