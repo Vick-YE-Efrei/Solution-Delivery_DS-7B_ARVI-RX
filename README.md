@@ -80,10 +80,11 @@ Comptes créés par `setup.js` :
 
 ### 4. Lancer les trois serveurs
 
+Ouvrir **trois terminaux** depuis la racine du projet, venv activé dans chacun.
+
 **Terminal 1 — FastAPI (moteur d'inférence)**
 
 ```bash
-# Depuis la racine du projet, venv activé
 uvicorn api.main:app --reload --port 8001
 ```
 
@@ -102,7 +103,7 @@ npm install      # première fois uniquement
 npm run dev
 ```
 
-Ouvrir `http://localhost:5173` dans le navigateur.
+Ouvrir **`http://localhost:5173`** dans le navigateur.
 
 ### Récapitulatif des ports
 
@@ -113,23 +114,25 @@ Ouvrir `http://localhost:5173` dans le navigateur.
 | FastAPI | 8001 |
 | MySQL | 3306 |
 
-### Modèles LoRA (optionnel)
+### Modèles LoRA — mode Amélioré
 
-Les poids `.safetensors` des adaptateurs LoRA ne sont pas versionnés (taille > 100 Mo). Ils doivent être placés manuellement aux chemins suivants :
+Les poids `.safetensors` ne sont pas versionnés (> 100 Mo). Ils doivent être présents localement :
 
 ```
-finetuning/lora_adapters/medgemma_4b_pt/medgemma_4b_pt/           ← adaptateurs MedGemma 4B PT
-finetuning/lora_adapters/gemma_4_E4B/gemma_4_E4B/gemma4_chestxray_lora_adapters/   ← adaptateurs Gemma 4E4B
+finetuning/lora_adapters/medgemma_4b_pt/medgemma_4b_pt/adapter_model.safetensors
+finetuning/lora_adapters/gemma_4_E4B/gemma_4_E4B/gemma4_chestxray_lora_adapters/adapter_model.safetensors
 ```
 
-Pour utiliser les modèles HuggingFace gated (`google/medgemma-4b-pt`) :
+Pour activer le vrai modèle MedGemma, connecter le compte HuggingFace ayant reçu l'accès au repo `google/medgemma-4b-pt` :
 
 ```bash
 pip install huggingface_hub
-huggingface-cli login   # token HF avec accès approuvé au modèle
+hf auth login   # coller le token généré sur huggingface.co/settings/tokens
 ```
 
-Sans GPU ou sans poids, le mode **"Amélioré"** bascule automatiquement sur le prédicteur jouet.
+> **Note GPU** : MedGemma 4B en quantification 4-bit nécessite une carte NVIDIA (CUDA) avec au moins 4 Go de VRAM. La première analyse en mode Amélioré prend 1 à 2 minutes (chargement du modèle en mémoire) ; les suivantes sont nettement plus rapides car le modèle reste en cache GPU.
+>
+> Sans GPU compatible, le mode Amélioré bascule automatiquement sur le prédicteur de démonstration (fallback toy).
 
 ---
 

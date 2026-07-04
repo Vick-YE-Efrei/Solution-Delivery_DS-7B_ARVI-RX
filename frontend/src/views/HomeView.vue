@@ -445,8 +445,7 @@ async function runAnalysis(file) {
     form.append('model_key', currentModel.value)
 
     const { data } = await axios.post('/api/analyses/predict', form, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-      timeout: 180_000,
+      timeout: 300_000,
     })
 
     currentResult.value = data

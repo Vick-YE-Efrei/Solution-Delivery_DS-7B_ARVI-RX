@@ -22,7 +22,16 @@ const upload = multer({
 })
 
 // ─── POST /api/analyses/predict — upload image → FastAPI → MySQL ───────────
-router.post('/predict', requireAuth, upload.single('image'), async (req, res) => {
+router.post('/predict', requireAuth, (req, res, next) => {
+  upload.single('image')(req, res, (err) => {
+    if (err) {
+      console.error('[MULTER ERROR]', err.code, err.message)
+      return res.status(400).json({ message: err.message || 'Erreur upload.' })
+    }
+    next()
+  })
+}, async (req, res) => {
+  console.log('[PREDICT] file:', req.file?.originalname, '| body mode:', req.body?.mode)
   if (!req.file) return res.status(400).json({ message: 'Aucune image reçue.' })
 
   const mode      = req.body.mode      || 'toy'
@@ -38,7 +47,7 @@ router.post('/predict', requireAuth, upload.single('image'), async (req, res) =>
     const fastapiRes = await axios.post(
       `${FASTAPI_URL}/predict?mode=${mode}&model_key=${model_key}`,
       form,
-      { headers: form.getHeaders(), timeout: 120_000 }
+      { headers: form.getHeaders(), timeout: 300_000 }
     )
     const pred = fastapiRes.data
 
@@ -73,13 +82,13 @@ router.post('/predict', requireAuth, upload.single('image'), async (req, res) =>
     })
   } catch (err) {
     console.error('Predict error:', err.message)
-    // Si FastAPI est hors ligne, retourner une erreur claire
+    console.error('FastAPI response body:', JSON.stringify(err.response?.data))
     if (err.code === 'ECONNREFUSED' || err.code === 'ECONNRESET') {
       return res.status(503).json({
         message: 'Le serveur de modèle (FastAPI) est inaccessible. Lancez-le avec : uvicorn api.main:app --reload',
       })
     }
-    return res.status(500).json({ message: 'Erreur lors de l\'analyse.' })
+    return res.status(500).json({ message: err.response?.data?.detail || 'Erreur lors de l\'analyse.' })
   } finally {
     // Nettoyage du fichier temporaire
     fs.unlink(filePath, () => {})

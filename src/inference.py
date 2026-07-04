@@ -12,6 +12,8 @@ from .preprocessing import basic_quality_flag
 
 WARNING = "Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise."
 
+_ROOT = Path(__file__).resolve().parents[1]
+
 _processor_cache: dict[str, Any] = {}
 _model_cache: dict[str, Any] = {}
 
@@ -57,19 +59,35 @@ def _load_model(model_id: str, lora_path: str) -> tuple[Any, Any]:
     cache_key = f"{model_id}:{lora_path}"
     if cache_key not in _model_cache:
         processor = AutoProcessor.from_pretrained(model_id)
-        bnb_config = BitsAndBytesConfig(
-            load_in_4bit=True,
-            bnb_4bit_quant_type="nf4",
-            bnb_4bit_use_double_quant=True,
-            bnb_4bit_compute_dtype=torch.bfloat16,
-        )
-        base = AutoModelForImageTextToText.from_pretrained(
-            model_id,
-            quantization_config=bnb_config,
-            torch_dtype=torch.bfloat16,
-            device_map="auto",
-            low_cpu_mem_usage=True,
-        )
+
+        has_gpu = torch.cuda.is_available()
+        if has_gpu:
+            vram_gb = torch.cuda.get_device_properties(0).total_memory / 1e9
+            # Laisse 0.5 Go pour le système, déborde le reste sur RAM CPU
+            gpu_alloc = f"{max(1, int(vram_gb - 0.5))}GiB"
+            print(f"[INFO] GPU détecté ({vram_gb:.1f} Go VRAM) — allocation GPU: {gpu_alloc}, débordement CPU")
+            bnb_config = BitsAndBytesConfig(
+                load_in_4bit=True,
+                bnb_4bit_quant_type="nf4",
+                bnb_4bit_use_double_quant=True,
+                bnb_4bit_compute_dtype=torch.bfloat16,
+            )
+            base = AutoModelForImageTextToText.from_pretrained(
+                model_id,
+                quantization_config=bnb_config,
+                dtype=torch.bfloat16,
+                device_map="cuda:0",
+                low_cpu_mem_usage=True,
+            )
+        else:
+            print("[INFO] Pas de GPU détecté — chargement du modèle en CPU (lent)")
+            base = AutoModelForImageTextToText.from_pretrained(
+                model_id,
+                dtype=torch.float32,
+                device_map="cpu",
+                low_cpu_mem_usage=True,
+            )
+
         model = PeftModel.from_pretrained(base, lora_path)
         model.eval()
         _processor_cache[cache_key] = processor
@@ -81,8 +99,10 @@ def _load_model(model_id: str, lora_path: str) -> tuple[Any, Any]:
 def vlm_predict_medgemma(
     image_path: str | Path,
     model_key: str = "medgemma_4b_pt",
-    lora_path: str = "./finetuning/lora_adapters/medgemma_4b_pt",
+    lora_path: str | None = None,
 ) -> dict[str, Any]:
+    if lora_path is None:
+        lora_path = str(_ROOT / "finetuning" / "lora_adapters" / "medgemma_4b_pt" / "medgemma_4b_pt")
     MODEL_IDS = {
         "gemma_4_E4B":    "google/gemma-4-E4B",
         "medgemma_4b_pt": "google/medgemma-4b-pt",
