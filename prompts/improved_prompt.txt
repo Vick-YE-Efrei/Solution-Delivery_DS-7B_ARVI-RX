@@ -16,6 +16,7 @@ Return only valid JSON with this schema:
 }
 
 Rules:
+- Do not invent clinical information that is not visible in the image.
 - No patient history invention.
 - No diagnosis language.
 - If confidence < 0.60, predicted_class must be "uncertain".

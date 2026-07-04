@@ -1,31 +1,19 @@
 # Assistant radiologue virtuel responsable
 
-> **Auteur :** Badr Tajini  
+> **Auteur :** RaVI Corp.  
 > **Solution Delivery - Filière Data**  
 > **École :** EFREI  
 > **Année académique :** 2025-2026
 
 ## Contexte
 
-Prototype pédagogique d'IA médicale multimodale pour apprendre à construire une chaîne **prudente, traçable et évaluée** autour d'une radiographie thoracique frontale.
+Prototype pédagogique d'IA médicale multimodalep à l'analyse de radiographies thoraciques frontales. Il reçoit une image, l'analyse via un modèle vision-langage et retourne une sortie JSON structurée, prudente et traçable limitée à trois classes : normal, suspected_opacity, uncertain. La classe uncertain est une décision de sécurité (image de qualité insuffisante, signes faibles, sortie invalide ou confiance trop basse), jamais un échec.
 
 ---
 
 > **Position non clinique.** Ce dépôt n'est pas un dispositif médical. Il ne doit jamais être utilisé pour diagnostiquer, trier ou orienter un patient. Toute sortie doit rester un résultat expérimental, vérifié par un professionnel qualifié.
 
 ---
-
-## Contrat du projet
-
-| Élément | Cadrage |
-|---|---|
-| Entrée | Une radiographie thoracique frontale |
-| Sorties | `normal`, `suspected_opacity`, `uncertain` |
-| Preuve minimale | JSON valide, warning, logs, métriques, cas d'erreur |
-| Données | Synthétiques ou publiques, autorisées et dé-identifiées |
-| Finalité | Prototype éducatif de data/IA, pas aide au diagnostic réelle |
-
-Le bon rendu ne cherche pas à impressionner par un modèle spectaculaire. Il démontre une méthode : périmètre limité, baseline reproductible, garde-fous, évaluation, analyse d'erreurs et limites explicites.
 
 ## Démarrage rapide
 
@@ -42,8 +30,6 @@ PYTHONPATH=. streamlit run app/streamlit_app.py # chercher les modules depuis le
 ```
 
 ## Smoke test du dépôt
-
-Avant une soutenance, un push ou une livraison, lancer le contrôle court :
 
 ```bash
 pip install -r requirements-test.txt
@@ -69,11 +55,7 @@ curl -X POST "http://127.0.0.1:8000/predict" \
   -F "file=@data/sample_images/CXR_SYN_002_suspected_opacity.png"
 ```
 
-La réponse doit contenir une classe, une confiance, des observations visuelles, une justification, des limites et l'avertissement non clinique.
-
 ## Structure du dépôt
-
-Le dépôt est organisé pour séparer clairement les responsabilités du pipeline :
 
 - [src](src) : cœur du système. Contient le prétraitement, l’inférence, les garde-fous, les métriques et la persistance SQLite.
 - [api](api) : point d’entrée HTTP minimal avec FastAPI pour faire tourner le pipeline sur une image uploadée.
@@ -81,13 +63,9 @@ Le dépôt est organisé pour séparer clairement les responsabilités du pipeli
 - [prompts](prompts) : prompts versionnés pour la baseline et la version améliorée.
 - [eval](eval) : scripts d’évaluation, sorties CSV/JSON, rapports et artefacts de comparaison.
 - [tests](tests) : tests de smoke et de bout en bout pour verrouiller le comportement attendu.
-- [data](data) : images et cas synthétiques utilisés pour les validations et les démonstrations.
+- [data](data) : images et cas utilisés pour les validations et les démonstrations.
 - [docs](docs) : documents de cadrage, architecture, éthique et protocole d’évaluation.
-- [finetuning](finetuning) : stubs et pistes expérimentales, sans impact sur la chaîne de base.
-
-### Fichiers racine utiles
-
-- [README.md](README.md) : guide d’utilisation et cadrage du projet.
+- [finetuning](finetuning) : pistes expérimentales, sans impact sur la chaîne de base.
 - [requirements.txt](requirements.txt) : dépendances principales du pipeline.
 - [requirements-test.txt](requirements-test.txt) : dépendances de test.
 - [pyproject.toml](pyproject.toml) : configuration Python minimale du projet.
@@ -99,16 +77,21 @@ Le dépôt est organisé pour séparer clairement les responsabilités du pipeli
 | Unsloth - Gemma 4 | Fine-tuning LoRA/QLoRA expérimental, uniquement après une baseline simple | [Guide Gemma 4](https://unsloth.ai/docs/models/gemma-4/train), [catalogue des modèles](https://unsloth.ai/docs/get-started/unsloth-model-catalog), [blog Unsloth](https://unsloth.ai/blog) |
 | MedGemma | Baseline ou adaptation médicale image-texte, avec prudence sur les conditions d'accès | [Model card Hugging Face](https://huggingface.co/google/medgemma-4b-pt) |
 
-## Points de vigilance
+## Références
 
-- Ne pas inventer d'information clinique absente de l'image.
-- Ne pas supprimer la classe `uncertain`; elle est un garde-fou, pas un échec.
-- Ne pas afficher uniquement des réussites en soutenance.
-- Ne jamais commiter de données patient réelles, identifiantes ou ambiguës.
-- Ne pas présenter le prototype comme validé médicalement.
+### Dépôt de référence
+- Assistant radiologue virtuel (base du projet) — https://github.com/BTajini/assistant-radiologue-virtuel  
 
-## Licence et sources externes
+---
 
-Le code pédagogique du dépôt est publié sous licence MIT. **Les datasets externes, modèles et bibliothèques utilisés conservent leurs licences propres** : les étudiants doivent vérifier et documenter les droits d'usage avant toute expérimentation.
+### Modèle utilisés comme backbones vision-langage multimodaux 
 
-Exigence minimale : indiquer dans le rapport la source, la version, la licence ou les conditions d'accès, les restrictions de redistribution, les traitements d'anonymisation et les limites d'interprétation. Aucun fichier patient réel, même pseudonymisé, ne doit être ajouté au dépôt sans autorisation explicite et traçable.
+- MedGemma 4B (modèle vision-langage pré-entraîné) — https://huggingface.co/google/medgemma-4b-pt  
+- Gemma 4 E2B (modèle fondation multimodal) — https://huggingface.co/google/gemma-4-E2B  
+
+---
+
+### Jeux de données publics utilisés
+
+- RSNA Pneumonia Processed Dataset — https://www.kaggle.com/datasets/iamtapendu/rsna-pneumonia-processed-dataset  
+- Chest X-Ray Pneumonia Dataset — https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia  
