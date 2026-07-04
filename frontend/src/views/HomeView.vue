@@ -441,7 +441,7 @@ async function runAnalysis(file) {
   try {
     const form = new FormData()
     form.append('image', file)
-    form.append('mode', currentMode.value)
+    form.append('mode', currentMode.value === 'baseline' ? 'toy' : 'improved')
     form.append('model_key', currentModel.value)
 
     const { data } = await axios.post('/api/analyses/predict', form, {

@@ -76,10 +76,16 @@ async def predict(
     with target.open("wb") as f:
         shutil.copyfileobj(file.file, f)
 
-    if mode == "toy":
-        pred = toy_predict(target, mode="baseline")
+    if mode == "toy" or mode == "baseline":
+        pred = toy_predict(target, mode=mode if mode in ("baseline", "improved") else "baseline")
     else:
-        lora_path = LORA_PATH_GEMMA if model_key == "gemma_4_E4B" else LORA_PATH_MEDGEMMA
-        pred = vlm_predict_medgemma(target, model_key=model_key, lora_path=lora_path)
+        # mode == "improved" → essaie le vrai modèle, fallback toy si GPU/modèle indisponible
+        try:
+            lora_path = LORA_PATH_GEMMA if model_key == "gemma_4_E4B" else LORA_PATH_MEDGEMMA
+            pred = vlm_predict_medgemma(target, model_key=model_key, lora_path=lora_path)
+        except Exception as exc:
+            print(f"[WARN] VLM indisponible ({exc}), fallback toy")
+            pred = toy_predict(target, mode="improved")
+            pred["model_name"] = f"toy-fallback ({model_key} indisponible)"
 
     return apply_safety_guardrails(pred)
