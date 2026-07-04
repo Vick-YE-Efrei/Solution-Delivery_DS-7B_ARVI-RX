@@ -27,7 +27,113 @@ Prototype pédagogique d'IA médicale multimodale pour apprendre à construire u
 
 Le bon rendu ne cherche pas à impressionner par un modèle spectaculaire. Il démontre une méthode : périmètre limité, baseline reproductible, garde-fous, évaluation, analyse d'erreurs et limites explicites.
 
-## Démarrage rapide
+## Démarrage — Application web complète
+
+L'application web se compose de trois serveurs à lancer en parallèle dans trois terminaux distincts, depuis la **racine du projet** (`C:\mastercamp\projet_arvi`).
+
+### Prérequis
+
+- Python 3.10+ avec `pip`
+- Node.js 18+
+- MySQL 8+ en service local
+
+### 1. Environnement Python
+
+```bash
+python -m venv .venv
+# Windows
+.venv\Scripts\activate
+# Linux / macOS
+source .venv/bin/activate
+
+pip install -r requirements.txt
+```
+
+### 2. Environnement Node
+
+```bash
+cd backend
+npm install
+cd ..
+```
+
+### 3. Configuration de la base de données
+
+```bash
+# Copier le fichier d'environnement et l'adapter
+cp backend/.env.example backend/.env
+# Ouvrir backend/.env et renseigner DB_PASSWORD avec le mot de passe MySQL local
+
+# Créer la base, les tables et les comptes de démonstration
+cd backend
+node setup.js
+cd ..
+```
+
+Comptes créés par `setup.js` :
+
+| Email | Mot de passe | Rôle |
+|---|---|---|
+| admin@arvi.fr | admin123 | admin |
+| marie@arvi.fr | user123 | user |
+| thomas@arvi.fr | user123 | user |
+
+### 4. Lancer les trois serveurs
+
+**Terminal 1 — FastAPI (moteur d'inférence)**
+
+```bash
+# Depuis la racine du projet, venv activé
+uvicorn api.main:app --reload --port 8001
+```
+
+**Terminal 2 — Backend Express**
+
+```bash
+cd backend
+node server.js
+```
+
+**Terminal 3 — Frontend Vue**
+
+```bash
+cd frontend
+npm install      # première fois uniquement
+npm run dev
+```
+
+Ouvrir `http://localhost:5173` dans le navigateur.
+
+### Récapitulatif des ports
+
+| Service | Port |
+|---|---|
+| Vue (Vite) | 5173 |
+| Express API | 3000 |
+| FastAPI | 8001 |
+| MySQL | 3306 |
+
+### Modèles LoRA (optionnel)
+
+Les poids `.safetensors` des adaptateurs LoRA ne sont pas versionnés (taille > 100 Mo). Ils doivent être placés manuellement aux chemins suivants :
+
+```
+finetuning/lora_adapters/medgemma_4b_pt/medgemma_4b_pt/           ← adaptateurs MedGemma 4B PT
+finetuning/lora_adapters/gemma_4_E4B/gemma_4_E4B/gemma4_chestxray_lora_adapters/   ← adaptateurs Gemma 4E4B
+```
+
+Pour utiliser les modèles HuggingFace gated (`google/medgemma-4b-pt`) :
+
+```bash
+pip install huggingface_hub
+huggingface-cli login   # token HF avec accès approuvé au modèle
+```
+
+Sans GPU ou sans poids, le mode **"Amélioré"** bascule automatiquement sur le prédicteur jouet.
+
+---
+
+## Démarrage rapide (pipeline Python seul)
 
 ```bash
 python -m venv .venv
