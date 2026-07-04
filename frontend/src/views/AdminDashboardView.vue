@@ -40,8 +40,17 @@
     <!-- Contenu -->
     <div class="content">
 
+      <!-- ── LOADING ── -->
+      <div v-if="isLoading" style="display:flex;align-items:center;justify-content:center;height:60vh;color:#9ca3af;font-size:14px;gap:10px;">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="animation:spin 1s linear infinite">
+          <circle cx="10" cy="10" r="8" stroke="#e5e7eb" stroke-width="2.5"/>
+          <path d="M10 2a8 8 0 0 1 8 8" stroke="#5b21b6" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        Chargement des données...
+      </div>
+
       <!-- ── VUE D'ENSEMBLE ── -->
-      <section v-if="section === 'overview'">
+      <section v-else-if="section === 'overview'">
         <div class="page-head">
           <h1 class="page-title">Vue d'ensemble</h1>
           <p class="page-sub">Tableau de bord — {{ today }}</p>
@@ -50,17 +59,17 @@
           <div class="stat-card">
             <p class="stat-label">Utilisateurs inscrits</p>
             <p class="stat-val">{{ stats.totalUsers }}</p>
-            <p class="stat-note">+{{ stats.newUsersThisWeek }} cette semaine</p>
+            <p class="stat-note">{{ users.filter(u => u.role === 'user').length }} utilisateurs, {{ users.filter(u => u.role === 'admin').length }} admins</p>
           </div>
           <div class="stat-card">
             <p class="stat-label">Analyses effectuées</p>
             <p class="stat-val">{{ stats.totalAnalyses }}</p>
-            <p class="stat-note">{{ stats.analysesToday }} aujourd'hui</p>
+            <p class="stat-note">Confiance moy. {{ stats.avgConfidence }}%</p>
           </div>
           <div class="stat-card">
-            <p class="stat-label">Précision globale</p>
-            <p class="stat-val">{{ stats.accuracy }}%</p>
-            <p class="stat-note">Sur {{ stats.evaluated }} cas évalués</p>
+            <p class="stat-label">Confiance moyenne</p>
+            <p class="stat-val">{{ stats.avgConfidence }}%</p>
+            <p class="stat-note">Sur {{ stats.totalAnalyses }} analyses</p>
           </div>
           <div class="stat-card">
             <p class="stat-label">Taux d'incertitude</p>
@@ -101,7 +110,7 @@
       </section>
 
       <!-- ── UTILISATEURS ── -->
-      <section v-if="section === 'users'">
+      <section v-else-if="section === 'users'">
         <div class="page-head">
           <h1 class="page-title">Utilisateurs</h1>
           <p class="page-sub">{{ users.length }} comptes enregistrés</p>
@@ -147,7 +156,7 @@
       </section>
 
       <!-- ── HISTORIQUE ANALYSES ── -->
-      <section v-if="section === 'analyses'">
+      <section v-else-if="section === 'analyses'">
         <div class="page-head">
           <h1 class="page-title">
             <span v-if="!selectedUser">Toutes les analyses</span>
@@ -210,13 +219,17 @@
       </section>
 
       <!-- ── PERFORMANCES ── -->
-      <section v-if="section === 'perf'">
+      <section v-else-if="section === 'perf'">
         <div class="page-head">
           <h1 class="page-title">Performances du modèle</h1>
-          <p class="page-sub">Métriques sur {{ perfData.total }} cas évalués</p>
+          <p class="page-sub">Métriques calculées sur {{ perfData.total }} analyses réelles</p>
         </div>
 
-        <div class="perf-grid">
+        <div v-if="perfData.total === 0" style="text-align:center;padding:60px;color:#9ca3af;font-size:14px;">
+          Aucune analyse enregistrée pour le moment. Lancez des analyses pour voir les métriques.
+        </div>
+
+        <div v-else class="perf-grid">
           <div class="card">
             <h2 class="card-title">Métriques globales</h2>
             <div class="metric-list">
@@ -233,7 +246,7 @@
           </div>
 
           <div class="card">
-            <h2 class="card-title">Comparaison Baseline / Amélioré</h2>
+            <h2 class="card-title">Baseline vs Amélioré</h2>
             <table class="perf-table">
               <thead>
                 <tr><th>Métrique</th><th>Baseline</th><th>Amélioré</th><th>Delta</th></tr>
@@ -244,7 +257,7 @@
                   <td class="text-center">{{ r.baseline }}</td>
                   <td class="text-center">{{ r.improved }}</td>
                   <td class="text-center">
-                    <span :class="r.delta > 0 ? 'delta-pos' : 'delta-neg'">
+                    <span :class="r.delta > 0 ? 'delta-pos' : r.delta < 0 ? 'delta-neg' : ''">
                       {{ r.delta > 0 ? '+' : '' }}{{ r.delta }}
                     </span>
                   </td>
@@ -254,28 +267,22 @@
           </div>
 
           <div class="card card--full">
-            <h2 class="card-title">Matrice de confusion (baseline)</h2>
-            <div class="matrix-wrap">
-              <table class="matrix-table">
-                <thead>
-                  <tr>
-                    <th></th>
-                    <th>Prédit : Normal</th>
-                    <th>Prédit : Opacité</th>
-                    <th>Prédit : Incertain</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="row in confusionMatrix" :key="row.label">
-                    <th>Réel : {{ row.label }}</th>
-                    <td v-for="(val, i) in row.vals" :key="i"
-                        :class="i === row.correctIdx ? 'matrix-correct' : 'matrix-cell'">
-                      {{ val }}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            <h2 class="card-title">Répartition par modèle</h2>
+            <table class="perf-table">
+              <thead>
+                <tr><th>Modèle</th><th>Analyses</th><th>Confiance moy.</th></tr>
+              </thead>
+              <tbody>
+                <tr v-for="m in perfData.byModel" :key="m.model_name">
+                  <td style="font-family:monospace;font-size:12px">{{ m.model_name }}</td>
+                  <td class="text-center">{{ m.count }}</td>
+                  <td class="text-center">{{ m.avg_conf }}%</td>
+                </tr>
+                <tr v-if="!perfData.byModel.length">
+                  <td colspan="3" style="text-align:center;color:#9ca3af;padding:16px">Aucune donnée</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </section>
@@ -285,55 +292,116 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import axios from 'axios'
 import { auth } from '../store/auth.js'
 
 const router  = useRouter()
 const section = ref('overview')
 const today   = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+const isLoading = ref(true)
 
-function logout() {
-  auth.logout()
-  router.push('/login')
-}
-
+function logout() { auth.logout(); router.push('/login') }
 function classLabel(pred) {
   return { normal: 'Normal', suspected_opacity: 'Opacité', uncertain: 'Incertain' }[pred] ?? pred
 }
-
-// ── Données mock ──
-const stats = {
-  totalUsers: 24, newUsersThisWeek: 3,
-  totalAnalyses: 187, analysesToday: 12,
-  accuracy: 81.4, evaluated: 120,
-  uncertainRate: 14.2
+function fmt(iso) {
+  return new Date(iso).toLocaleString('fr-FR', {
+    day: '2-digit', month: 'short', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  })
+}
+function timeAgo(iso) {
+  const diff = Math.floor((Date.now() - new Date(iso)) / 1000)
+  if (diff < 60)   return `il y a ${diff}s`
+  if (diff < 3600) return `il y a ${Math.floor(diff/60)}min`
+  if (diff < 86400) return `il y a ${Math.floor(diff/3600)}h`
+  return `il y a ${Math.floor(diff/86400)}j`
 }
 
-const distribution = [
-  { label: 'Normal',            pct: 52, color: '#16a34a' },
-  { label: 'Opacité suspectée', pct: 34, color: '#c2410c' },
-  { label: 'Incertain',         pct: 14, color: '#d97706' }
-]
+// ── State ──
+const stats         = ref({ totalUsers: 0, totalAnalyses: 0, uncertainRate: 0, avgConfidence: 0, avgLatency: 0 })
+const distribution  = ref([])
+const recentActivity = ref([])
+const users         = ref([])
+const allAnalyses   = ref([])
+const byModel       = ref([])
 
-const recentActivity = [
-  { id: 1, user: 'Marie Dupont',    result: 'normal',            time: 'il y a 3 min' },
-  { id: 2, user: 'Thomas Leroy',    result: 'suspected_opacity', time: 'il y a 11 min' },
-  { id: 3, user: 'Aisha Kone',      result: 'uncertain',         time: 'il y a 28 min' },
-  { id: 4, user: 'Julien Bernard',  result: 'normal',            time: 'il y a 42 min' },
-  { id: 5, user: 'Sara Morin',      result: 'suspected_opacity', time: 'il y a 1h' }
-]
+// ── Chargement ──
+onMounted(async () => {
+  try {
+    const [usersRes, analysesRes, statsRes] = await Promise.all([
+      axios.get('/api/users'),
+      axios.get('/api/analyses'),
+      axios.get('/api/analyses/stats'),
+    ])
 
-const users = ref([
-  { id: 1, name: 'Marie Dupont',   email: 'marie@efrei.fr',   role: 'user',  analysisCount: 14, createdAt: '12 juin 2026' },
-  { id: 2, name: 'Thomas Leroy',   email: 'thomas@efrei.fr',  role: 'user',  analysisCount: 9,  createdAt: '14 juin 2026' },
-  { id: 3, name: 'Aisha Kone',     email: 'aisha@efrei.fr',   role: 'user',  analysisCount: 21, createdAt: '10 juin 2026' },
-  { id: 4, name: 'Admin Système',  email: 'admin@efrei.fr',   role: 'admin', analysisCount: 0,  createdAt: '1 juin 2026' },
-  { id: 5, name: 'Julien Bernard', email: 'julien@efrei.fr',  role: 'user',  analysisCount: 7,  createdAt: '18 juin 2026' },
-  { id: 6, name: 'Sara Morin',     email: 'sara@efrei.fr',    role: 'user',  analysisCount: 31, createdAt: '8 juin 2026' }
-])
+    // Utilisateurs
+    users.value = usersRes.data.map(u => ({
+      id:            u.id,
+      name:          u.name,
+      email:         u.email,
+      role:          u.role,
+      analysisCount: u.analysis_count,
+      createdAt:     new Date(u.created_at).toLocaleDateString('fr-FR'),
+    }))
 
-const userSearch  = ref('')
+    // Analyses
+    allAnalyses.value = analysesRes.data.map(a => ({
+      id:         a.id,
+      userId:     a.user_id,
+      userName:   a.user_name,
+      date:       fmt(a.created_at),
+      mode:       a.mode,
+      prediction: a.predicted_class,
+      confidence: a.confidence,
+      threshold:  a.threshold ?? 0.70,
+      modelName:  a.model_name,
+      latency:    a.latency_ms,
+    }))
+
+    // Stats globales
+    const s = statsRes.data.analyses
+    const u = statsRes.data.users
+    const total = s.total || 0
+    stats.value = {
+      totalUsers:    u.total,
+      totalAnalyses: total,
+      uncertainRate: total ? +((s.uncertain_count / total) * 100).toFixed(1) : 0,
+      avgConfidence: s.avg_confidence ?? 0,
+      avgLatency:    Math.round(s.avg_latency_ms ?? 0),
+    }
+
+    // Distribution réelle
+    if (total > 0) {
+      distribution.value = [
+        { label: 'Normal',            pct: +((s.normal_count  / total) * 100).toFixed(1), color: '#16a34a', count: s.normal_count },
+        { label: 'Opacité suspectée', pct: +((s.opacity_count / total) * 100).toFixed(1), color: '#c2410c', count: s.opacity_count },
+        { label: 'Incertain',         pct: +((s.uncertain_count / total) * 100).toFixed(1), color: '#d97706', count: s.uncertain_count },
+      ]
+    }
+
+    // Par modèle
+    byModel.value = statsRes.data.by_model ?? []
+
+    // Activité récente (5 dernières analyses)
+    recentActivity.value = analysesRes.data.slice(0, 5).map(a => ({
+      id:     a.id,
+      user:   a.user_name,
+      result: a.predicted_class,
+      time:   timeAgo(a.created_at),
+    }))
+
+  } catch (e) {
+    console.error('Erreur chargement admin:', e.message)
+  } finally {
+    isLoading.value = false
+  }
+})
+
+// ── Utilisateurs filtrés ──
+const userSearch = ref('')
 const filteredUsers = computed(() =>
   users.value.filter(u =>
     u.name.toLowerCase().includes(userSearch.value.toLowerCase()) ||
@@ -341,57 +409,76 @@ const filteredUsers = computed(() =>
   )
 )
 
-const selectedUser = ref(null)
+// ── Analyses filtrées ──
+const selectedUser   = ref(null)
+const analysisSearch = ref('')
+const analysisFilter = ref('')
+
 function viewUserHistory(u) {
   selectedUser.value = u
   section.value = 'analyses'
 }
 
-const allAnalyses = [
-  { id: 1,  userName: 'Marie Dupont',   date: '25 juin 2026 14:32', mode: 'baseline',  prediction: 'normal',            confidence: 0.87, threshold: 0.70 },
-  { id: 2,  userName: 'Thomas Leroy',   date: '25 juin 2026 13:18', mode: 'improved',  prediction: 'suspected_opacity', confidence: 0.76, threshold: 0.70 },
-  { id: 3,  userName: 'Aisha Kone',     date: '25 juin 2026 11:05', mode: 'baseline',  prediction: 'uncertain',         confidence: 0.58, threshold: 0.70 },
-  { id: 4,  userName: 'Marie Dupont',   date: '24 juin 2026 16:44', mode: 'improved',  prediction: 'normal',            confidence: 0.92, threshold: 0.70 },
-  { id: 5,  userName: 'Sara Morin',     date: '24 juin 2026 10:21', mode: 'baseline',  prediction: 'suspected_opacity', confidence: 0.81, threshold: 0.65 },
-  { id: 6,  userName: 'Julien Bernard', date: '23 juin 2026 09:55', mode: 'improved',  prediction: 'normal',            confidence: 0.89, threshold: 0.70 },
-  { id: 7,  userName: 'Aisha Kone',     date: '22 juin 2026 15:30', mode: 'improved',  prediction: 'suspected_opacity', confidence: 0.74, threshold: 0.70 },
-  { id: 8,  userName: 'Thomas Leroy',   date: '21 juin 2026 11:12', mode: 'baseline',  prediction: 'uncertain',         confidence: 0.61, threshold: 0.70 },
-]
-
-const analysisSearch = ref('')
-const analysisFilter = ref('')
-
 const filteredAnalyses = computed(() => {
   let list = selectedUser.value
-    ? allAnalyses.filter(a => a.userName === selectedUser.value.name)
-    : allAnalyses
+    ? allAnalyses.value.filter(a => a.userId === selectedUser.value.id)
+    : allAnalyses.value
   if (analysisSearch.value)
-    list = list.filter(a => a.userName.toLowerCase().includes(analysisSearch.value.toLowerCase()))
+    list = list.filter(a => (a.userName ?? '').toLowerCase().includes(analysisSearch.value.toLowerCase()))
   if (analysisFilter.value)
     list = list.filter(a => a.prediction === analysisFilter.value)
   return list
 })
 
-const perfData = {
-  total: 120,
-  metrics: [
-    { name: 'Précision (accuracy)', value: '81.4%', pct: 81, color: '#5b21b6' },
-    { name: 'F1-score macro',       value: '0.78',  pct: 78, color: '#7c3aed' },
-    { name: 'Rappel (recall)',       value: '0.80',  pct: 80, color: '#8b5cf6' },
-    { name: 'Précision (precision)', value: '0.77',  pct: 77, color: '#a78bfa' }
-  ],
-  comparison: [
-    { metric: 'Accuracy',     baseline: '74.2%', improved: '81.4%', delta: +7.2 },
-    { metric: 'F1 macro',     baseline: '0.71',  improved: '0.78',  delta: +0.07 },
-    { metric: 'Taux uncertain', baseline: '22%',  improved: '14%',   delta: -8 }
-  ]
-}
+// ── Performances calculées depuis les vraies données ──
+const perfData = computed(() => {
+  const list = allAnalyses.value
+  const total = list.length
+  if (total === 0) return { total: 0, metrics: [], comparison: [], byModel: [] }
 
-const confusionMatrix = [
-  { label: 'Normal',   vals: [38, 3, 2], correctIdx: 0 },
-  { label: 'Opacité',  vals: [4, 31, 6], correctIdx: 1 },
-  { label: 'Incertain',vals: [1, 2, 33], correctIdx: 2 }
-]
+  const baseline = list.filter(a => a.mode === 'toy' || a.mode === 'baseline')
+  const improved = list.filter(a => a.mode === 'improved')
+
+  const avgConf = arr => arr.length ? +(arr.reduce((s, a) => s + a.confidence, 0) / arr.length * 100).toFixed(1) : 0
+  const uncertainPct = arr => arr.length ? +((arr.filter(a => a.prediction === 'uncertain').length / arr.length) * 100).toFixed(1) : 0
+  const avgLat = arr => arr.length ? Math.round(arr.reduce((s, a) => s + (a.latency ?? 0), 0) / arr.length) : 0
+
+  const globalConf = avgConf(list)
+  const globalUncert = uncertainPct(list)
+  const globalLat = avgLat(list)
+
+  return {
+    total,
+    metrics: [
+      { name: 'Confiance moyenne',         value: globalConf + '%',  pct: globalConf,              color: '#5b21b6' },
+      { name: 'Taux normal',               value: distribution.value[0]?.pct + '%' ?? '–', pct: distribution.value[0]?.pct ?? 0, color: '#16a34a' },
+      { name: 'Taux opacité suspectée',    value: distribution.value[1]?.pct + '%' ?? '–', pct: distribution.value[1]?.pct ?? 0, color: '#c2410c' },
+      { name: 'Taux incertitude',          value: globalUncert + '%', pct: globalUncert,            color: '#d97706' },
+      { name: 'Latence moyenne',           value: globalLat + ' ms',  pct: Math.min(globalLat / 50, 100), color: '#0ea5e9' },
+    ],
+    comparison: [
+      {
+        metric:   'Confiance moy.',
+        baseline: avgConf(baseline) + '%',
+        improved: avgConf(improved) + '%',
+        delta:    +(avgConf(improved) - avgConf(baseline)).toFixed(1),
+      },
+      {
+        metric:   'Taux incertitude',
+        baseline: uncertainPct(baseline) + '%',
+        improved: uncertainPct(improved) + '%',
+        delta:    +(uncertainPct(improved) - uncertainPct(baseline)).toFixed(1),
+      },
+      {
+        metric:   'Nb analyses',
+        baseline: baseline.length,
+        improved: improved.length,
+        delta:    improved.length - baseline.length,
+      },
+    ],
+    byModel: byModel.value,
+  }
+})
 </script>
 
 <style scoped>
