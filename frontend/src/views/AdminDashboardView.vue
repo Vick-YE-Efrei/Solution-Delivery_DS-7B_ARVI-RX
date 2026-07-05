@@ -24,6 +24,15 @@
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 5v3.5l2.5 1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
           Performances
         </a>
+        <div style="height:1px;background:#1e293b;margin:8px 0"></div>
+        <router-link to="/guide" class="slink" style="text-decoration:none">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="1" width="10" height="14" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 5h6M5 8h6M5 11h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          Guide d'utilisation
+        </router-link>
+        <router-link to="/about" class="slink" style="text-decoration:none">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 7v5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="4.5" r="0.8" fill="currentColor"/></svg>
+          À propos
+        </router-link>
       </nav>
       <div class="sidebar-footer">
         <div class="admin-info">
@@ -33,7 +42,10 @@
             <p class="admin-role">Administrateur</p>
           </div>
         </div>
-        <button class="logout-btn" @click="logout">Déconnexion</button>
+        <button class="logout-btn" @click="logout">
+          <span class="material-symbols-outlined" style="font-size:15px;vertical-align:middle;margin-right:6px;">logout</span>
+          Déconnexion
+        </button>
       </div>
     </aside>
 
@@ -296,6 +308,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { auth } from '../store/auth.js'
+const raviLogo = '/ravi-logo.png'
 
 const router  = useRouter()
 const section = ref('overview')
@@ -583,7 +596,7 @@ const perfData = computed(() => {
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
-.logout-btn:hover { background: rgba(255,255,255,0.10); color: #e5e7eb; }
+.logout-btn:hover { background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.25); color: #f87171; }
 
 /* ── Contenu ── */
 .content {

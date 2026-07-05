@@ -45,7 +45,8 @@
           </div>
         </div>
         <button @click="logout"
-          class="w-full text-[10px] font-bold text-slate-500 hover:text-slate-300 uppercase tracking-wider py-1 transition-colors">
+          class="w-full flex items-center justify-center gap-2 mt-1 px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
+          <span class="material-symbols-outlined text-base">logout</span>
           Déconnexion
         </button>
       </div>
@@ -76,7 +77,7 @@
       <div class="mx-[32px] mt-4 mb-2">
         <div class="bg-[#fef3c7] text-[#92400e] px-6 py-3 flex items-center justify-center gap-3 w-full border border-[#fde68a] rounded-xl premium-shadow">
           <span class="material-symbols-outlined text-lg">warning</span>
-          <span class="font-bold text-xs tracking-wide">Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise.</span>
+          <span class="font-bold text-xs tracking-wide">ATTENTION : Ceci est un prototype à but pédagogique. Les résultats présentés n'équivalent pas à un diagnostic médical. Nous vous prions de faire valider tout résultat par un professionnel de la santé.</span>
         </div>
       </div>
 
@@ -348,6 +349,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { auth } from '../store/auth.js'
+const raviLogo = '/ravi-logo.png'
 
 const router = useRouter()
 
