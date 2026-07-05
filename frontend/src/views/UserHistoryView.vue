@@ -24,16 +24,11 @@
           <span class="material-symbols-outlined text-xl">assessment</span>
           <span class="font-medium text-sm">Métriques</span>
         </router-link>
-        <a href="#"
+        <router-link to="/about"
           class="text-slate-400 hover:text-white rounded-xl px-4 py-3 flex items-center gap-3.5 hover:bg-white/5 transition-colors">
-          <span class="material-symbols-outlined text-xl">menu_book</span>
-          <span class="font-medium text-sm">Documentation</span>
-        </a>
-        <a href="#"
-          class="text-slate-400 hover:text-white rounded-xl px-4 py-3 flex items-center gap-3.5 hover:bg-white/5 transition-colors">
-          <span class="material-symbols-outlined text-xl">school</span>
-          <span class="font-medium text-sm">Guide Pédagogique</span>
-        </a>
+          <span class="material-symbols-outlined text-xl">info</span>
+          <span class="font-medium text-sm">À propos</span>
+        </router-link>
       </nav>
 
       <div class="px-6 py-4 mt-auto border-t border-slate-800">
