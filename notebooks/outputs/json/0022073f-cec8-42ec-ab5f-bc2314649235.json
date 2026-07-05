@@ -1,0 +1,20 @@
+{
+  "case_id": "0022073f-cec8-42ec-ab5f-bc2314649235",
+  "image_path": "C:\\Users\\vicky\\Documents\\Efrei\\ING1-NEW\\Projet\\Mastercamp\\ARVI-RX\\repo_git\\Solution-Delivery_DS-7B_ARVI-RX\\data\\RSNA\\Training\\Images\\0022073f-cec8-42ec-ab5f-bc2314649235.png",
+  "label": "suspected_opacity",
+  "image_quality": "good",
+  "predicted_class": "suspected_opacity",
+  "confidence": 0.7,
+  "visual_evidence": [
+    "terme détecté : 'opacified'",
+    "The lungs are diffusely opacified with bilateral pleural effusions.\nThe heart is enlarged.\nThe mediastinal contours are normal.\nThe right picc line terminates in the mid svc.\nThe left picc line termin"
+  ],
+  "justification": "Classe déduite par mots-clés depuis la description libre générée par MedGemma-4b-pt. Résultat expérimental, non clinique.",
+  "limitations": [
+    "modèle de base (pt) non instruction-tuned",
+    "classification par mots-clés, non calibrée",
+    "confiance heuristique, non probabiliste",
+    "pas de contexte clinique"
+  ],
+  "warning": "Educational prototype only. Not for diagnosis. A qualified clinician must verify the image."
+}

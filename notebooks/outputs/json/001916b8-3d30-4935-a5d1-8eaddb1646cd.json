@@ -1,0 +1,20 @@
+{
+  "case_id": "001916b8-3d30-4935-a5d1-8eaddb1646cd",
+  "image_path": "C:\\Users\\vicky\\Documents\\Efrei\\ING1-NEW\\Projet\\Mastercamp\\ARVI-RX\\repo_git\\Solution-Delivery_DS-7B_ARVI-RX\\data\\RSNA\\Training\\Images\\001916b8-3d30-4935-a5d1-8eaddb1646cd.png",
+  "label": "suspected_opacity",
+  "image_quality": "good",
+  "predicted_class": "uncertain",
+  "confidence": 0.5,
+  "visual_evidence": [
+    "ambigu : 'opacified' + 'clear'",
+    "The right lung is completely opacified with a small amount of aerated lung at the apex.\nThe left lung is clear.\nThe heart is shifted to the right.\nThe mediastinum is shifted to the left.\nThe right ple"
+  ],
+  "justification": "Classe déduite par mots-clés depuis la description libre générée par MedGemma-4b-pt. Résultat expérimental, non clinique.",
+  "limitations": [
+    "modèle de base (pt) non instruction-tuned",
+    "classification par mots-clés, non calibrée",
+    "confiance heuristique, non probabiliste",
+    "pas de contexte clinique"
+  ],
+  "warning": "Educational prototype only. Not for diagnosis. A qualified clinician must verify the image."
+}

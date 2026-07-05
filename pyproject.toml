@@ -1,3 +1,7 @@
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]
+
+[project]
+name = "Solution-Delivery_DS-7B_ARVI-RX"
+requires-python = ">=3.11,<4"
