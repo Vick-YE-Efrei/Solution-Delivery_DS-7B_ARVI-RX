@@ -4,7 +4,7 @@
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-brand">
-        <img :src="raviLogo" alt="RAVI" style="width:26px;height:26px;border-radius:6px;object-fit:cover;flex-shrink:0;" />
+        <img :src="raviLogo" alt="RAVI" style="width:32px;height:32px;border-radius:8px;object-fit:cover;flex-shrink:0;box-shadow:0 0 0 2px rgba(255,255,255,0.1);" />
         <span>RAVI Admin</span>
       </div>
       <nav class="sidebar-nav">

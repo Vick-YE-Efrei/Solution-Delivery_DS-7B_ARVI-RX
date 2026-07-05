@@ -3,14 +3,13 @@
 
     <!-- ═══════════════════ SIDEBAR ═══════════════════ -->
     <aside class="flex flex-col h-screen w-64 sticky left-0 top-0 bg-[#0f172a] py-6 z-50">
-      <div class="px-6 mb-8">
-        <div class="flex items-center gap-3">
-          <img :src="raviLogo" alt="RAVI" class="w-10 h-10 rounded-xl object-cover flex-shrink-0" />
-          <div>
-            <h1 class="page-title-font text-2xl text-white font-extrabold tracking-tight">RAVI</h1>
-            <p class="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold">Prototype Pédagogique</p>
-          </div>
+      <div class="flex flex-col items-center px-4 mb-6">
+        <div class="w-16 h-16 rounded-2xl overflow-hidden ring-2 ring-white/10 shadow-lg mb-3">
+          <img :src="raviLogo" alt="RAVI" class="w-full h-full object-cover" />
         </div>
+        <h1 class="page-title-font text-xl text-white font-extrabold tracking-tight">RAVI</h1>
+        <p class="text-[9px] uppercase tracking-[0.25em] text-slate-500 font-bold mt-0.5">Prototype Pédagogique</p>
+        <div class="w-full h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent mt-4"></div>
       </div>
 
       <nav class="flex-1 px-4 space-y-1">
