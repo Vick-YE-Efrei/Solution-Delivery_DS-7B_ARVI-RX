@@ -20,3 +20,5 @@ assets/
 
 eval/outputs
 medical_ai_evidence.sqlite
+
+data/assistant-radio-evidence.sqlite
