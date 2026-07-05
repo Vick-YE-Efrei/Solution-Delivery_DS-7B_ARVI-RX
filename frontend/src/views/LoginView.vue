@@ -5,11 +5,11 @@
     <div class="auth-left">
       <div class="auth-left-inner">
         <div class="brand">
-          <div class="brand-dot"></div>
-          <span class="brand-name">Assistant Radiologue Virtuel</span>
+          <img src="/ravi-logo.png" alt="Logo RaVI" class="brand-logo" />
+          <span class="brand-name">RaVI</span>
         </div>
         <div class="auth-pitch">
-          <h1>Analysez des radiographies<br />de façon responsable.</h1>
+          <h1>RaVI analyse les radiographies<br />de façon responsable.</h1>
           <p>
             Un prototype pédagogique construit autour de la traçabilité,
             de l'incertitude explicite et de la rigueur d'ingénierie.
@@ -211,13 +211,13 @@ async function handleRegister() {
 .auth-layout {
   display: flex;
   min-height: 100vh;
-  font-family: system-ui, sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
 }
 
 /* ── Gauche ── */
 .auth-left {
   width: 45%;
-  background: #111111;
+  background: #0f172a;
   color: #f9fafb;
   display: flex;
   align-items: stretch;
@@ -229,7 +229,7 @@ async function handleRegister() {
   position: absolute;
   top: -120px; left: -120px;
   width: 400px; height: 400px;
-  background: radial-gradient(circle, rgba(124,58,237,0.18) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(59,130,246,0.18) 0%, transparent 70%);
   pointer-events: none;
 }
 .auth-left::after {
@@ -237,7 +237,7 @@ async function handleRegister() {
   position: absolute;
   bottom: -80px; right: -80px;
   width: 300px; height: 300px;
-  background: radial-gradient(circle, rgba(91,33,182,0.12) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(37,99,235,0.12) 0%, transparent 70%);
   pointer-events: none;
 }
 .auth-left-inner {
@@ -254,11 +254,14 @@ async function handleRegister() {
   align-items: center;
   gap: 10px;
 }
-.brand-dot {
-  width: 9px; height: 9px;
-  border-radius: 50%;
-  background: #7c3aed;
-  box-shadow: 0 0 10px rgba(124,58,237,0.7);
+.brand-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #ffffff;
+  object-fit: contain;
+  padding: 3px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.18);
   flex-shrink: 0;
 }
 .brand-name {
@@ -275,7 +278,7 @@ async function handleRegister() {
   padding: 40px 0;
 }
 .auth-pitch h1 {
-  font-family: 'Georgia', serif;
+  font-family: 'Manrope', sans-serif;
   font-size: 34px;
   font-weight: 700;
   color: #f9fafb;
@@ -297,7 +300,7 @@ async function handleRegister() {
 /* ── Droite ── */
 .auth-right {
   flex: 1;
-  background: #f4f3ef;
+  background: #f1f5f9;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -305,7 +308,7 @@ async function handleRegister() {
 }
 .auth-card {
   background: #ffffff;
-  border: 1px solid #e5e2db;
+  border: 1px solid #e2e8f0;
   border-radius: 16px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.07);
   padding: 36px 40px;
@@ -319,7 +322,7 @@ async function handleRegister() {
 /* ── Tabs ── */
 .auth-tabs {
   display: flex;
-  background: #f4f3ef;
+  background: #f1f5f9;
   border-radius: 8px;
   padding: 4px;
   gap: 2px;
@@ -338,7 +341,7 @@ async function handleRegister() {
 }
 .auth-tab.active {
   background: #ffffff;
-  color: #111111;
+  color: #0f172a;
   box-shadow: 0 1px 4px rgba(0,0,0,0.10);
 }
 
@@ -363,18 +366,18 @@ async function handleRegister() {
 .form-input {
   width: 100%;
   padding: 11px 14px;
-  border: 1.5px solid #e5e2db;
+  border: 1.5px solid #e2e8f0;
   border-radius: 8px;
   font-size: 14px;
-  color: #111111;
-  background: #fafaf9;
-  font-family: system-ui, sans-serif;
+  color: #0f172a;
+  background: #f8fafc;
+  font-family: 'Inter', system-ui, sans-serif;
   transition: border-color 0.15s, box-shadow 0.15s;
   outline: none;
 }
 .form-input:focus {
-  border-color: #5b21b6;
-  box-shadow: 0 0 0 3px rgba(91,33,182,0.10);
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.10);
   background: #ffffff;
 }
 .form-input::placeholder { color: #d1d5db; }
@@ -395,7 +398,7 @@ async function handleRegister() {
   padding: 0;
   transition: color 0.15s;
 }
-.eye-btn:hover { color: #5b21b6; }
+.eye-btn:hover { color: #2563eb; }
 
 .form-error {
   font-size: 13px;
@@ -418,7 +421,7 @@ async function handleRegister() {
 .btn-submit {
   width: 100%;
   padding: 13px;
-  background: #111111;
+  background: #0f172a;
   color: white;
   border: none;
   border-radius: 8px;
@@ -433,12 +436,12 @@ async function handleRegister() {
   margin-top: 4px;
 }
 .btn-submit:hover:not(:disabled) {
-  background: #1f1f1f;
+  background: #1e293b;
   box-shadow: 0 4px 14px rgba(0,0,0,0.2);
   transform: translateY(-1px);
 }
 .btn-submit:disabled {
-  background: #e5e2db;
+  background: #e2e8f0;
   color: #9ca3af;
   cursor: not-allowed;
 }

@@ -3,9 +3,12 @@
 
     <!-- ═══════════════════ SIDEBAR ═══════════════════ -->
     <aside class="flex flex-col h-screen w-64 sticky left-0 top-0 bg-[#0f172a] py-6 z-50">
-      <div class="px-8 mb-8">
-        <h1 class="page-title-font text-2xl text-white font-extrabold tracking-tight">ARVI-RX</h1>
-        <p class="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold mt-1">Prototype Pédagogique</p>
+      <div class="px-6 mb-8 flex items-center gap-3">
+        <img src="/ravi-logo.png" alt="Logo RaVI" class="h-12 w-12 rounded-xl bg-white object-contain p-1 shadow-sm" />
+        <div>
+          <h1 class="page-title-font text-2xl text-white font-extrabold tracking-tight">RaVI</h1>
+          <p class="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold mt-1">Prototype Pédagogique</p>
+        </div>
       </div>
 
       <nav class="flex-1 px-4 space-y-1">
@@ -24,16 +27,11 @@
           <span class="material-symbols-outlined text-xl">assessment</span>
           <span class="font-medium text-sm">Métriques</span>
         </router-link>
-        <a href="#"
+        <router-link to="/about"
           class="text-slate-400 hover:text-white rounded-xl px-4 py-3 flex items-center gap-3.5 hover:bg-white/5 transition-colors">
-          <span class="material-symbols-outlined text-xl">menu_book</span>
-          <span class="font-medium text-sm">Documentation</span>
-        </a>
-        <a href="#"
-          class="text-slate-400 hover:text-white rounded-xl px-4 py-3 flex items-center gap-3.5 hover:bg-white/5 transition-colors">
-          <span class="material-symbols-outlined text-xl">school</span>
-          <span class="font-medium text-sm">Guide Pédagogique</span>
-        </a>
+          <span class="material-symbols-outlined text-xl">info</span>
+          <span class="font-medium text-sm">&Agrave; propos</span>
+        </router-link>
       </nav>
 
       <div class="px-6 py-4 mt-auto border-t border-slate-800">
@@ -62,27 +60,10 @@
           <h2 class="page-title-font text-lg font-extrabold text-on-surface">Analyse Thoracique</h2>
         </div>
         <div class="flex items-center gap-4">
-          <!-- Mode Toggle -->
-          <div class="flex items-center gap-2 bg-surface-container-low rounded-full p-1 border border-outline-variant">
-            <button @click="setMode('baseline')"
-              :class="currentMode === 'baseline'
-                ? 'px-4 py-1.5 rounded-full text-[11px] font-bold transition-all bg-primary text-white'
-                : 'px-4 py-1.5 rounded-full text-[11px] font-bold transition-all text-on-surface-variant hover:bg-white'">
-              Baseline
-            </button>
-            <button @click="setMode('improved')"
-              :class="currentMode === 'improved'
-                ? 'px-4 py-1.5 rounded-full text-[11px] font-bold transition-all bg-primary text-white'
-                : 'px-4 py-1.5 rounded-full text-[11px] font-bold transition-all text-on-surface-variant hover:bg-white'">
-              Improved
-            </button>
+          <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-100">
+            <span class="material-symbols-outlined text-primary text-sm">memory</span>
+            <span class="text-[10px] font-bold text-blue-700 uppercase tracking-wider">MedGemma 4B PT</span>
           </div>
-          <!-- Sélecteur modèle -->
-          <select v-model="currentModel"
-            class="text-[11px] font-bold text-slate-600 border border-outline-variant rounded-full px-3 py-1.5 bg-white outline-none cursor-pointer">
-            <option value="medgemma_4b_pt">MedGemma 4B PT</option>
-            <option value="gemma_4_E4B">Gemma 4E4B</option>
-          </select>
           <!-- API Status -->
           <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-100">
             <span class="w-2 h-2 rounded-full bg-emerald-500 status-pulse"></span>
@@ -142,7 +123,7 @@
           </div>
           <div class="flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-100 rounded-full">
             <span class="w-2 h-2 rounded-full bg-blue-500 status-pulse"></span>
-            <span class="text-[11px] font-bold text-blue-700 uppercase tracking-wider">{{ currentModel }} actif</span>
+            <span class="text-[11px] font-bold text-blue-700 uppercase tracking-wider">MedGemma 4B PT actif</span>
           </div>
         </div>
 
@@ -334,9 +315,9 @@
       <footer class="w-full py-4 mt-auto border-t border-outline-variant bg-white/50 flex flex-col md:flex-row justify-between items-center px-[32px] gap-3">
         <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">EFREI — Solution Delivery — Filière Data — 2025-2026</span>
         <div class="flex items-center gap-6">
-          <a class="text-[9px] font-bold text-slate-400 hover:text-primary transition-all uppercase tracking-widest" href="#">Documentation</a>
-          <a class="text-[9px] font-bold text-slate-400 hover:text-primary transition-all uppercase tracking-widest" href="#">Architecture</a>
-          <a class="text-[9px] font-bold text-slate-400 hover:text-primary transition-all uppercase tracking-widest" href="#">Protocole d'évaluation</a>
+          <router-link class="text-[9px] font-bold text-slate-400 hover:text-primary transition-all uppercase tracking-widest" to="/about">Documentation</router-link>
+          <router-link class="text-[9px] font-bold text-slate-400 hover:text-primary transition-all uppercase tracking-widest" to="/about">Architecture</router-link>
+          <router-link class="text-[9px] font-bold text-slate-400 hover:text-primary transition-all uppercase tracking-widest" to="/about">Protocole d&rsquo;&eacute;valuation</router-link>
         </div>
         <span class="text-[9px] text-slate-400 font-semibold">Ce prototype n'est pas un dispositif médical.</span>
       </footer>
@@ -379,8 +360,6 @@ const isAnalyzing   = ref(false)
 const analyzeError  = ref('')
 const fileName      = ref('')
 const previewUrl    = ref('')
-const currentMode   = ref('baseline')
-const currentModel  = ref('medgemma_4b_pt')
 const currentResult = ref(null)
 const history       = ref([])
 const showJson      = ref(false)
@@ -393,7 +372,6 @@ const userInitials = computed(() => {
 function logout() { auth.logout(); router.push('/login') }
 
 // ── Mode ──
-function setMode(mode) { currentMode.value = mode }
 
 // ── Upload ──
 function onFileChange(e) {
@@ -441,8 +419,8 @@ async function runAnalysis(file) {
   try {
     const form = new FormData()
     form.append('image', file)
-    form.append('mode', currentMode.value === 'baseline' ? 'toy' : 'improved')
-    form.append('model_key', currentModel.value)
+    form.append('mode', 'improved')
+    form.append('model_key', 'medgemma_4b_pt')
 
     const { data } = await axios.post('/api/analyses/predict', form, {
       timeout: 300_000,
@@ -537,3 +515,4 @@ const classLabelClass = computed(() => {
 
 function onKeydown(e) { if (e.key === 'Escape') showJson.value = false }
 </script>
+
