@@ -62,7 +62,7 @@
         <h2 class="page-title-font text-lg font-extrabold text-on-surface">À propos d'ARVI-RX</h2>
       </header>
 
-      <div class="px-8 py-8 space-y-8 max-w-4xl">
+      <div class="px-8 py-8 space-y-8 max-w-4xl mx-auto w-full">
 
         <!-- Avertissement -->
         <div class="bg-amber-50 border border-amber-200 rounded-2xl px-6 py-4 flex items-start gap-3">
