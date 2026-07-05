@@ -7,6 +7,7 @@ import LoginView from './views/LoginView.vue'
 import AdminDashboardView from './views/AdminDashboardView.vue'
 import UserHistoryView from './views/UserHistoryView.vue'
 import AboutView from './views/AboutView.vue'
+import GuideView from './views/GuideView.vue'
 import { auth } from './store/auth.js'
 import './assets/global.css'
 
@@ -27,7 +28,8 @@ const router = createRouter({
     { path: '/',        component: HomeView,             meta: { requiresAuth: true } },
     { path: '/history', component: UserHistoryView,      meta: { requiresAuth: true } },
     { path: '/admin',   component: AdminDashboardView,   meta: { requiresAuth: true, requiresAdmin: true } },
-    { path: '/about',   component: AboutView,            meta: { requiresAuth: true } }
+    { path: '/about',   component: AboutView,            meta: { requiresAuth: true } },
+    { path: '/guide',   component: GuideView,            meta: { requiresAuth: true } }
   ]
 })
 
