@@ -27,18 +27,123 @@ Prototype pédagogique d'IA médicale multimodale pour apprendre à construire u
 
 Le bon rendu ne cherche pas à impressionner par un modèle spectaculaire. Il démontre une méthode : périmètre limité, baseline reproductible, garde-fous, évaluation, analyse d'erreurs et limites explicites.
 
-## Démarrage rapide
+## Démarrage — Application web complète
+
+L'application web se compose de trois serveurs à lancer en parallèle dans trois terminaux distincts, depuis la **racine du projet** (`C:\mastercamp\projet_arvi`).
+
+### Prérequis
+
+- Python 3.10+ avec `pip`
+- Node.js 18+
+- MySQL 8+ en service local
+
+### 1. Environnement Python
 
 ```bash
-# Use Python 3.11 (recommended)
-# Unix/macOS:
-python3.11 -m venv .venv
-# Windows (PowerShell):
-py -3.11 -m venv .venv
+python -m venv .venv
+# Windows
+.venv\Scripts\activate
+# Linux / macOS
+source .venv/bin/activate
+
+pip install -r requirements.txt
+```
+
+### 2. Environnement Node
+
+```bash
+cd backend
+npm install
+cd ..
+```
+
+### 3. Configuration de la base de données
+
+```bash
+# Copier le fichier d'environnement et l'adapter
+cp backend/.env.example backend/.env
+# Ouvrir backend/.env et renseigner DB_PASSWORD avec le mot de passe MySQL local
+
+# Créer la base, les tables et les comptes de démonstration
+cd backend
+node setup.js
+cd ..
+```
+
+Comptes créés par `setup.js` :
+
+| Email | Mot de passe | Rôle |
+|---|---|---|
+| <admin@arvi.fr> | admin123 | admin |
+| <marie@arvi.fr> | user123 | user |
+| <thomas@arvi.fr> | user123 | user |
+
+### 4. Lancer les trois serveurs
+
+Ouvrir **trois terminaux** depuis la racine du projet, venv activé dans chacun.
+
+**Terminal 1 — FastAPI (moteur d'inférence)**
+
+```bash
+uvicorn api.main:app --reload --port 8001
+```
+
+**Terminal 2 — Backend Express**
+
+```bash
+cd backend
+node server.js
+```
+
+**Terminal 3 — Frontend Vue**
+
+```bash
+cd frontend
+npm install      # première fois uniquement
+npm run dev
+```
+
+Ouvrir **`http://localhost:5173`** dans le navigateur.
+
+### Récapitulatif des ports
+
+| Service | Port |
+|---|---|
+| Vue (Vite) | 5173 |
+| Express API | 3000 |
+| FastAPI | 8001 |
+| MySQL | 3306 |
+
+### Modèles LoRA — mode Amélioré
+
+Les poids `.safetensors` ne sont pas versionnés (> 100 Mo). Ils doivent être présents localement :
+
+```
+finetuning/lora_adapters/medgemma_4b_pt/medgemma_4b_pt/adapter_model.safetensors
+finetuning/lora_adapters/gemma_4_E4B/gemma_4_E4B/gemma4_chestxray_lora_adapters/adapter_model.safetensors
+```
+
+Pour activer le vrai modèle MedGemma, connecter le compte HuggingFace ayant reçu l'accès au repo `google/medgemma-4b-pt` :
+
+```bash
+pip install huggingface_hub
+hf auth login   # coller le token généré sur huggingface.co/settings/tokens
+```
+
+> **Note GPU** : MedGemma 4B en quantification 4-bit nécessite une carte NVIDIA (CUDA) avec au moins 4 Go de VRAM. La première analyse en mode Amélioré prend 1 à 2 minutes (chargement du modèle en mémoire) ; les suivantes sont nettement plus rapides car le modèle reste en cache GPU.
+>
+> Sans GPU compatible, le mode Amélioré bascule automatiquement sur le prédicteur de démonstration (fallback toy).
+
+---
+
+## Démarrage rapide (pipeline Python seul)
+
+```bash
+python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 python eval/run_evaluation.py --mode toy
-PYTHONPATH=. streamlit run app/streamlit_app.py # chercher les modules depuis le dossier courant (la racine du projet)
+PYTHONPATH=. streamlit run app/streamlit_app.py # chercher les modules depuis le dossier courant (la racine du projet).
 ```
 
 ## Smoke test du dépôt
