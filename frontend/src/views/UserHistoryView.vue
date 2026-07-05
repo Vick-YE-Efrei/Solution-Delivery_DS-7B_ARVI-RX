@@ -3,13 +3,12 @@
 
     <!-- ═══════════════════ SIDEBAR ═══════════════════ -->
     <aside class="flex flex-col h-screen w-64 sticky left-0 top-0 bg-[#0f172a] py-6 z-50">
-      <div class="flex flex-col items-center px-4 mb-6">
-        <div class="w-16 h-16 rounded-2xl bg-white shadow-lg mb-3 flex items-center justify-center p-2">
-          <img :src="raviLogo" alt="RAVI" class="w-full h-full object-contain" />
+      <div class="px-6 mb-8 flex items-center gap-3">
+        <img src="/ravi-logo.png" alt="Logo RaVI" class="h-12 w-12 rounded-xl bg-white object-contain p-1 shadow-sm" />
+        <div>
+          <h1 class="page-title-font text-2xl text-white font-extrabold tracking-tight">RaVI</h1>
+          <p class="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold mt-1">Prototype Pédagogique</p>
         </div>
-        <h1 class="page-title-font text-xl text-white font-extrabold tracking-tight">RAVI</h1>
-        <p class="text-[9px] uppercase tracking-[0.25em] text-slate-500 font-bold mt-0.5">Prototype Pédagogique</p>
-        <div class="w-full h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent mt-4"></div>
       </div>
 
       <nav class="flex-1 px-4 space-y-1">
@@ -28,15 +27,10 @@
           <span class="material-symbols-outlined text-xl">assessment</span>
           <span class="font-medium text-sm">Métriques</span>
         </router-link>
-        <router-link to="/guide"
-          class="text-slate-400 hover:text-white rounded-xl px-4 py-3 flex items-center gap-3.5 hover:bg-white/5 transition-colors">
-          <span class="material-symbols-outlined text-xl">menu_book</span>
-          <span class="font-medium text-sm">Guide d'utilisation</span>
-        </router-link>
         <router-link to="/about"
           class="text-slate-400 hover:text-white rounded-xl px-4 py-3 flex items-center gap-3.5 hover:bg-white/5 transition-colors">
           <span class="material-symbols-outlined text-xl">info</span>
-          <span class="font-medium text-sm">À propos</span>
+          <span class="font-medium text-sm">&Agrave; propos</span>
         </router-link>
       </nav>
 
@@ -317,7 +311,7 @@ const filteredAnalyses = computed(() => {
   border: 1.5px solid #e2e8f0;
   border-radius: 8px;
   font-size: 13px;
-  font-family: system-ui, sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
   color: #0f172a;
   background: white;
   outline: none;

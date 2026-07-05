@@ -4,8 +4,8 @@
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-brand">
-        <img :src="raviLogo" alt="RAVI" style="width:32px;height:32px;border-radius:8px;object-fit:contain;background:white;padding:3px;flex-shrink:0;" />
-        <span>RAVI Admin</span>
+        <img src="/ravi-logo.png" alt="Logo RaVI" class="brand-logo" />
+        <span>RaVI Admin</span>
       </div>
       <nav class="sidebar-nav">
         <a href="#" class="slink" :class="{ active: section === 'overview' }" @click.prevent="section = 'overview'">
@@ -56,7 +56,7 @@
       <div v-if="isLoading" style="display:flex;align-items:center;justify-content:center;height:60vh;color:#9ca3af;font-size:14px;gap:10px;">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="animation:spin 1s linear infinite">
           <circle cx="10" cy="10" r="8" stroke="#e5e7eb" stroke-width="2.5"/>
-          <path d="M10 2a8 8 0 0 1 8 8" stroke="#5b21b6" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M10 2a8 8 0 0 1 8 8" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round"/>
         </svg>
         Chargement des données...
       </div>
@@ -463,7 +463,7 @@ const perfData = computed(() => {
   return {
     total,
     metrics: [
-      { name: 'Confiance moyenne',         value: globalConf + '%',  pct: globalConf,              color: '#5b21b6' },
+      { name: 'Confiance moyenne',         value: globalConf + '%',  pct: globalConf,              color: '#2563eb' },
       { name: 'Taux normal',               value: distribution.value[0]?.pct + '%' ?? '–', pct: distribution.value[0]?.pct ?? 0, color: '#16a34a' },
       { name: 'Taux opacité suspectée',    value: distribution.value[1]?.pct + '%' ?? '–', pct: distribution.value[1]?.pct ?? 0, color: '#c2410c' },
       { name: 'Taux incertitude',          value: globalUncert + '%', pct: globalUncert,            color: '#d97706' },
@@ -498,14 +498,14 @@ const perfData = computed(() => {
 .layout {
   display: flex;
   min-height: 100vh;
-  font-family: system-ui, sans-serif;
-  background: #f4f3ef;
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #f1f5f9;
 }
 
 /* ── Sidebar ── */
 .sidebar {
   width: 220px;
-  background: #111111;
+  background: #0f172a;
   color: #f9fafb;
   display: flex;
   flex-direction: column;
@@ -528,11 +528,14 @@ const perfData = computed(() => {
   color: #e5e7eb;
   letter-spacing: -0.01em;
 }
-.brand-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: #7c3aed;
-  box-shadow: 0 0 8px rgba(124,58,237,0.7);
+.brand-logo {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: #ffffff;
+  object-fit: contain;
+  padding: 3px;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.12);
   flex-shrink: 0;
 }
 .sidebar-nav {
@@ -554,7 +557,7 @@ const perfData = computed(() => {
   transition: background 0.15s, color 0.15s;
 }
 .slink:hover  { background: rgba(255,255,255,0.06); color: #e5e7eb; }
-.slink.active { background: rgba(124,58,237,0.18); color: #c4b5fd; }
+.slink.active { background: rgba(59,130,246,0.18); color: #93c5fd; }
 
 .sidebar-footer {
   border-top: 1px solid rgba(255,255,255,0.08);
@@ -571,7 +574,7 @@ const perfData = computed(() => {
 .admin-avatar {
   width: 32px; height: 32px;
   border-radius: 50%;
-  background: #5b21b6;
+  background: #2563eb;
   color: white;
   display: flex;
   align-items: center;
@@ -607,10 +610,10 @@ const perfData = computed(() => {
 
 .page-head { display: flex; flex-direction: column; gap: 4px; }
 .page-title {
-  font-family: 'Georgia', serif;
+  font-family: 'Manrope', sans-serif;
   font-size: 24px;
   font-weight: 700;
-  color: #0d0d0d;
+  color: #0f172a;
   letter-spacing: -0.02em;
   display: flex;
   align-items: center;
@@ -618,10 +621,10 @@ const perfData = computed(() => {
 }
 .page-sub { font-size: 13px; color: #6b7280; }
 .back-btn {
-  font-family: system-ui, sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
   font-size: 13px;
   font-weight: 500;
-  color: #5b21b6;
+  color: #2563eb;
   background: none;
   border: none;
   cursor: pointer;
@@ -636,28 +639,28 @@ const perfData = computed(() => {
 }
 .stat-card {
   background: white;
-  border: 1px solid #e5e2db;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
   padding: 20px 22px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 .stat-label { font-size: 11.5px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; }
-.stat-val   { font-size: 30px; font-weight: 700; color: #0d0d0d; font-family: 'Georgia', serif; letter-spacing: -0.03em; line-height: 1; margin-bottom: 6px; }
+.stat-val   { font-size: 30px; font-weight: 700; color: #0f172a; font-family: 'Manrope', sans-serif; letter-spacing: -0.03em; line-height: 1; margin-bottom: 6px; }
 .stat-note  { font-size: 12px; color: #9ca3af; }
 
 /* ── Card ── */
 .card {
   background: white;
-  border: 1px solid #e5e2db;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 .card-title {
-  font-family: 'Georgia', serif;
+  font-family: 'Manrope', sans-serif;
   font-size: 15px;
   font-weight: 700;
-  color: #0d0d0d;
+  color: #0f172a;
   margin-bottom: 18px;
 }
 
@@ -672,7 +675,7 @@ const perfData = computed(() => {
 .dist-bars { display: flex; flex-direction: column; gap: 14px; }
 .dist-row  { display: flex; align-items: center; gap: 12px; }
 .dist-label { font-size: 13px; color: #374151; min-width: 120px; }
-.dist-track { flex: 1; height: 8px; background: #f4f3ef; border-radius: 99px; overflow: hidden; }
+.dist-track { flex: 1; height: 8px; background: #f1f5f9; border-radius: 99px; overflow: hidden; }
 .dist-fill  { height: 100%; border-radius: 99px; transition: width 0.6s ease; }
 .dist-pct   { font-size: 12px; font-weight: 600; color: #6b7280; min-width: 32px; text-align: right; }
 
@@ -683,14 +686,14 @@ const perfData = computed(() => {
   align-items: center;
   gap: 12px;
   padding: 11px 0;
-  border-bottom: 1px solid #f4f3ef;
+  border-bottom: 1px solid #f1f5f9;
 }
 .activity-item:last-child { border-bottom: none; }
 .act-avatar {
   width: 30px; height: 30px;
   border-radius: 50%;
   background: #ede9fe;
-  color: #5b21b6;
+  color: #2563eb;
   font-size: 12px;
   font-weight: 700;
   display: flex;
@@ -716,24 +719,24 @@ const perfData = computed(() => {
 .search-input {
   flex: 1;
   padding: 9px 14px;
-  border: 1.5px solid #e5e2db;
+  border: 1.5px solid #e2e8f0;
   border-radius: 8px;
   font-size: 13.5px;
-  font-family: system-ui, sans-serif;
-  color: #0d0d0d;
-  background: #fafaf9;
+  font-family: 'Inter', system-ui, sans-serif;
+  color: #0f172a;
+  background: #f8fafc;
   outline: none;
   transition: border-color 0.15s;
 }
-.search-input:focus { border-color: #5b21b6; }
+.search-input:focus { border-color: #2563eb; }
 .filter-select {
   padding: 9px 12px;
-  border: 1.5px solid #e5e2db;
+  border: 1.5px solid #e2e8f0;
   border-radius: 8px;
   font-size: 13px;
-  font-family: system-ui, sans-serif;
-  color: #0d0d0d;
-  background: #fafaf9;
+  font-family: 'Inter', system-ui, sans-serif;
+  color: #0f172a;
+  background: #f8fafc;
   outline: none;
   cursor: pointer;
 }
@@ -750,16 +753,16 @@ const perfData = computed(() => {
   letter-spacing: 0.06em;
   color: #9ca3af;
   padding: 0 12px 10px;
-  border-bottom: 1px solid #e5e2db;
+  border-bottom: 1px solid #e2e8f0;
 }
 .data-table td {
   padding: 12px;
-  border-bottom: 1px solid #f4f3ef;
+  border-bottom: 1px solid #f1f5f9;
   color: #374151;
   vertical-align: middle;
 }
 .data-table tr:last-child td { border-bottom: none; }
-.data-table tr:hover td { background: #fafaf9; }
+.data-table tr:hover td { background: #f8fafc; }
 .text-soft { color: #6b7280; }
 .text-center { text-align: center; }
 
@@ -768,7 +771,7 @@ const perfData = computed(() => {
   width: 28px; height: 28px;
   border-radius: 50%;
   background: #ede9fe;
-  color: #5b21b6;
+  color: #2563eb;
   font-size: 12px;
   font-weight: 700;
   display: flex;
@@ -784,12 +787,12 @@ const perfData = computed(() => {
   padding: 2px 9px;
   border-radius: 99px;
 }
-.role-admin { background: #ede9fe; color: #5b21b6; }
-.role-user  { background: #f4f3ef; color: #6b7280; }
+.role-admin { background: #ede9fe; color: #2563eb; }
+.role-user  { background: #f1f5f9; color: #6b7280; }
 
 .action-btn {
   font-size: 12.5px;
-  color: #5b21b6;
+  color: #2563eb;
   background: #ede9fe;
   border: none;
   border-radius: 6px;
@@ -802,7 +805,7 @@ const perfData = computed(() => {
 
 .mode-chip {
   font-size: 11.5px;
-  background: #f4f3ef;
+  background: #f1f5f9;
   color: #6b7280;
   padding: 2px 8px;
   border-radius: 4px;
@@ -825,7 +828,7 @@ const perfData = computed(() => {
 }
 .conf-bar {
   height: 5px;
-  background: #5b21b6;
+  background: #2563eb;
   border-radius: 99px;
   max-width: 80px;
   min-width: 4px;
@@ -845,8 +848,8 @@ const perfData = computed(() => {
 .metric-row  { display: flex; flex-direction: column; gap: 6px; }
 .metric-info { display: flex; justify-content: space-between; align-items: baseline; }
 .metric-name { font-size: 13.5px; color: #374151; }
-.metric-val  { font-size: 14px; font-weight: 700; color: #0d0d0d; }
-.metric-track { height: 6px; background: #f4f3ef; border-radius: 99px; overflow: hidden; }
+.metric-val  { font-size: 14px; font-weight: 700; color: #0f172a; }
+.metric-track { height: 6px; background: #f1f5f9; border-radius: 99px; overflow: hidden; }
 .metric-fill  { height: 100%; border-radius: 99px; transition: width 0.6s ease; }
 
 .perf-table {
@@ -861,12 +864,12 @@ const perfData = computed(() => {
   letter-spacing: 0.06em;
   color: #9ca3af;
   padding: 0 12px 10px;
-  border-bottom: 1px solid #e5e2db;
+  border-bottom: 1px solid #e2e8f0;
   text-align: left;
 }
 .perf-table td {
   padding: 11px 12px;
-  border-bottom: 1px solid #f4f3ef;
+  border-bottom: 1px solid #f1f5f9;
   color: #374151;
 }
 .perf-table tr:last-child td { border-bottom: none; }
@@ -886,7 +889,7 @@ const perfData = computed(() => {
   font-weight: 700;
   color: #6b7280;
   text-align: center;
-  border-bottom: 1px solid #e5e2db;
+  border-bottom: 1px solid #e2e8f0;
 }
 .matrix-table th:first-child { text-align: left; }
 .matrix-table tr th:first-child {
@@ -895,21 +898,21 @@ const perfData = computed(() => {
   color: #374151;
   padding: 12px 16px;
   border-bottom: none;
-  border-right: 1px solid #e5e2db;
+  border-right: 1px solid #e2e8f0;
 }
 .matrix-cell {
   padding: 14px 16px;
   text-align: center;
   color: #374151;
-  background: #fafaf9;
-  border: 1px solid #e5e2db;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
   font-size: 15px;
 }
 .matrix-correct {
   padding: 14px 16px;
   text-align: center;
   background: #ede9fe;
-  color: #5b21b6;
+  color: #2563eb;
   font-weight: 700;
   font-size: 15px;
   border: 1px solid #ddd6fe;
