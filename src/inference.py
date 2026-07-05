@@ -44,7 +44,9 @@ def _positive_hit(text: str, keywords: list[str]) -> str | None:
     t = text.lower()
     for k in keywords:
         for m in re.finditer(re.escape(k), t):
-            ctx = t[max(0, m.start() - 25):m.start()]
+            # Fenêtre élargie à 70 chars pour capturer les négations distantes
+            # ex: "without focal consolidation, pleural effusion" (~38 chars)
+            ctx = t[max(0, m.start() - 70):m.start()]
             if any(re.search(rf"\b{re.escape(n)}\b", ctx) for n in _NEG_TERMS):
                 continue
             return k
