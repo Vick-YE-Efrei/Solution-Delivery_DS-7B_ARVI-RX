@@ -28,12 +28,15 @@ def write_csv(path: Path, rows: list[dict]) -> None:
         w.writerows(rows)
 
 
-def run(mode: str, db_path: Path) -> tuple[list[dict], dict]:
-    cases = read_cases(ROOT / "data" / "chest_xray" / "chest_xray_train.csv")
+def run(mode: str, db_path: Path, use_toy: bool = False) -> tuple[list[dict], dict]:
+    if use_toy:
+        cases = read_cases(ROOT / "data" / "synthetic_cases.csv")
+    else:
+        cases = read_cases(ROOT / "data" / "chest_xray" / "chest_xray_train.csv")
     rows = []
     init_db(db_path)
 
-    print("DEBUG mode:", mode)
+    print("DEBUG mode:", mode, file=sys.stderr)
 
     # if mode == "toy":
     #     def predict_fn(img):
@@ -44,9 +47,9 @@ def run(mode: str, db_path: Path) -> tuple[list[dict], dict]:
     #     def predict_fn(img):
     #         return inference.vlm_predict_medgemma(img, medgemma_prompt)
 
-    if mode == "toy":
+    if use_toy:
         def predict_fn(img):
-            return inference.toy_predict(img, mode="baseline")
+            return inference.toy_predict(img, mode=mode)
     elif mode == "baseline":
         prompt_path = ROOT / "prompts" / "baseline_prompt.txt"
         medgemma_prompt = prompt_path.read_text(encoding="utf-8")
@@ -89,12 +92,14 @@ def main() -> None:
     out_dir = args.out_dir
     out_dir.mkdir(parents=True, exist_ok=True)
     if args.mode == "toy":
-        modes = ["toy"]
+        modes = ["baseline", "improved"]
+        use_toy = True
     else:
         modes = [args.mode]
+        use_toy = False
     summary = []
     for mode in modes:
-        rows, metrics = run(mode, args.db_path)
+        rows, metrics = run(mode, args.db_path, use_toy=use_toy)
         write_csv(out_dir / f"{mode}_predictions.csv", rows)
         (out_dir / f"{mode}_metrics.json").write_text(
             json.dumps(metrics, indent=2), encoding="utf-8"

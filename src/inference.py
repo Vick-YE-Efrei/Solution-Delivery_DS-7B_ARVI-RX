@@ -4,13 +4,8 @@ from pathlib import Path
 import time
 from typing import Any
 from PIL import Image
-import torch
-from transformers import AutoProcessor, AutoModelForImageTextToText, BitsAndBytesConfig
-from peft import PeftModel
 
 from .preprocessing import basic_quality_flag
-
-from transformers.models.gemma4.modeling_gemma4 import Gemma4ClippableLinear
 
 WARNING = "Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise."
 MODEL_ID = "google/gemma-4-E2B" # OU "google/medgemma-4b-pt" 
@@ -21,6 +16,8 @@ processor = None
 model = None
 
 def unwrap_clippable_linears(model):
+    from transformers.models.gemma4.modeling_gemma4 import Gemma4ClippableLinear
+
     for name, module in list(model.named_modules()):
         if isinstance(module, Gemma4ClippableLinear):
             parts = name.split(".")
@@ -72,6 +69,10 @@ def toy_predict(image_path: str | Path, mode: str = "baseline") -> dict[str, Any
 def load_medgemma():
     global processor, model
 
+    import torch
+    from transformers import AutoProcessor, AutoModelForImageTextToText, BitsAndBytesConfig
+    from peft import PeftModel
+
     if processor is None:
         processor = AutoProcessor.from_pretrained(MODEL_ID)
 
@@ -107,6 +108,8 @@ def load_medgemma():
 
 def vlm_predict_medgemma(image_path: str | Path, prompt: str) -> dict[str, Any]:
     load_medgemma()
+
+    import torch
 
     start = time.perf_counter()
     image = Image.open(image_path).convert("RGB")
