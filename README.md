@@ -53,7 +53,9 @@ Labels dérivés du fichier `stage2_train_metadata.csv` fourni par RSNA :
 ```bash
 python -m venv .venv
 source .venv/bin/activate   # Windows : .venv\Scripts\activate
+python -m pip install --upgrade pip setuptools wheel
 pip install -r requirements.txt
+#pip install pillow --no-cache-dir
 
 # Pipeline "jouet" (validation de la baseline)
 python eval/run_evaluation.py --mode toy
@@ -67,6 +69,9 @@ Avant une soutenance, un push ou une livraison, lancer le contrôle court :
 ```bash
 pip install -r requirements-test.txt
 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -q
+# sous windows :
+# $env:PYTEST_DISABLE_PLUGIN_AUTOLOAD=1
+# python -m pytest -q
 python -m compileall -q src api app eval finetuning tests
 python eval/run_evaluation.py --mode toy \
   --out-dir /tmp/assistant-radio-eval \
@@ -80,19 +85,19 @@ Ce smoke test vérifie la structure du dépôt, le contrat du dataset synthétiq
 ```bash
 # Pipeline jouet — dataset synthétique (baseline + improved)
 python eval/run_evaluation.py --mode toy \
-  --cases-csv data/synthetic_cases.csv \
+  # --cases-csv data/synthetic_cases.csv \
   --out-dir eval/outputs \
   --db-path data/assistant-radio-evidence.sqlite
 
 # Preprocessing pixel-based — dataset RSNA réel
 python eval/run_evaluation.py --mode preprocessing \
-  --cases-csv data/rsna_samples.csv \
+  # --cases-csv data/rsna_samples.csv \
   --out-dir eval/outputs/rsna \
   --db-path data/assistant-radio-evidence.sqlite
 
 # MedGemma-4b-pt (expérimental, nécessite token HuggingFace + ~9 Go RAM)
 python eval/run_evaluation.py --mode baseline \
-  --cases-csv data/synthetic_cases.csv \
+  # --cases-csv data/synthetic_cases.csv \
   --out-dir eval/outputs \
   --db-path data/assistant-radio-evidence.sqlite
 ```
