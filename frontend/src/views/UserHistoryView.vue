@@ -4,8 +4,8 @@
     <!-- ═══════════════════ SIDEBAR ═══════════════════ -->
     <aside class="flex flex-col h-screen w-64 sticky left-0 top-0 bg-[#0f172a] py-6 z-50">
       <div class="flex flex-col items-center px-4 mb-6">
-        <div class="w-16 h-16 rounded-2xl overflow-hidden ring-2 ring-white/10 shadow-lg mb-3">
-          <img :src="raviLogo" alt="RAVI" class="w-full h-full object-cover" />
+        <div class="w-16 h-16 rounded-2xl bg-white shadow-lg mb-3 flex items-center justify-center p-2">
+          <img :src="raviLogo" alt="RAVI" class="w-full h-full object-contain" />
         </div>
         <h1 class="page-title-font text-xl text-white font-extrabold tracking-tight">RAVI</h1>
         <p class="text-[9px] uppercase tracking-[0.25em] text-slate-500 font-bold mt-0.5">Prototype Pédagogique</p>
