@@ -3,9 +3,14 @@
 
     <!-- ═══════════════════ SIDEBAR ═══════════════════ -->
     <aside class="flex flex-col h-screen w-64 sticky left-0 top-0 bg-[#0f172a] py-6 z-50">
-      <div class="px-8 mb-8">
-        <h1 class="page-title-font text-2xl text-white font-extrabold tracking-tight">ARVI-RX</h1>
-        <p class="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold mt-1">Prototype Pédagogique</p>
+      <div class="px-6 mb-8">
+        <div class="flex items-center gap-3">
+          <img :src="raviLogo" alt="RAVI" class="w-10 h-10 rounded-xl object-cover flex-shrink-0" />
+          <div>
+            <h1 class="page-title-font text-2xl text-white font-extrabold tracking-tight">RAVI</h1>
+            <p class="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold">Prototype Pédagogique</p>
+          </div>
+        </div>
       </div>
 
       <nav class="flex-1 px-4 space-y-1">
@@ -59,7 +64,7 @@
       <!-- Top Bar -->
       <header class="flex items-center px-8 h-16 glass-header sticky top-0 z-40 border-b border-outline-variant gap-3">
         <span class="material-symbols-outlined text-on-surface-variant">info</span>
-        <h2 class="page-title-font text-lg font-extrabold text-on-surface">À propos d'ARVI-RX</h2>
+        <h2 class="page-title-font text-lg font-extrabold text-on-surface">À propos de RAVI</h2>
       </header>
 
       <div class="px-8 py-8 space-y-8 max-w-4xl mx-auto w-full">
@@ -68,7 +73,7 @@
         <div class="bg-amber-50 border border-amber-200 rounded-2xl px-6 py-4 flex items-start gap-3">
           <span class="material-symbols-outlined text-amber-600 mt-0.5 flex-shrink-0">warning</span>
           <p class="text-sm text-amber-900 font-medium leading-relaxed">
-            Prototype pédagogique — non destiné au diagnostic clinique. Toute sortie doit être vérifiée par un professionnel de santé qualifié.
+            ATTENTION : Ceci est un prototype à but pédagogique. Les résultats présentés n'équivalent pas à un diagnostic médical. Nous vous prions de faire valider tout résultat par un professionnel de la santé.
           </p>
         </div>
 
@@ -76,10 +81,10 @@
         <div class="bg-white rounded-2xl border border-outline-variant premium-shadow p-6">
           <div class="flex items-center gap-3 mb-4">
             <span class="material-symbols-outlined text-primary text-2xl">local_hospital</span>
-            <h2 class="page-title-font text-xl font-extrabold text-on-surface">Qu'est-ce qu'ARVI-RX ?</h2>
+            <h2 class="page-title-font text-xl font-extrabold text-on-surface">Qu'est-ce que RAVI ?</h2>
           </div>
           <p class="text-sm text-on-surface-variant leading-relaxed mb-3">
-            <strong class="text-on-surface">ARVI-RX</strong> (Assistant Radiologue Virtuel Intelligent) est un prototype pédagogique d'intelligence artificielle médicale développé dans le cadre du Mastercamp EFREI 2025-2026.
+            <strong class="text-on-surface">RAVI</strong> (Assistant Radiologue Virtuel Intelligent) est un prototype pédagogique d'intelligence artificielle médicale développé dans le cadre du Mastercamp EFREI 2025-2026.
           </p>
           <p class="text-sm text-on-surface-variant leading-relaxed mb-3">
             L'objectif est d'apprendre à construire une chaîne d'analyse prudente, traçable et évaluée autour de radiographies thoraciques frontales, en intégrant un modèle de langage visuel (VLM) médical.
@@ -208,6 +213,7 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { auth } from '../store/auth.js'
+const raviLogo = '/ravi-logo.png'
 
 const router = useRouter()
 

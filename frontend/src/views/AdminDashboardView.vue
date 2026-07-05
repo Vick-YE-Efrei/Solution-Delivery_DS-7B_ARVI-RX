@@ -4,8 +4,8 @@
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-brand">
-        <div class="brand-dot"></div>
-        <span>ARV Admin</span>
+        <img :src="raviLogo" alt="RAVI" style="width:26px;height:26px;border-radius:6px;object-fit:cover;flex-shrink:0;" />
+        <span>RAVI Admin</span>
       </div>
       <nav class="sidebar-nav">
         <a href="#" class="slink" :class="{ active: section === 'overview' }" @click.prevent="section = 'overview'">
@@ -305,6 +305,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { auth } from '../store/auth.js'
+const raviLogo = '/ravi-logo.png'
 
 const router  = useRouter()
 const section = ref('overview')

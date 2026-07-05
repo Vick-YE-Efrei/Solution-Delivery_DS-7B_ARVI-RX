@@ -3,9 +3,14 @@
 
     <!-- ═══════════════════ SIDEBAR ═══════════════════ -->
     <aside class="flex flex-col h-screen w-64 sticky left-0 top-0 bg-[#0f172a] py-6 z-50">
-      <div class="px-8 mb-8">
-        <h1 class="page-title-font text-2xl text-white font-extrabold tracking-tight">ARVI-RX</h1>
-        <p class="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold mt-1">Prototype Pédagogique</p>
+      <div class="px-6 mb-8">
+        <div class="flex items-center gap-3">
+          <img :src="raviLogo" alt="RAVI" class="w-10 h-10 rounded-xl object-cover flex-shrink-0" />
+          <div>
+            <h1 class="page-title-font text-2xl text-white font-extrabold tracking-tight">RAVI</h1>
+            <p class="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold">Prototype Pédagogique</p>
+          </div>
+        </div>
       </div>
 
       <nav class="flex-1 px-4 space-y-1">
@@ -237,6 +242,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { auth } from '../store/auth.js'
+const raviLogo = '/ravi-logo.png'
 
 const router     = useRouter()
 const filter     = ref('')
