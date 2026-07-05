@@ -29,7 +29,7 @@ def write_csv(path: Path, rows: list[dict]) -> None:
 
 
 def run(mode: str, db_path: Path) -> tuple[list[dict], dict]:
-    cases = read_cases(ROOT / "data" / "CHEST_X-RAY" / "chest_xray_train.csv")
+    cases = read_cases(ROOT / "data" / "chest_xray" / "chest_xray_train.csv")
     rows = []
     init_db(db_path)
 

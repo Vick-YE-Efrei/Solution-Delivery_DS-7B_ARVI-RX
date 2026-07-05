@@ -1,0 +1,20 @@
+{
+  "case_id": "0025d2de-bd78-4d36-9f72-e15a5e22ca82",
+  "image_path": "C:\\Users\\vicky\\Documents\\Efrei\\ING1-NEW\\Projet\\Mastercamp\\ARVI-RX\\repo_git\\Solution-Delivery_DS-7B_ARVI-RX\\data\\RSNA\\Training\\Images\\0025d2de-bd78-4d36-9f72-e15a5e22ca82.png",
+  "label": "normal",
+  "image_quality": "good",
+  "predicted_class": "normal",
+  "confidence": 0.7,
+  "visual_evidence": [
+    "terme détecté : 'normal'",
+    "The lungs are clear.\nThe cardiomediastinal silhouette is normal.\nThe hilar contours are normal.\nThere is no pleural effusion or pneumothorax.\nThe osseous structures are normal.\nThe soft tissues are no"
+  ],
+  "justification": "Classe déduite par mots-clés depuis la description libre générée par MedGemma-4b-pt. Résultat expérimental, non clinique.",
+  "limitations": [
+    "modèle de base (pt) non instruction-tuned",
+    "classification par mots-clés, non calibrée",
+    "confiance heuristique, non probabiliste",
+    "pas de contexte clinique"
+  ],
+  "warning": "Educational prototype only. Not for diagnosis. A qualified clinician must verify the image."
+}

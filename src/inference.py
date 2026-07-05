@@ -10,13 +10,25 @@ from peft import PeftModel
 
 from .preprocessing import basic_quality_flag
 
+from transformers.models.gemma4.modeling_gemma4 import Gemma4ClippableLinear
+
 WARNING = "Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise."
-MODEL_ID = "google/gemma-4-E4B" # OU "google/medgemma-4b-pt" 
+MODEL_ID = "google/gemma-4-E2B" # OU "google/medgemma-4b-pt" 
 USE_QLORA = True  # True pour QLoRA, False pour le modèle de base
 LORA_PATH = "./finetuning/lora_adapters/gemma_4_E4B"  # Chemin vers le modèle LoRA finetuné
 
 processor = None
 model = None
+
+def unwrap_clippable_linears(model):
+    for name, module in list(model.named_modules()):
+        if isinstance(module, Gemma4ClippableLinear):
+            parts = name.split(".")
+            parent = model
+            for part in parts[:-1]:
+                parent = getattr(parent, part)
+            setattr(parent, parts[-1], module.linear)
+    return model
 
 def toy_predict(image_path: str | Path, mode: str = "baseline") -> dict[str, Any]:
     """Deterministic toy predictor used to validate the repo pipeline.
@@ -75,16 +87,18 @@ def load_medgemma():
             base_model = AutoModelForImageTextToText.from_pretrained(
                 MODEL_ID,
                 quantization_config=bnb_config,
-                torch_dtype=torch.bfloat16,
+                dtype=torch.bfloat16,
                 device_map="auto",
                 low_cpu_mem_usage=True,
             )
+
+            base_model = unwrap_clippable_linears(base_model)
 
             model = PeftModel.from_pretrained(base_model, LORA_PATH)
         else:
             model = AutoModelForImageTextToText.from_pretrained(
                 MODEL_ID,
-                torch_dtype=torch.bfloat16,
+                dtype=torch.bfloat16,
                 device_map="auto",
                 low_cpu_mem_usage=True,
             )
@@ -100,7 +114,7 @@ def vlm_predict_medgemma(image_path: str | Path, prompt: str) -> dict[str, Any]:
     # 4b-pt : pas de chat template — on construit l'input directement
     inputs = processor(
         images=image,
-        text=processor.tokenizer.boi_token + " " + prompt,
+        text=prompt,
         return_tensors="pt",
     ).to(model.device)
 
