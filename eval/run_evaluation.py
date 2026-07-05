@@ -14,12 +14,12 @@ from src.metrics import summarize_metrics
 from src.database import insert_run, init_db
 
 
-def read_cases(path: Path):
+def read_cases(path: Path) -> list[dict]:
     with path.open(newline="", encoding="utf-8") as f:
         return list(csv.DictReader(f))
 
 
-def write_csv(path: Path, rows: list[dict]):
+def write_csv(path: Path, rows: list[dict]) -> None:
     if not rows:
         return
     with path.open("w", newline="", encoding="utf-8") as f:
@@ -28,17 +28,38 @@ def write_csv(path: Path, rows: list[dict]):
         w.writerows(rows)
 
 
-def run(mode: str, db_path: Path):
-    cases = read_cases(ROOT / "data" / "synthetic_cases.csv")
+def run(mode: str, db_path: Path, use_toy: bool = False) -> tuple[list[dict], dict]:
+    if use_toy:
+        cases = read_cases(ROOT / "data" / "synthetic_cases.csv")
+    else:
+        cases = read_cases(ROOT / "data" / "chest_xray" / "chest_xray_train.csv")
     rows = []
     init_db(db_path)
 
-    if mode in ("toy", "baseline"):
+    print("DEBUG mode:", mode, file=sys.stderr)
+
+    # if mode == "toy":
+    #     def predict_fn(img):
+    #         return inference.toy_predict(img, mode="baseline")
+    # else:
+    #     prompt_path = ROOT / "prompts" / "improved_prompt.txt"
+    #     medgemma_prompt = prompt_path.read_text(encoding="utf-8")
+    #     def predict_fn(img):
+    #         return inference.vlm_predict_medgemma(img, medgemma_prompt)
+
+    if use_toy:
         def predict_fn(img):
-            return inference.toy_predict(img, mode="baseline")
+            return inference.toy_predict(img, mode=mode)
+    elif mode == "baseline":
+        prompt_path = ROOT / "prompts" / "baseline_prompt.txt"
+        medgemma_prompt = prompt_path.read_text(encoding="utf-8")
+        def predict_fn(img):
+            return inference.vlm_predict_medgemma(img, medgemma_prompt)
     elif mode == "improved":
+        prompt_path = ROOT / "prompts" / "improved_prompt.txt"
+        medgemma_prompt = prompt_path.read_text(encoding="utf-8")
         def predict_fn(img):
-            return inference.toy_predict(img, mode="improved")
+            return inference.vlm_predict_medgemma(img, medgemma_prompt)
 
     for case in cases:
         image_path = ROOT / case["image_path"]
@@ -62,7 +83,7 @@ def run(mode: str, db_path: Path):
     return rows, metrics
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", choices=["toy", "baseline", "improved"], default="toy")
     parser.add_argument("--out-dir", type=Path, default=ROOT / "eval" / "outputs")
@@ -70,16 +91,15 @@ def main():
     args = parser.parse_args()
     out_dir = args.out_dir
     out_dir.mkdir(parents=True, exist_ok=True)
-
-    # Le mode "toy" lance baseline + improved avec toy_predict
-    # (comportement attendu par le smoke test)
     if args.mode == "toy":
         modes = ["baseline", "improved"]
+        use_toy = True
     else:
         modes = [args.mode]
+        use_toy = False
     summary = []
     for mode in modes:
-        rows, metrics = run(mode, args.db_path)
+        rows, metrics = run(mode, args.db_path, use_toy=use_toy)
         write_csv(out_dir / f"{mode}_predictions.csv", rows)
         (out_dir / f"{mode}_metrics.json").write_text(
             json.dumps(metrics, indent=2), encoding="utf-8"

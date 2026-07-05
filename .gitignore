@@ -9,8 +9,14 @@ eval/outputs/
 .env
 .DS_Store
 
-# Local/professor visual material
-assets/
+finetuning/lora_adapters/gemma_4_E4B
+finetuning/lora_adapters/medgemma_4b_pt
+
+# Chest X-Ray Images
+data/RSNA/Test
+data/RSNA/Training
+data/chest_xray/test
+data/chest_xray/train
 
 # Local review / rollback material
 .rollback*/
@@ -18,5 +24,4 @@ assets/
 # Local duplicate; the shareable PDF lives in docs/appel_offre.pdf
 /appel_offre.pdf
 
-eval/outputs
-medical_ai_evidence.sqlite
+data/assistant-radio-evidence.sqlite
