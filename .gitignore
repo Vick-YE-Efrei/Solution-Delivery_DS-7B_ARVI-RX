@@ -24,3 +24,5 @@ medical_ai_evidence.sqlite
 data/RSNA/
 
 finetuning/outputs/
+
+data/assistant-radio-evidence.sqlite
