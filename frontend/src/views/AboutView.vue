@@ -24,6 +24,11 @@
           <span class="material-symbols-outlined text-xl">assessment</span>
           <span class="font-medium text-sm">Métriques</span>
         </router-link>
+        <router-link to="/guide"
+          class="text-slate-400 hover:text-white rounded-xl px-4 py-3 flex items-center gap-3.5 hover:bg-white/5 transition-colors">
+          <span class="material-symbols-outlined text-xl">menu_book</span>
+          <span class="font-medium text-sm">Guide d'utilisation</span>
+        </router-link>
         <router-link to="/about"
           class="rounded-xl px-4 py-3 flex items-center gap-3.5 border border-blue-500/20 bg-blue-600/10 text-blue-400">
           <span class="material-symbols-outlined text-xl" style="font-variation-settings:'FILL' 1">info</span>
