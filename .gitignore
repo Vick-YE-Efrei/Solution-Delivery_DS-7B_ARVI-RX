@@ -25,3 +25,11 @@ assets/
 
 # Local duplicate; the shareable PDF lives in docs/appel_offre.pdf
 /appel_offre.pdf
+
+eval/outputs
+medical_ai_evidence.sqlite
+
+data/assistant-radio-evidence.sqlite
+data/RSNA/
+
+finetuning/outputs/
