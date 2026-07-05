@@ -51,7 +51,8 @@
           </div>
         </div>
         <button @click="logout"
-          class="w-full text-[10px] font-bold text-slate-500 hover:text-slate-300 uppercase tracking-wider py-1 transition-colors">
+          class="w-full flex items-center justify-center gap-2 mt-1 px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
+          <span class="material-symbols-outlined text-base">logout</span>
           Déconnexion
         </button>
       </div>

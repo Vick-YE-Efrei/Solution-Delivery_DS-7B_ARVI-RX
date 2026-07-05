@@ -42,7 +42,10 @@
             <p class="admin-role">Administrateur</p>
           </div>
         </div>
-        <button class="logout-btn" @click="logout">Déconnexion</button>
+        <button class="logout-btn" @click="logout">
+          <span class="material-symbols-outlined" style="font-size:15px;vertical-align:middle;margin-right:6px;">logout</span>
+          Déconnexion
+        </button>
       </div>
     </aside>
 
@@ -590,7 +593,7 @@ const perfData = computed(() => {
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
-.logout-btn:hover { background: rgba(255,255,255,0.10); color: #e5e7eb; }
+.logout-btn:hover { background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.25); color: #f87171; }
 
 /* ── Contenu ── */
 .content {
