@@ -21,7 +21,7 @@ from src.metrics import summarize_metrics
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_repository_student_contract_is_present() -> None:
+def test_repository_student_contract_is_present():
     """Vérifie que le dépôt contient bien les fichiers attendus pour la livraison,
     et qu'aucun fichier interdit (rapports internes, données non anonymisées,
     sorties générées...) n'a été commité par erreur.
@@ -61,7 +61,7 @@ def test_repository_student_contract_is_present() -> None:
     assert forbidden == []
 
 
-def test_synthetic_dataset_contract_is_valid() -> None:
+def test_synthetic_dataset_contract_is_valid():
     """Vérifie que le dataset jouet a les bonnes colonnes, des labels valides,
     au moins 20 cas, et que chaque image référencée existe bien sur le disque.
     """
@@ -80,7 +80,7 @@ def test_synthetic_dataset_contract_is_valid() -> None:
         assert (ROOT / row["image_path"]).exists()
 
 
-def test_prediction_schema_warning_and_guardrails() -> None:
+def test_prediction_schema_warning_and_guardrails():
     """Une prédiction du prédicteur jouet, une fois passée par les garde-fous,
     doit rester conforme au schéma JSON et porter le warning non-clinique.
     """
@@ -94,7 +94,7 @@ def test_prediction_schema_warning_and_guardrails() -> None:
     assert "not a validated medical model" in pred["limitations"]
 
 
-def test_python_source_tree_compiles() -> None:
+def test_python_source_tree_compiles():
     """Vérifie qu'il n'y a pas d'erreur de syntaxe qui traîne dans le code source
     (équivalent à `python -m compileall`, mais exécuté comme un test).
     """
@@ -102,7 +102,7 @@ def test_python_source_tree_compiles() -> None:
         assert compileall.compile_dir(ROOT / folder, quiet=1)
 
 
-def test_invalid_model_output_falls_back_to_uncertain() -> None:
+def test_invalid_model_output_falls_back_to_uncertain():
     """Une sortie qui ne respecte pas le contrat (classe "diagnosis" inexistante)
     doit être rattrapée par le garde-fou : reclassée en "uncertain", confiance
     plafonnée, et l'erreur tracée dans guardrail_errors.
@@ -115,7 +115,7 @@ def test_invalid_model_output_falls_back_to_uncertain() -> None:
     assert pred["guardrail_errors"]
 
 
-def test_metrics_and_api_health_contract() -> None:
+def test_metrics_and_api_health_contract():
     """Vérifie summarize_metrics() sur un petit exemple à la main, et que le endpoint
     de santé de l'API renvoie bien le statut et le scope attendus.
     """
@@ -132,7 +132,7 @@ def test_metrics_and_api_health_contract() -> None:
     assert metrics["warning_rate"] == 1.0
 
 
-def test_api_predict_preserves_uploaded_case_signal() -> None:
+def test_api_predict_preserves_uploaded_case_signal():
     """Envoie une vraie image (via l'endpoint /predict) et vérifie que la classe
     prédite correspond bien à ce que le nom du fichier indique (toy_predict lit
     le nom du fichier), et que le warning est présent dans la réponse HTTP.
@@ -153,7 +153,7 @@ def test_api_predict_preserves_uploaded_case_signal() -> None:
     shutil.rmtree(ROOT / "tmp_uploads", ignore_errors=True)
 
 
-def test_evaluation_command_runs_and_preserves_warning_contract(tmp_path: Path) -> None:
+def test_evaluation_command_runs_and_preserves_warning_contract(tmp_path: Path):
     """Lance vraiment `eval/run_evaluation.py --mode toy` en sous-processus (comme
     un utilisateur le ferait en ligne de commande) et vérifie la sortie produite :
     code de retour, JSON de résumé, et fichiers écrits dans tmp_path (pas dans le

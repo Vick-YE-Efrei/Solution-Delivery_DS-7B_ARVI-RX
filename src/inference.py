@@ -21,7 +21,7 @@ _ROOT = Path(__file__).resolve().parents[1]
 _processor_cache: dict[str, Any] = {}
 _model_cache: dict[str, Any] = {}
 
-# ── Keyword classification (same logic as the inference notebook) ──────────
+# Classification par mots-clés, même logique que dans le notebook d'inférence.
 _OPACITY_KW = [
     "opacity", "opacities", "opacified", "opacification",
     "consolidation", "consolidations", "pneumonia", "infiltrate",
@@ -90,7 +90,7 @@ def _classify_from_text(text: str) :
     return "uncertain", 0.50, ["aucun terme discriminant clair"]
 
 
-# ── Model loading ──────────────────────────────────────────────────────────
+# Chargement du modèle réel (VLM), utilisé par vlm_predict_medgemma.
 
 def toy_predict(image_path: str | Path, mode: str = "baseline"):
     """Prédicteur jouet, déterministe : il lit la classe attendue dans le nom du fichier.

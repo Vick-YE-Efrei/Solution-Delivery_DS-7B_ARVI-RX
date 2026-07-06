@@ -11,7 +11,7 @@ license, GPU requirements and official Google/Hugging Face examples before runni
 # 4. Keep non-clinical warning and uncertainty rules.
 
 
-def main() -> None:
+def main():
     """Ne fait rien de réel pour l'instant — juste un rappel que ce stub reste à implémenter."""
     print("Skeleton only. Connect official MedGemma fine-tuning recipe after validation.")
 

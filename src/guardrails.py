@@ -7,7 +7,7 @@ REQUIRED_KEYS = {"image_quality", "predicted_class", "confidence", "visual_evide
 WARNING_TEXT = "Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise."
 
 
-def validate_prediction(pred: dict[str, Any]) -> tuple[bool, list[str]]:
+def validate_prediction(pred: dict[str, Any]):
     """Vérifie qu'une prédiction respecte le contrat JSON attendu.
 
     Renvoie (True, []) si tout est bon, sinon (False, liste des erreurs trouvées).
@@ -38,7 +38,7 @@ def validate_prediction(pred: dict[str, Any]) -> tuple[bool, list[str]]:
     return not errors, errors
 
 
-def apply_safety_guardrails(pred: dict[str, Any]) -> dict[str, Any]:
+def apply_safety_guardrails(pred: dict[str, Any]):
     """Force une sortie sûre par défaut : en cas de doute, on répond "uncertain".
 
     Trois filets de sécurité successifs :

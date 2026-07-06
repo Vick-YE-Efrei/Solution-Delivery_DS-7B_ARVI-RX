@@ -6,7 +6,7 @@ from typing import Iterable
 CLASSES = ["normal", "suspected_opacity", "uncertain"]
 
 
-def accuracy(y_true: Iterable[str], y_pred: Iterable[str]) -> float:
+def accuracy(y_true: Iterable[str], y_pred: Iterable[str]):
     """Proportion de prédictions qui tombent exactement sur le bon label."""
     y_true = list(y_true); y_pred = list(y_pred)
     if not y_true:
@@ -14,7 +14,7 @@ def accuracy(y_true: Iterable[str], y_pred: Iterable[str]) -> float:
     return sum(a == b for a, b in zip(y_true, y_pred)) / len(y_true)
 
 
-def macro_f1(y_true: Iterable[str], y_pred: Iterable[str], classes: list[str] = CLASSES) -> float:
+def macro_f1(y_true: Iterable[str], y_pred: Iterable[str], classes: list[str] = CLASSES):
     """F1 moyenné sur les 3 classes (pas pondéré par leur fréquence).
 
     On calcule un F1 par classe (vue comme "cette classe" vs "le reste"), puis on
@@ -35,7 +35,7 @@ def macro_f1(y_true: Iterable[str], y_pred: Iterable[str], classes: list[str] = 
     return sum(scores) / len(scores)
 
 
-def confusion_counts(y_true: Iterable[str], y_pred: Iterable[str]) -> dict[str, int]:
+def confusion_counts(y_true: Iterable[str], y_pred: Iterable[str]):
     """Compte chaque paire (label réel, classe prédite) — une matrice de confusion à plat."""
     counts = Counter()
     for t, p in zip(y_true, y_pred):
@@ -43,7 +43,7 @@ def confusion_counts(y_true: Iterable[str], y_pred: Iterable[str]) -> dict[str, 
     return dict(counts)
 
 
-def summarize_metrics(rows: list[dict]) -> dict[str, float]:
+def summarize_metrics(rows: list[dict]):
     """Calcule toutes les métriques d'une passe d'évaluation à partir des lignes de résultats.
 
     rows est la liste produite par eval/run_evaluation.py : chaque ligne a au moins

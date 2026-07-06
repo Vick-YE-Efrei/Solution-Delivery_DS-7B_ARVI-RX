@@ -52,13 +52,13 @@ N_PER_CLASS_TEST = 1000
 N_PER_CLASS_TRAIN = None
 
 
-def read_cases(path: Path) -> list[dict]:
+def read_cases(path: Path):
     """Charge un CSV de cas (rsna_samples.csv) en liste de dicts, une entrée par ligne."""
     with path.open(newline="", encoding="utf-8") as f:
         return list(csv.DictReader(f))
 
 
-def split_train_test(cases: list[dict], seed: int = SEED) -> tuple[list[dict], list[dict]]:
+def split_train_test(cases: list[dict], seed: int = SEED):
     """Split stratifié à effectif fixe par classe. Prend d'abord
     N_PER_CLASS_TEST cas par classe pour le test, puis le reste pour le
     train (plafonné à N_PER_CLASS_TRAIN si défini).
@@ -92,7 +92,7 @@ def split_train_test(cases: list[dict], seed: int = SEED) -> tuple[list[dict], l
     return train_cases, test_cases
 
 
-def write_csv(path: Path, rows: list[dict]) -> None:
+def write_csv(path: Path, rows: list[dict]):
     """Écrit au format chest_xray_*.csv : case_id, image_path, label,
     true_label, confidence.
     """
@@ -116,7 +116,7 @@ def write_csv(path: Path, rows: list[dict]) -> None:
             })
 
 
-def print_distribution(rows: list[dict], title: str) -> None:
+def print_distribution(rows: list[dict], title: str):
     """Affiche le nombre de cas par classe, pour vérifier à l'œil que le split reste équilibré."""
     counts = Counter(r["label"] for r in rows)
     print(f"\n{title} — {len(rows)} cas")
@@ -124,7 +124,7 @@ def print_distribution(rows: list[dict], title: str) -> None:
         print(f"  {label:<20}: {counts.get(label, 0)}")
 
 
-def main() -> None:
+def main():
     """Point d'entrée CLI : charge rsna_samples.csv, split, écrit les CSV train/test."""
     cases = read_cases(IN_CSV)
     print(f"{len(cases)} cas chargés depuis {IN_CSV.name}")

@@ -8,14 +8,14 @@ from pathlib import Path
 SCHEMA_PATH = Path(__file__).resolve().parents[1] / "sql" / "schema.sql"
 
 
-def connect(db_path: str | Path = "medical_ai_evidence.sqlite") -> sqlite3.Connection:
+def connect(db_path: str | Path = "medical_ai_evidence.sqlite"):
     """Ouvre une connexion SQLite sur db_path, avec les lignes accessibles comme des dicts."""
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row  # permet de faire row["case_id"] plutôt que row[0]
     return conn
 
 
-def init_db(db_path: str | Path = "medical_ai_evidence.sqlite") -> None:
+def init_db(db_path: str | Path = "medical_ai_evidence.sqlite"):
     """Crée la base (et ses tables) si elle n'existe pas encore, à partir de sql/schema.sql.
 
     Rejouer le script est sans danger : le schéma utilise CREATE TABLE IF NOT EXISTS.
@@ -25,7 +25,7 @@ def init_db(db_path: str | Path = "medical_ai_evidence.sqlite") -> None:
     conn.commit(); conn.close()
 
 
-def insert_run(db_path: str | Path, case_id: str, image_path: str, prediction: dict) -> None:
+def insert_run(db_path: str | Path, case_id: str, image_path: str, prediction: dict):
     """Journalise une prédiction dans la table `runs`, comme preuve d'exécution.
 
     prediction est la sortie brute du prédicteur (toy ou VLM) ; on la stocke aussi

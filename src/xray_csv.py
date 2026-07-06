@@ -40,10 +40,7 @@ N_PER_CLASS_TRAIN = 640
 N_PER_CLASS_TEST = 160
 
 
-# ─────────────────────────────────────────────────────────────────────────
-# STEP 1 — indexation brute 
-# ─────────────────────────────────────────────────────────────────────────
-
+# Étape 1 — indexation brute des images sur disque.
 def index_raw_cases():
     """
     Parcourt train/, test/, val/ et indexe chaque image avec son label
@@ -71,11 +68,8 @@ def index_raw_cases():
     return cases_raw
 
 
-# ─────────────────────────────────────────────────────────────────────────
-# STEP 2 — déduplication + filtrage des fichiers parasites
-# ─────────────────────────────────────────────────────────────────────────
-
-def deduplicate(cases_raw: list[dict]) -> list[dict]:
+# Étape 2 — déduplication et filtrage des fichiers parasites.
+def deduplicate(cases_raw: list[dict]):
     """
     Déduplique sur (case_id, label) et exclut __MACOSX / ._* / fichiers
     cachés, qui apparaissent fréquemment dans les archives zip Kaggle
@@ -103,10 +97,7 @@ def deduplicate(cases_raw: list[dict]) -> list[dict]:
     return cases
 
 
-# ─────────────────────────────────────────────────────────────────────────
-# STEP 3 — score de confiance qualité (contraste + netteté)
-# ─────────────────────────────────────────────────────────────────────────
-
+# Étape 3 — score de confiance qualité (contraste + netteté).
 def quality_metrics(image_path: Path):
     """
     Retourne (contraste, netteté) bruts pour une image, sur une version
@@ -189,10 +180,7 @@ def compute_confidence_and_reclassify(cases: list[dict]):
     return cases
 
 
-# ─────────────────────────────────────────────────────────────────────────
-# STEP 4 — split train/test à effectif fixe par classe
-# ─────────────────────────────────────────────────────────────────────────
-
+# Étape 4 — split train/test à effectif fixe par classe.
 def split_train_test(cases: list[dict], seed: int = SEED):
     """
     Split stratifié à effectif fixe par classe : exactement
@@ -225,10 +213,7 @@ def split_train_test(cases: list[dict], seed: int = SEED):
     return train_cases, test_cases
 
 
-# ─────────────────────────────────────────────────────────────────────────
-# Écriture CSV — format attendu par eval/run_evaluation.py
-# ─────────────────────────────────────────────────────────────────────────
-
+# Écriture CSV — format attendu par eval/run_evaluation.py.
 def write_csv(path: Path, rows: list[dict], split_name: str):
     """Écrit un split (train ou test) au format case_id/image_path/label/true_label/confidence."""
     if not rows:
