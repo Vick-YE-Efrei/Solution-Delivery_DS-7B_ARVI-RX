@@ -8,56 +8,45 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.append(str(ROOT))
 
-import src.inference as inference
+from src.inference import toy_predict
 from src.guardrails import apply_safety_guardrails, validate_prediction
 from src.metrics import summarize_metrics
 from src.database import insert_run, init_db
 
 
-def read_cases(path: Path):
-    with path.open(newline="", encoding="utf-8") as f:
+def read_cases(path: Path) -> list[dict]:
+    with path.open(newline='', encoding='utf-8') as f:
         return list(csv.DictReader(f))
 
 
-def write_csv(path: Path, rows: list[dict]):
+def write_csv(path: Path, rows: list[dict]) -> None:
     if not rows:
         return
-    with path.open("w", newline="", encoding="utf-8") as f:
+    with path.open('w', newline='', encoding='utf-8') as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
-        w.writeheader()
-        w.writerows(rows)
+        w.writeheader(); w.writerows(rows)
 
 
-def run(mode: str, db_path: Path):
-    cases = read_cases(ROOT / "data" / "synthetic_cases.csv")
+def run(mode: str, db_path: Path) -> tuple[list[dict], dict]:
+    cases = read_cases(ROOT / 'data' / 'synthetic_cases.csv')
     rows = []
     init_db(db_path)
-
-    if mode in ("toy", "baseline"):
-        def predict_fn(img):
-            return inference.toy_predict(img, mode="baseline")
-    elif mode == "improved":
-        def predict_fn(img):
-            return inference.toy_predict(img, mode="improved")
-
     for case in cases:
-        image_path = ROOT / case["image_path"]
-        pred = predict_fn(image_path)
-        pred = apply_safety_guardrails(pred)
+        image_path = ROOT / case['image_path']
+        pred = apply_safety_guardrails(toy_predict(image_path, mode=mode))
         valid, errors = validate_prediction(pred)
         row = {
-            "case_id":          case["case_id"],
-            "label":            case["label"],
-            "predicted_class":  pred["predicted_class"],
-            "confidence":       pred["confidence"],
-            "json_valid":       valid,
-            "warning":          pred.get("warning", ""),
-            "latency_ms":       pred.get("latency_ms", 0),
-            "guardrail_errors": ";".join(errors),
+            'case_id': case['case_id'],
+            'label': case['label'],
+            'predicted_class': pred['predicted_class'],
+            'confidence': pred['confidence'],
+            'json_valid': valid,
+            'warning': pred.get('warning', ''),
+            'latency_ms': pred.get('latency_ms', 0),
+            'guardrail_errors': ';'.join(errors),
         }
         rows.append(row)
-        insert_run(db_path, case["case_id"], str(image_path), pred)
-
+        insert_run(db_path, case['case_id'], str(image_path), pred)
     metrics = summarize_metrics(rows)
     return rows, metrics
 
