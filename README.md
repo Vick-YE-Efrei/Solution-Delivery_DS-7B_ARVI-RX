@@ -53,13 +53,15 @@ Labels dérivés du fichier `stage2_train_metadata.csv` fourni par RSNA :
 ```bash
 python -m venv .venv
 source .venv/bin/activate   # Windows : .venv\Scripts\activate
-python -m pip install --upgrade pip setuptools wheel
+python -m pip install --upgrade pip "setuptools<82" wheel
 pip install -r requirements.txt
 #pip install pillow --no-cache-dir
 
 # Pipeline "jouet" (validation de la baseline)
 python eval/run_evaluation.py --mode toy
 streamlit run app/streamlit_app.py
+```
+
 ## Démarrage — Application web complète
 
 L'application web se compose de trois serveurs à lancer en parallèle dans trois terminaux distincts, depuis la **racine du projet** (`C:\mastercamp\projet_arvi`).
