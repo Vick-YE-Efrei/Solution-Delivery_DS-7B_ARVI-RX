@@ -18,7 +18,7 @@ backend/node_modules/
 *.safetensors
 
 # Local/professor visual material
-assets/
+/assets/
 
 # Local review / rollback material
 .rollback*/
