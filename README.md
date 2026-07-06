@@ -48,31 +48,33 @@ Labels dérivés du fichier `stage2_train_metadata.csv` fourni par RSNA :
 > Source : [RSNA Pneumonia Processed Dataset — Kaggle](https://www.kaggle.com/datasets/iamtapendu/rsna-pneumonia-processed-dataset)  
 > Licence : CC BY-NC-SA 4.0. Données dé-identifiées. Aucune image patient réelle ne doit être commitée dans ce dépôt.
 
-## Démarrage rapide
+## Démarrage
+
+Deux options selon le besoin : le pipeline Python seul suffit pour valider l'évaluation et les garde-fous ; l'application web complète ajoute l'authentification, l'historique et le dashboard admin.
+
+### Option A — Pipeline Python seul (jouet)
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate   # Windows : .venv\Scripts\activate
 python -m pip install --upgrade pip "setuptools<82" wheel
 pip install -r requirements.txt
-#pip install pillow --no-cache-dir
 
-# Pipeline "jouet" (validation de la baseline)
 python eval/run_evaluation.py --mode toy
-streamlit run app/streamlit_app.py
+PYTHONPATH=. streamlit run app/streamlit_app.py   # PYTHONPATH=. pour résoudre les imports depuis la racine du projet
 ```
 
-## Démarrage — Application web complète
+### Option B — Application web complète
 
-L'application web se compose de trois serveurs à lancer en parallèle dans trois terminaux distincts, depuis la **racine du projet** (`C:\mastercamp\projet_arvi`).
+L'application web se compose de trois serveurs à lancer en parallèle dans trois terminaux distincts, depuis la racine du projet.
 
-### Prérequis
+#### Prérequis
 
 - Python 3.10+ avec `pip`
 - Node.js 18+
 - MySQL 8+ en service local
 
-### 1. Environnement Python
+#### 1. Environnement Python
 
 ```bash
 python -m venv .venv
@@ -84,7 +86,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 2. Environnement Node
+#### 2. Environnement Node
 
 ```bash
 cd backend
@@ -92,7 +94,7 @@ npm install
 cd ..
 ```
 
-### 3. Configuration de la base de données
+#### 3. Configuration de la base de données
 
 ```bash
 # Copier le fichier d'environnement et l'adapter
@@ -113,7 +115,7 @@ Comptes créés par `setup.js` :
 | <marie@arvi.fr> | user123 | user |
 | <thomas@arvi.fr> | user123 | user |
 
-### 4. Lancer les trois serveurs
+#### 4. Lancer les trois serveurs
 
 Ouvrir **trois terminaux** depuis la racine du projet, venv activé dans chacun.
 
@@ -140,7 +142,7 @@ npm run dev
 
 Ouvrir **`http://localhost:5173`** dans le navigateur.
 
-### Récapitulatif des ports
+#### Récapitulatif des ports
 
 | Service | Port |
 |---|---|
@@ -149,7 +151,7 @@ Ouvrir **`http://localhost:5173`** dans le navigateur.
 | FastAPI | 8001 |
 | MySQL | 3306 |
 
-### Modèles LoRA — mode Amélioré
+#### Modèles LoRA — mode Amélioré
 
 Les poids `.safetensors` ne sont pas versionnés (> 100 Mo). Ils doivent être présents localement :
 
@@ -168,18 +170,6 @@ hf auth login   # coller le token généré sur huggingface.co/settings/tokens
 > **Note GPU** : MedGemma 4B en quantification 4-bit nécessite une carte NVIDIA (CUDA) avec au moins 4 Go de VRAM. La première analyse en mode Amélioré prend 1 à 2 minutes (chargement du modèle en mémoire) ; les suivantes sont nettement plus rapides car le modèle reste en cache GPU.
 >
 > Sans GPU compatible, le mode Amélioré bascule automatiquement sur le prédicteur de démonstration (fallback toy).
-
----
-
-## Démarrage rapide (pipeline Python seul)
-
-```bash
-python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-python eval/run_evaluation.py --mode toy
-PYTHONPATH=. streamlit run app/streamlit_app.py # chercher les modules depuis le dossier courant (la racine du projet).
-```
 
 ## Smoke test du dépôt
 
@@ -202,35 +192,34 @@ Ce smoke test vérifie la structure du dépôt, le contrat du dataset synthétiq
 ## Modes d'évaluation
 
 ```bash
-# Pipeline jouet — dataset synthétique (baseline + improved)
+# Pipeline jouet — dataset synthétique (lance baseline + improved)
 python eval/run_evaluation.py --mode toy \
-  # --cases-csv data/synthetic_cases.csv \
   --out-dir eval/outputs \
   --db-path data/assistant-radio-evidence.sqlite
 
-# Preprocessing pixel-based — dataset RSNA réel
+# Preprocessing pixel-based — dataset RSNA réel (basic_quality_flag, pas de classification)
 python eval/run_evaluation.py --mode preprocessing \
-  # --cases-csv data/rsna_samples.csv \
   --out-dir eval/outputs/rsna \
   --db-path data/assistant-radio-evidence.sqlite
 
-# MedGemma-4b-pt (expérimental, nécessite token HuggingFace + ~9 Go RAM)
+# Baseline jouet isolée (toy_predict en mode "baseline" seul, sans "improved")
 python eval/run_evaluation.py --mode baseline \
-  # --cases-csv data/synthetic_cases.csv \
   --out-dir eval/outputs \
   --db-path data/assistant-radio-evidence.sqlite
 ```
 
+> Le vrai modèle MedGemma-4b-pt (expérimental, nécessite token HuggingFace + ~9 Go RAM) n'est pas branché dans ce script : il est accessible via l'API (`api/main.py`, paramètre `model_key`), voir [API de démonstration](#api-de-démonstration).
+
 ## API de démonstration
 
 ```bash
-uvicorn api.main:app --reload
+uvicorn api.main:app --reload --port 8001
 ```
 
 Exemple :
 
 ```bash
-curl -X POST "http://127.0.0.1:8000/predict" \
+curl -X POST "http://127.0.0.1:8001/predict?mode=improved&model_key=medgemma_4b_pt" \
   -F "file=@data/sample_images/CXR_SYN_002_suspected_opacity.png"
 ```
 
@@ -256,6 +245,8 @@ assistant-radiologue-virtuel/
 │   └── rsna.py                  # génération de rsna_samples.csv depuis RSNA (dataset importé en local depuis Kaggle)
 ├── api/           # FastAPI
 ├── app/           # Streamlit / Gradio
+├── backend/       # API Express + MySQL (auth, historique, dashboard admin)
+├── frontend/      # SPA Vue (upload, historique, dashboard admin)
 ├── eval/          # évaluation, sorties CSV/JSON, registre d'erreurs
 ├── tests/         # smoke tests et contrat minimal
 ├── notebooks/     # notebooks de démarrage
