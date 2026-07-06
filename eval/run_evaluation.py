@@ -2,6 +2,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+from collections import Counter
 from pathlib import Path
 import sys
 
@@ -12,6 +13,7 @@ from src.inference import toy_predict
 from src.guardrails import apply_safety_guardrails, validate_prediction
 from src.metrics import summarize_metrics
 from src.database import insert_run, init_db
+from src.preprocessing import basic_quality_flag
 
 
 def read_cases(path: Path) -> list[dict]:
@@ -27,7 +29,52 @@ def write_csv(path: Path, rows: list[dict]) -> None:
         w.writeheader(); w.writerows(rows)
 
 
+def run_preprocessing(db_path: Path) -> tuple[list[dict], dict]:
+    """Pixel-based quality check over the real RSNA dataset (no classification)."""
+    cases = read_cases(ROOT / 'data' / 'rsna_samples.csv')
+    rows = []
+    init_db(db_path)
+
+    for case in cases:
+        image_path = ROOT / case['image_path']
+        quality = basic_quality_flag(image_path)
+        pred = apply_safety_guardrails({
+            'image_quality': quality,
+            'predicted_class': 'uncertain',
+            'confidence': 0.0,
+            'visual_evidence': [],
+            'justification': 'Pixel-based preprocessing quality check, no classification performed.',
+            'limitations': ['preprocessing stage only, not a diagnostic prediction'],
+        })
+        valid, errors = validate_prediction(pred)
+        row = {
+            'case_id':          case['case_id'],
+            'label':            case['label'],
+            'quality':          quality,
+            'predicted_class':  pred['predicted_class'],
+            'confidence':       pred['confidence'],
+            'json_valid':       valid,
+            'warning':          pred.get('warning', ''),
+            'guardrail_errors': ';'.join(errors),
+        }
+        rows.append(row)
+        insert_run(db_path, case['case_id'], str(image_path), pred)
+
+    json_valid = [r['json_valid'] for r in rows]
+    warnings = [bool(r['warning']) for r in rows]
+    metrics = {
+        'n': len(rows),
+        'json_valid_rate': round(sum(json_valid) / len(json_valid), 4) if rows else 0,
+        'warning_rate': round(sum(warnings) / len(warnings), 4) if rows else 0,
+        'quality_distribution': dict(Counter(r['quality'] for r in rows)),
+    }
+    return rows, metrics
+
+
 def run(mode: str, db_path: Path) -> tuple[list[dict], dict]:
+    if mode == 'preprocessing':
+        return run_preprocessing(db_path)
+
     cases = read_cases(ROOT / 'data' / 'synthetic_cases.csv')
     rows = []
     init_db(db_path)
@@ -53,7 +100,7 @@ def run(mode: str, db_path: Path) -> tuple[list[dict], dict]:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", choices=["toy", "baseline", "improved"], default="toy")
+    parser.add_argument("--mode", choices=["toy", "baseline", "improved", "preprocessing"], default="toy")
     parser.add_argument("--out-dir", type=Path, default=ROOT / "eval" / "outputs")
     parser.add_argument("--db-path", type=Path, default=ROOT / "medical_ai_evidence.sqlite")
     args = parser.parse_args()
