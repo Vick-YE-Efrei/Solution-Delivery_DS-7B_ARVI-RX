@@ -29,11 +29,12 @@ def load_image(path: str | Path, size: tuple[int, int] = DEFAULT_SIZE):
     if path.suffix.lower() not in ALLOWED_SUFFIXES:
         raise ValueError(f"Unsupported image format: {path.suffix}")
     img = Image.open(path).convert("RGB")
-    return img.resize(size, resample=Image.LANCZOS) #Filtre de référence pour les images 
+    return img.resize(size, resample=Image.LANCZOS) #Filtre de référence pour les images
 
 def _compute_image_stats(img: Image.Image):
-    """
-    Calcule des statistiques simples sur l'image en niveaux de gris.
+    """Calcule des indicateurs simples de qualité sur l'image en niveaux de gris :
+    luminosité moyenne, écart-type des pixels et densité de bords (netteté).
+    Sert de base à basic_quality_flag() pour classer good/limited/poor.
     """
     gray = img.convert("L") # Convertit l'image RGB en niveaux de gris.
     pixels_arr = np.array(gray)
@@ -52,7 +53,12 @@ def _compute_image_stats(img: Image.Image):
     }
 
 def _laplacian_variance(gray: Image.Image):
-    """Variance du Laplacien discret 3×3 — mesure de netteté/contenu."""
+    """Variance du Laplacien discret 3×3 — mesure de netteté/contenu.
+
+    Le noyau appliqué ici (8 au centre, -1 sur les 8 voisins) est l'approximation
+    classique du Laplacien 2D : plus l'image a de contours nets, plus sa variance
+    après ce filtre est élevée. Une image floue ou uniforme donne une variance proche de 0.
+    """
     arr = np.array(gray, dtype=np.float32)
     lap = (
         - arr[:-2, :-2] - arr[:-2, 1:-1] - arr[:-2, 2:]
@@ -63,23 +69,16 @@ def _laplacian_variance(gray: Image.Image):
     # On vérifie que le Laplacien n'est pas vide (image trop petite ou uniforme).
     if lap.size == 0:
         return 0.0
-    
+
     return float(lap.var())
 
-# def basic_quality_flag(path: str | Path) -> str:
-#     """Toy quality flag based on filename metadata.
-
-#     Replace this with real image-quality checks in a serious implementation.
-#     """
-#     name = Path(path).name.lower()
-#     if "uncertain" in name or "limited" in name:
-#         return "limited"
-#     return "good"
-    
 
 def basic_quality_flag(path: str | Path):
-    """
-    Toy quality flag based on filename metadata.
+    """Évalue la qualité pixel d'une radiographie et renvoie "good", "limited" ou "poor".
+
+    C'est un filtre de préproc avant tout modèle : une image trop sombre/claire,
+    trop uniforme ou trop floue n'a aucune chance de donner une prédiction fiable,
+    autant le savoir avant l'inférence plutôt que de laisser le modèle deviner.
     """
     path = Path(path)
     if not path.exists():

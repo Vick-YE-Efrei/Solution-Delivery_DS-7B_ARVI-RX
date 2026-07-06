@@ -15,6 +15,9 @@ WARNING = "Prototype pédagogique. Non destiné au diagnostic. Validation par un
 
 _ROOT = Path(__file__).resolve().parents[1]
 
+# Les modèles/processeurs HuggingFace sont lourds à charger (plusieurs secondes à
+# quelques minutes) : on les garde en mémoire une fois chargés plutôt que de les
+# recharger à chaque appel de vlm_predict_medgemma.
 _processor_cache: dict[str, Any] = {}
 _model_cache: dict[str, Any] = {}
 
@@ -40,20 +43,37 @@ _HEDGE_KW = [
 _NEG_TERMS = ["no", "without", "free of", "negative for", "absence of"]
 
 
-def _positive_hit(text: str, keywords: list[str]) -> str | None:
+def _positive_hit(text: str, keywords: list[str]) :
+    """Cherche le premier mot-clé présent dans text qui n'est pas nié juste avant.
+
+    Renvoie le mot-clé trouvé (utile pour la justification), ou None si aucun
+    des keywords n'apparaît "positivement". On regarde les 150 caractères qui
+    précèdent chaque occurrence pour repérer une négation même un peu éloignée
+    dans la phrase (ex: "without focal consolidation, pleural effusion").
+    """
     t = text.lower()
     for k in keywords:
         for m in re.finditer(re.escape(k), t):
-            # Fenêtre élargie à 70 chars pour capturer les négations distantes
+            # Fenêtre élargie à 150 chars pour capturer les négations distantes
             # ex: "without focal consolidation, pleural effusion" (~38 chars)
             ctx = t[max(0, m.start() - 150):m.start()]
             if any(re.search(rf"\b{re.escape(n)}\b", ctx) for n in _NEG_TERMS):
-                continue
+                continue  # le mot-clé est nié dans son contexte, on ne le compte pas
             return k
     return None
 
 
-def _classify_from_text(text: str) -> tuple[str, float, list[str]]:
+def _classify_from_text(text: str) :
+    """Transforme la description en texte libre générée par le VLM en une classe du projet.
+
+    Logique de décision, dans l'ordre :
+    - un terme d'opacité ET "clear" en même temps → contradictoire, on reste prudent (uncertain) ;
+    - un terme d'opacité seul → suspected_opacity ;
+    - un langage de type "possible/questionable/suboptimal" → le modèle hésite, on suit (uncertain) ;
+    - un terme "normal/clear/unremarkable" → normal ;
+    - rien de tout ça → on ne force pas une classe qu'on ne peut pas justifier (uncertain).
+    Les confidences (0.50/0.70) sont des heuristiques fixes, pas des probabilités calibrées.
+    """
     op    = _positive_hit(text, _OPACITY_KW)
     clear = _positive_hit(text, _CLEAR_KW)
     hedge = _positive_hit(text, _HEDGE_KW)
@@ -72,7 +92,14 @@ def _classify_from_text(text: str) -> tuple[str, float, list[str]]:
 
 # ── Model loading ──────────────────────────────────────────────────────────
 
-def toy_predict(image_path: str | Path, mode: str = "baseline") -> dict[str, Any]:
+def toy_predict(image_path: str | Path, mode: str = "baseline"):
+    """Prédicteur jouet, déterministe : il lit la classe attendue dans le nom du fichier.
+
+    Ça n'a rien d'un vrai modèle — c'est fait exprès, pour valider tout le reste du
+    pipeline (garde-fous, métriques, format JSON, base SQLite...) sans dépendre d'un
+    modèle réel. En mode "improved" la confiance est légèrement plus basse : on
+    simule un système un peu plus prudent que la baseline.
+    """
     start   = time.perf_counter()
     name    = Path(image_path).name.lower()
     quality = basic_quality_flag(image_path)
@@ -107,7 +134,16 @@ def toy_predict(image_path: str | Path, mode: str = "baseline") -> dict[str, Any
     }
 
 
-def _load_model(model_id: str, lora_path: str | None) -> tuple[Any, Any]:
+def _load_model(model_id: str, lora_path: str | None):
+    """Charge (ou récupère depuis le cache) le processor et le modèle pour model_id.
+
+    Sur GPU, le modèle est chargé en 4-bit (NF4 + double quantization via
+    bitsandbytes) pour tenir dans peu de VRAM — c'est ce qui permet de faire tourner
+    un modèle de plusieurs milliards de paramètres sur une carte grand public.
+    Sans GPU, on retombe sur du float32 CPU : ça marche mais c'est nettement plus lent.
+    Si un chemin d'adaptateurs LoRA est fourni et existe, on le greffe par-dessus le
+    modèle de base (fine-tuning léger) ; sinon on garde le modèle pré-entraîné tel quel.
+    """
     cache_key = f"{model_id}:{lora_path}"
     if cache_key not in _model_cache:
         processor = AutoProcessor.from_pretrained(model_id)
@@ -118,15 +154,15 @@ def _load_model(model_id: str, lora_path: str | None) -> tuple[Any, Any]:
             print(f"[INFO] GPU détecté ({vram_gb:.1f} Go VRAM)")
             bnb_config = BitsAndBytesConfig(
                 load_in_4bit=True,
-                bnb_4bit_quant_type="nf4",
-                bnb_4bit_use_double_quant=True,
+                bnb_4bit_quant_type="nf4",           # quantization NF4 : bon compromis précision/mémoire pour des poids ~gaussiens
+                bnb_4bit_use_double_quant=True,       # quantifie aussi les constantes de quantization, gagne un peu plus de mémoire
                 bnb_4bit_compute_dtype=torch.bfloat16,
             )
             base = AutoModelForImageTextToText.from_pretrained(
                 model_id,
                 quantization_config=bnb_config,
                 dtype=torch.bfloat16,
-                device_map={"": 0},
+                device_map={"": 0},   # force tout le modèle sur le GPU 0 (pas de split multi-GPU ici)
                 low_cpu_mem_usage=True,
             )
         else:
@@ -143,7 +179,7 @@ def _load_model(model_id: str, lora_path: str | None) -> tuple[Any, Any]:
         else:
             print("[INFO] Aucun adaptateur LoRA — modèle de base utilisé")
 
-        base.eval()
+        base.eval()  # mode inférence : désactive dropout etc., on ne fait pas de training ici
         _processor_cache[cache_key] = processor
         _model_cache[cache_key]     = base
 
@@ -154,7 +190,14 @@ def vlm_predict_medgemma(
     image_path: str | Path,
     model_key: str = "medgemma_4b_pt",
     lora_path: str | None = None,
-) -> dict[str, Any]:
+):
+    """Inférence réelle avec un VLM (Gemma/MedGemma) : décrit l'image puis classe le texte.
+
+    Contrairement à toy_predict, ici on charge un vrai modèle et on lui fait générer
+    une description en langage naturel de la radio, qu'on reclasse ensuite avec
+    _classify_from_text (mots-clés). C'est expérimental : la confiance vient de
+    règles heuristiques, pas d'une probabilité calibrée par le modèle.
+    """
     MODEL_IDS = {
         "gemma_4_E4B":    "google/gemma-4-E4B",
         "medgemma_4b_pt": "google/medgemma-4b-pt",
@@ -175,7 +218,9 @@ def vlm_predict_medgemma(
 
     image = Image.open(image_path).convert("RGB")
 
-    # Prompt description libre — adapté au modèle -pt (non instruction-tuned)
+    # Prompt description libre — adapté au modèle -pt (non instruction-tuned).
+    # boi_token = "beginning of image", le token spécial qui indique au modèle où
+    # insérer les embeddings visuels dans la séquence de texte.
     boi    = processor.tokenizer.boi_token
     prompt = (
         f"{boi}\n"
@@ -187,10 +232,11 @@ def vlm_predict_medgemma(
 
     inputs = processor(images=image, text=prompt, return_tensors="pt").to(model.device)
 
-    with torch.no_grad():
-        outputs = model.generate(**inputs, max_new_tokens=120, do_sample=False)
+    with torch.no_grad():  # pas d'entraînement ici, inutile de calculer les gradients
+        outputs = model.generate(**inputs, max_new_tokens=120, do_sample=False)  # greedy, déterministe
 
-    # Décoder uniquement les tokens générés (pas le prompt)
+    # generate() renvoie prompt + réponse concaténés : on retire la partie prompt
+    # pour ne décoder que ce que le modèle a réellement généré.
     generated = outputs[0][inputs["input_ids"].shape[1]:]
     raw_text  = processor.decode(generated, skip_special_tokens=True)
 

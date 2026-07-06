@@ -12,6 +12,7 @@ license, GPU requirements and official Google/Hugging Face examples before runni
 
 
 def main() -> None:
+    """Ne fait rien de réel pour l'instant — juste un rappel que ce stub reste à implémenter."""
     print("Skeleton only. Connect official MedGemma fine-tuning recipe after validation.")
 
 

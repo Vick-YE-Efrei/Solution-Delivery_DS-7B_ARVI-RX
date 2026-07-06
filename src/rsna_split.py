@@ -53,6 +53,7 @@ N_PER_CLASS_TRAIN = None
 
 
 def read_cases(path: Path) -> list[dict]:
+    """Charge un CSV de cas (rsna_samples.csv) en liste de dicts, une entrée par ligne."""
     with path.open(newline="", encoding="utf-8") as f:
         return list(csv.DictReader(f))
 
@@ -116,6 +117,7 @@ def write_csv(path: Path, rows: list[dict]) -> None:
 
 
 def print_distribution(rows: list[dict], title: str) -> None:
+    """Affiche le nombre de cas par classe, pour vérifier à l'œil que le split reste équilibré."""
     counts = Counter(r["label"] for r in rows)
     print(f"\n{title} — {len(rows)} cas")
     for label in ALL_LABELS:
@@ -123,6 +125,7 @@ def print_distribution(rows: list[dict], title: str) -> None:
 
 
 def main() -> None:
+    """Point d'entrée CLI : charge rsna_samples.csv, split, écrit les CSV train/test."""
     cases = read_cases(IN_CSV)
     print(f"{len(cases)} cas chargés depuis {IN_CSV.name}")
     print("Distribution :", dict(Counter(c["label"] for c in cases)))

@@ -230,6 +230,7 @@ def split_train_test(cases: list[dict], seed: int = SEED):
 # ─────────────────────────────────────────────────────────────────────────
 
 def write_csv(path: Path, rows: list[dict], split_name: str):
+    """Écrit un split (train ou test) au format case_id/image_path/label/true_label/confidence."""
     if not rows:
         print(f"Aucune ligne pour {split_name}, fichier non créé.")
         return
@@ -249,6 +250,7 @@ def write_csv(path: Path, rows: list[dict], split_name: str):
 
 
 def main():
+    """Pipeline complet : indexation -> déduplication -> score qualité -> split -> écriture CSV."""
     cases_raw = index_raw_cases()
     cases = deduplicate(cases_raw)
     cases = compute_confidence_and_reclassify(cases)

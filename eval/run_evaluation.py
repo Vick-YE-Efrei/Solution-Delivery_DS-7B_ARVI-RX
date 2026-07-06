@@ -16,12 +16,14 @@ from src.database import insert_run, init_db
 from src.preprocessing import basic_quality_flag
 
 
-def read_cases(path: Path) -> list[dict]:
+def read_cases(path: Path):
+    """Charge un CSV de cas (synthetic_cases.csv ou rsna_samples.csv) en liste de dicts."""
     with path.open(newline='', encoding='utf-8') as f:
         return list(csv.DictReader(f))
 
 
-def write_csv(path: Path, rows: list[dict]) -> None:
+def write_csv(path: Path, rows: list[dict]):
+    """Écrit rows en CSV, colonnes déduites des clés de la première ligne. Ne fait rien si rows est vide."""
     if not rows:
         return
     with path.open('w', newline='', encoding='utf-8') as f:
@@ -29,8 +31,14 @@ def write_csv(path: Path, rows: list[dict]) -> None:
         w.writeheader(); w.writerows(rows)
 
 
-def run_preprocessing(db_path: Path) -> tuple[list[dict], dict]:
-    """Pixel-based quality check over the real RSNA dataset (no classification)."""
+def run_preprocessing(db_path: Path):
+    """Contrôle qualité pixel-based sur le vrai dataset RSNA, sans classification.
+
+    Contrairement à run(), qui simule une prédiction de classe, ce mode se
+    contente de faire tourner basic_quality_flag() sur chaque image et de
+    journaliser le résultat : il n'y a pas de "bonne réponse" à comparer, donc
+    pas d'accuracy/macro_f1 ici (voir quality_distribution à la place).
+    """
     cases = read_cases(ROOT / 'data' / 'rsna_samples.csv')
     rows = []
     init_db(db_path)
@@ -71,7 +79,13 @@ def run_preprocessing(db_path: Path) -> tuple[list[dict], dict]:
     return rows, metrics
 
 
-def run(mode: str, db_path: Path) -> tuple[list[dict], dict]:
+def run(mode: str, db_path: Path):
+    """Lance une passe d'évaluation sur le dataset jouet pour un mode donné.
+
+    mode vaut "baseline" ou "improved" (le mode "toy" est éclaté en ces deux-là
+    avant d'arriver ici, voir main()). "preprocessing" est délégué à
+    run_preprocessing() puisqu'il utilise un dataset et une logique différents.
+    """
     if mode == 'preprocessing':
         return run_preprocessing(db_path)
 
@@ -99,6 +113,9 @@ def run(mode: str, db_path: Path) -> tuple[list[dict], dict]:
 
 
 def main():
+    """Point d'entrée CLI : parse --mode/--out-dir/--db-path, lance l'évaluation,
+    écrit les CSV/JSON de résultats et affiche le résumé.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", choices=["toy", "baseline", "improved", "preprocessing"], default="toy")
     parser.add_argument("--out-dir", type=Path, default=ROOT / "eval" / "outputs")
