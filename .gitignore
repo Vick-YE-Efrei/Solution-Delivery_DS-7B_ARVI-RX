@@ -33,5 +33,3 @@ data/RSNA/
 data/assistant-radio-evidence.sqlite
 
 finetuning/outputs/
-
-data/assistant-radio-evidence.sqlite
