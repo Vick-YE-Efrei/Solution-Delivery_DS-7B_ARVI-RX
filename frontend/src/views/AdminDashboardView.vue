@@ -10,28 +10,24 @@
       <nav class="sidebar-nav">
         <a href="#" class="slink" :class="{ active: section === 'overview' }" @click.prevent="section = 'overview'">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="9" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="9" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/></svg>
-          Vue d'ensemble
+          {{ t('admin.overview') }}
         </a>
         <a href="#" class="slink" :class="{ active: section === 'users' }" @click.prevent="section = 'users'">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="6" cy="5" r="3" stroke="currentColor" stroke-width="1.4"/><path d="M1 14c0-3 2-5 5-5s5 2 5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M12 7c1.7 0 3 1.3 3 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="12" cy="4" r="2" stroke="currentColor" stroke-width="1.4"/></svg>
-          Utilisateurs
+          {{ t('admin.users') }}
         </a>
         <a href="#" class="slink" :class="{ active: section === 'analyses' }" @click.prevent="section = 'analyses'">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 12h2l2-5 3 8 2-6 1 3h2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Historique analyses
+          {{ t('admin.analyses') }}
         </a>
         <a href="#" class="slink" :class="{ active: section === 'perf' }" @click.prevent="section = 'perf'">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 5v3.5l2.5 1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-          Performances
+          {{ t('admin.performance') }}
         </a>
         <div style="height:1px;background:#1e293b;margin:8px 0"></div>
-        <router-link to="/guide" class="slink" style="text-decoration:none">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="1" width="10" height="14" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 5h6M5 8h6M5 11h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-          Guide d'utilisation
-        </router-link>
-        <router-link to="/about" class="slink" style="text-decoration:none">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 7v5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="4.5" r="0.8" fill="currentColor"/></svg>
-          À propos
+        <router-link to="/" class="slink" style="text-decoration:none;color:#a78bfa;background:rgba(124,58,237,0.12);">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="6" cy="5" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M1 14c0-2.8 2-4.5 5-4.5s5 1.7 5 4.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M11 8l3 3m0 0l-3 3m3-3H9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          {{ t('nav.user_interface') }}
         </router-link>
       </nav>
       <div class="sidebar-footer">
@@ -39,12 +35,16 @@
           <div class="admin-avatar">{{ auth.user?.name?.[0]?.toUpperCase() ?? 'A' }}</div>
           <div>
             <p class="admin-name">{{ auth.user?.name ?? 'Admin' }}</p>
-            <p class="admin-role">Administrateur</p>
+            <p class="admin-role">{{ t('admin.role_admin') }}</p>
           </div>
         </div>
+        <button class="logout-btn" style="margin-bottom:4px;background:transparent;border-color:#1e293b;color:#64748b;" @click="toggleLocale">
+          <span class="material-symbols-outlined" style="font-size:15px;vertical-align:middle;margin-right:6px;">translate</span>
+          {{ locale === 'fr' ? 'English' : 'Français' }}
+        </button>
         <button class="logout-btn" @click="logout">
           <span class="material-symbols-outlined" style="font-size:15px;vertical-align:middle;margin-right:6px;">logout</span>
-          Déconnexion
+          {{ t('common.logout') }}
         </button>
       </div>
     </aside>
@@ -58,44 +58,44 @@
           <circle cx="10" cy="10" r="8" stroke="#e5e7eb" stroke-width="2.5"/>
           <path d="M10 2a8 8 0 0 1 8 8" stroke="#5b21b6" stroke-width="2.5" stroke-linecap="round"/>
         </svg>
-        Chargement des données...
+        {{ t('admin.loading') }}
       </div>
 
       <!-- ── VUE D'ENSEMBLE ── -->
       <section v-else-if="section === 'overview'">
         <div class="page-head">
-          <h1 class="page-title">Vue d'ensemble</h1>
-          <p class="page-sub">Tableau de bord — {{ today }}</p>
+          <h1 class="page-title">{{ t('admin.overview') }}</h1>
+          <p class="page-sub">{{ t('admin.dashboard') }} — {{ today }}</p>
         </div>
         <div class="stats-grid">
           <div class="stat-card">
-            <p class="stat-label">Utilisateurs inscrits</p>
+            <p class="stat-label">{{ t('admin.stat_users') }}</p>
             <p class="stat-val">{{ stats.totalUsers }}</p>
-            <p class="stat-note">{{ users.filter(u => u.role === 'user').length }} utilisateurs, {{ users.filter(u => u.role === 'admin').length }} admins</p>
+            <p class="stat-note">{{ users.filter(u => u.role === 'user').length }} {{ t('admin.stat_users_note_u') }}, {{ users.filter(u => u.role === 'admin').length }} {{ t('admin.stat_users_note_a') }}</p>
           </div>
           <div class="stat-card">
-            <p class="stat-label">Analyses effectuées</p>
+            <p class="stat-label">{{ t('admin.stat_analyses') }}</p>
             <p class="stat-val">{{ stats.totalAnalyses }}</p>
-            <p class="stat-note">Confiance moy. {{ stats.avgConfidence }}%</p>
+            <p class="stat-note">{{ t('admin.stat_conf_note') }} {{ stats.avgConfidence }}%</p>
           </div>
           <div class="stat-card">
-            <p class="stat-label">Confiance moyenne</p>
+            <p class="stat-label">{{ t('admin.stat_avg_conf') }}</p>
             <p class="stat-val">{{ stats.avgConfidence }}%</p>
-            <p class="stat-note">Sur {{ stats.totalAnalyses }} analyses</p>
+            <p class="stat-note">{{ t('admin.stat_on') }} {{ stats.totalAnalyses }} {{ t('admin.stat_on_analyses') }}</p>
           </div>
           <div class="stat-card">
-            <p class="stat-label">Taux d'incertitude</p>
+            <p class="stat-label">{{ t('admin.stat_uncertainty') }}</p>
             <p class="stat-val">{{ stats.uncertainRate }}%</p>
-            <p class="stat-note">Classe uncertain retournée</p>
+            <p class="stat-note">{{ t('admin.stat_uncertainty_note') }}</p>
           </div>
         </div>
 
         <div class="overview-row">
           <div class="card">
-            <h2 class="card-title">Répartition des classes</h2>
+            <h2 class="card-title">{{ t('admin.dist_title') }}</h2>
             <div class="dist-bars">
-              <div v-for="item in distribution" :key="item.label" class="dist-row">
-                <span class="dist-label">{{ item.label }}</span>
+              <div v-for="item in distribution" :key="item.key" class="dist-row">
+                <span class="dist-label">{{ t('class.' + item.key) }}</span>
                 <div class="dist-track">
                   <div class="dist-fill" :style="{ width: item.pct + '%', background: item.color }"></div>
                 </div>
@@ -105,16 +105,16 @@
           </div>
 
           <div class="card">
-            <h2 class="card-title">Activité récente</h2>
+            <h2 class="card-title">{{ t('admin.activity_title') }}</h2>
             <ul class="activity-list">
               <li v-for="act in recentActivity" :key="act.id" class="activity-item">
                 <div class="act-avatar">{{ act.user[0].toUpperCase() }}</div>
                 <div class="act-info">
                   <span class="act-user">{{ act.user }}</span>
-                  <span class="act-action">a lancé une analyse</span>
+                  <span class="act-action">{{ t('admin.activity_action') }}</span>
                   <span :class="['act-badge', `badge--${act.result}`]">{{ classLabel(act.result) }}</span>
                 </div>
-                <span class="act-time">{{ act.time }}</span>
+                <span class="act-time">{{ timeAgo(act.createdAt) }}</span>
               </li>
             </ul>
           </div>
@@ -124,22 +124,22 @@
       <!-- ── UTILISATEURS ── -->
       <section v-else-if="section === 'users'">
         <div class="page-head">
-          <h1 class="page-title">Utilisateurs</h1>
-          <p class="page-sub">{{ users.length }} comptes enregistrés</p>
+          <h1 class="page-title">{{ t('admin.users') }}</h1>
+          <p class="page-sub">{{ users.length }} {{ t('admin.accounts_count') }}</p>
         </div>
         <div class="card">
           <div class="table-toolbar">
-            <input v-model="userSearch" class="search-input" placeholder="Rechercher un utilisateur…" />
+            <input v-model="userSearch" class="search-input" :placeholder="t('admin.search_user')" />
           </div>
           <table class="data-table">
             <thead>
               <tr>
-                <th>Nom</th>
-                <th>E-mail</th>
-                <th>Rôle</th>
-                <th>Analyses</th>
-                <th>Inscrit le</th>
-                <th>Actions</th>
+                <th>{{ t('admin.col_name') }}</th>
+                <th>{{ t('admin.col_email') }}</th>
+                <th>{{ t('admin.col_role') }}</th>
+                <th>{{ t('admin.analyses') }}</th>
+                <th>{{ t('admin.col_registered') }}</th>
+                <th>{{ t('admin.col_actions') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -159,7 +159,7 @@
                 <td class="text-center">{{ u.analysisCount }}</td>
                 <td class="text-soft">{{ u.createdAt }}</td>
                 <td>
-                  <button class="action-btn" @click="viewUserHistory(u)">Historique</button>
+                  <button class="action-btn" @click="viewUserHistory(u)">{{ t('admin.btn_history') }}</button>
                 </td>
               </tr>
             </tbody>
@@ -171,33 +171,33 @@
       <section v-else-if="section === 'analyses'">
         <div class="page-head">
           <h1 class="page-title">
-            <span v-if="!selectedUser">Toutes les analyses</span>
+            <span v-if="!selectedUser">{{ t('admin.all_analyses') }}</span>
             <span v-else>
-              Analyses de {{ selectedUser.name }}
-              <button class="back-btn" @click="selectedUser = null">← Retour</button>
+              {{ t('admin.analyses_of') }} {{ selectedUser.name }}
+              <button class="back-btn" @click="selectedUser = null">{{ t('admin.back') }}</button>
             </span>
           </h1>
-          <p class="page-sub">{{ filteredAnalyses.length }} analyses</p>
+          <p class="page-sub">{{ filteredAnalyses.length }} {{ t('admin.analyses').toLowerCase() }}</p>
         </div>
         <div class="card">
           <div class="table-toolbar">
-            <input v-model="analysisSearch" class="search-input" placeholder="Rechercher…" />
+            <input v-model="analysisSearch" class="search-input" :placeholder="t('admin.search')" />
             <select v-model="analysisFilter" class="filter-select">
-              <option value="">Toutes les classes</option>
-              <option value="normal">Normal</option>
-              <option value="suspected_opacity">Opacité suspectée</option>
-              <option value="uncertain">Incertain</option>
+              <option value="">{{ t('history.all_classes') }}</option>
+              <option value="normal">{{ t('class.normal') }}</option>
+              <option value="suspected_opacity">{{ t('class.suspected_opacity') }}</option>
+              <option value="uncertain">{{ t('class.uncertain') }}</option>
             </select>
           </div>
           <table class="data-table">
             <thead>
               <tr>
-                <th>Utilisateur</th>
-                <th>Date</th>
-                <th>Mode</th>
-                <th>Résultat</th>
-                <th>Confiance</th>
-                <th>Seuil</th>
+                <th>{{ t('admin.col_user') }}</th>
+                <th>{{ t('admin.col_date') }}</th>
+                <th>{{ t('admin.col_mode') }}</th>
+                <th>{{ t('admin.col_result') }}</th>
+                <th>{{ t('admin.col_confidence') }}</th>
+                <th>{{ t('admin.col_threshold') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -233,17 +233,17 @@
       <!-- ── PERFORMANCES ── -->
       <section v-else-if="section === 'perf'">
         <div class="page-head">
-          <h1 class="page-title">Performances du modèle</h1>
-          <p class="page-sub">Métriques calculées sur {{ perfData.total }} analyses réelles</p>
+          <h1 class="page-title">{{ t('admin.perf_title') }}</h1>
+          <p class="page-sub">{{ t('admin.perf_sub') }} {{ perfData.total }} {{ t('admin.perf_sub2') }}</p>
         </div>
 
         <div v-if="perfData.total === 0" style="text-align:center;padding:60px;color:#9ca3af;font-size:14px;">
-          Aucune analyse enregistrée pour le moment. Lancez des analyses pour voir les métriques.
+          {{ t('admin.no_data_msg') }}
         </div>
 
         <div v-else class="perf-grid">
           <div class="card">
-            <h2 class="card-title">Métriques globales</h2>
+            <h2 class="card-title">{{ t('admin.global_metrics') }}</h2>
             <div class="metric-list">
               <div v-for="m in perfData.metrics" :key="m.name" class="metric-row">
                 <div class="metric-info">
@@ -258,10 +258,10 @@
           </div>
 
           <div class="card">
-            <h2 class="card-title">Baseline vs Amélioré</h2>
+            <h2 class="card-title">{{ t('admin.comparison_title') }}</h2>
             <table class="perf-table">
               <thead>
-                <tr><th>Métrique</th><th>Baseline</th><th>Amélioré</th><th>Delta</th></tr>
+                <tr><th>{{ t('admin.col_metric') }}</th><th>Baseline</th><th>{{ t('admin.col_improved') }}</th><th>{{ t('admin.col_delta') }}</th></tr>
               </thead>
               <tbody>
                 <tr v-for="r in perfData.comparison" :key="r.metric">
@@ -279,10 +279,10 @@
           </div>
 
           <div class="card card--full">
-            <h2 class="card-title">Répartition par modèle</h2>
+            <h2 class="card-title">{{ t('admin.by_model') }}</h2>
             <table class="perf-table">
               <thead>
-                <tr><th>Modèle</th><th>Analyses</th><th>Confiance moy.</th></tr>
+                <tr><th>{{ t('admin.col_model') }}</th><th>{{ t('admin.analyses') }}</th><th>{{ t('admin.col_avg_conf') }}</th></tr>
               </thead>
               <tbody>
                 <tr v-for="m in perfData.byModel" :key="m.model_name">
@@ -291,7 +291,7 @@
                   <td class="text-center">{{ m.avg_conf }}%</td>
                 </tr>
                 <tr v-if="!perfData.byModel.length">
-                  <td colspan="3" style="text-align:center;color:#9ca3af;padding:16px">Aucune donnée</td>
+                  <td colspan="3" style="text-align:center;color:#9ca3af;padding:16px">{{ t('admin.no_data') }}</td>
                 </tr>
               </tbody>
             </table>
@@ -308,29 +308,46 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { auth } from '../store/auth.js'
+import { t, locale, toggleLocale } from '../store/locale.js'
 const raviLogo = '/ravi-logo.png'
 
 const router  = useRouter()
 const section = ref('overview')
-const today   = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
 const isLoading = ref(true)
+
+const today = computed(() => {
+  const loc = locale.value === 'fr' ? 'fr-FR' : 'en-GB'
+  return new Date().toLocaleDateString(loc, { day: 'numeric', month: 'long', year: 'numeric' })
+})
 
 function logout() { auth.logout(); router.push('/login') }
 function classLabel(pred) {
-  return { normal: 'Normal', suspected_opacity: 'Opacité', uncertain: 'Incertain' }[pred] ?? pred
+  return {
+    normal:            t('class.normal'),
+    suspected_opacity: t('class.suspected_opacity'),
+    uncertain:         t('class.uncertain'),
+  }[pred] ?? pred
 }
 function fmt(iso) {
-  return new Date(iso).toLocaleString('fr-FR', {
+  const loc = locale.value === 'fr' ? 'fr-FR' : 'en-GB'
+  return new Date(iso).toLocaleString(loc, {
     day: '2-digit', month: 'short', year: 'numeric',
     hour: '2-digit', minute: '2-digit'
   })
 }
 function timeAgo(iso) {
   const diff = Math.floor((Date.now() - new Date(iso)) / 1000)
-  if (diff < 60)   return `il y a ${diff}s`
-  if (diff < 3600) return `il y a ${Math.floor(diff/60)}min`
-  if (diff < 86400) return `il y a ${Math.floor(diff/3600)}h`
-  return `il y a ${Math.floor(diff/86400)}j`
+  if (locale.value === 'fr') {
+    if (diff < 60)    return `il y a ${diff}s`
+    if (diff < 3600)  return `il y a ${Math.floor(diff/60)}min`
+    if (diff < 86400) return `il y a ${Math.floor(diff/3600)}h`
+    return `il y a ${Math.floor(diff/86400)}j`
+  } else {
+    if (diff < 60)    return `${diff}s ago`
+    if (diff < 3600)  return `${Math.floor(diff/60)}min ago`
+    if (diff < 86400) return `${Math.floor(diff/3600)}h ago`
+    return `${Math.floor(diff/86400)}d ago`
+  }
 }
 
 // ── State ──
@@ -389,9 +406,9 @@ onMounted(async () => {
     // Distribution réelle
     if (total > 0) {
       distribution.value = [
-        { label: 'Normal',            pct: +((s.normal_count  / total) * 100).toFixed(1), color: '#16a34a', count: s.normal_count },
-        { label: 'Opacité suspectée', pct: +((s.opacity_count / total) * 100).toFixed(1), color: '#c2410c', count: s.opacity_count },
-        { label: 'Incertain',         pct: +((s.uncertain_count / total) * 100).toFixed(1), color: '#d97706', count: s.uncertain_count },
+        { key: 'normal',            pct: +((s.normal_count  / total) * 100).toFixed(1), color: '#16a34a', count: s.normal_count },
+        { key: 'suspected_opacity', pct: +((s.opacity_count / total) * 100).toFixed(1), color: '#c2410c', count: s.opacity_count },
+        { key: 'uncertain',         pct: +((s.uncertain_count / total) * 100).toFixed(1), color: '#d97706', count: s.uncertain_count },
       ]
     }
 
@@ -400,10 +417,10 @@ onMounted(async () => {
 
     // Activité récente (5 dernières analyses)
     recentActivity.value = analysesRes.data.slice(0, 5).map(a => ({
-      id:     a.id,
-      user:   a.user_name,
-      result: a.predicted_class,
-      time:   timeAgo(a.created_at),
+      id:        a.id,
+      user:      a.user_name,
+      result:    a.predicted_class,
+      createdAt: a.created_at,
     }))
 
   } catch (e) {
@@ -463,27 +480,27 @@ const perfData = computed(() => {
   return {
     total,
     metrics: [
-      { name: 'Confiance moyenne',         value: globalConf + '%',  pct: globalConf,              color: '#5b21b6' },
-      { name: 'Taux normal',               value: distribution.value[0]?.pct + '%' ?? '–', pct: distribution.value[0]?.pct ?? 0, color: '#16a34a' },
-      { name: 'Taux opacité suspectée',    value: distribution.value[1]?.pct + '%' ?? '–', pct: distribution.value[1]?.pct ?? 0, color: '#c2410c' },
-      { name: 'Taux incertitude',          value: globalUncert + '%', pct: globalUncert,            color: '#d97706' },
-      { name: 'Latence moyenne',           value: globalLat + ' ms',  pct: Math.min(globalLat / 50, 100), color: '#0ea5e9' },
+      { name: t('admin.metric_avg_conf'),       value: globalConf + '%',  pct: globalConf,              color: '#5b21b6' },
+      { name: t('admin.metric_normal_rate'),     value: (distribution.value[0]?.pct ?? 0) + '%', pct: distribution.value[0]?.pct ?? 0, color: '#16a34a' },
+      { name: t('admin.metric_opacity_rate'),    value: (distribution.value[1]?.pct ?? 0) + '%', pct: distribution.value[1]?.pct ?? 0, color: '#c2410c' },
+      { name: t('admin.metric_uncertain_rate'),  value: globalUncert + '%', pct: globalUncert,            color: '#d97706' },
+      { name: t('admin.metric_avg_latency'),     value: globalLat + ' ms',  pct: Math.min(globalLat / 50, 100), color: '#0ea5e9' },
     ],
     comparison: [
       {
-        metric:   'Confiance moy.',
+        metric:   t('admin.comp_avg_conf'),
         baseline: avgConf(baseline) + '%',
         improved: avgConf(improved) + '%',
         delta:    +(avgConf(improved) - avgConf(baseline)).toFixed(1),
       },
       {
-        metric:   'Taux incertitude',
+        metric:   t('admin.comp_uncertain_rate'),
         baseline: uncertainPct(baseline) + '%',
         improved: uncertainPct(improved) + '%',
         delta:    +(uncertainPct(improved) - uncertainPct(baseline)).toFixed(1),
       },
       {
-        metric:   'Nb analyses',
+        metric:   t('admin.comp_count'),
         baseline: baseline.length,
         improved: improved.length,
         delta:    improved.length - baseline.length,

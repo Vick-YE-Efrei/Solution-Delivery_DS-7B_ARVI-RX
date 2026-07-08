@@ -66,6 +66,7 @@ async def predict(
     file: UploadFile = File(...),
     mode: str = Query(default="toy", description="toy | baseline | improved"),
     model_key: str = Query(default="medgemma_4b_pt", description="gemma_4_E4B | medgemma_4b_pt"),
+    lang: str = Query(default="fr", description="fr | en"),
 ) -> dict:
     UPLOAD_DIR.mkdir(exist_ok=True)
     filename  = Path(file.filename or "image.png").name
@@ -83,7 +84,7 @@ async def predict(
         else:
             try:
                 lora_path = LORA_PATH_GEMMA if model_key == "gemma_4_E4B" else LORA_PATH_MEDGEMMA
-                pred = vlm_predict_medgemma(target, model_key=model_key, lora_path=lora_path)
+                pred = vlm_predict_medgemma(target, model_key=model_key, lora_path=lora_path, lang=lang)
             except Exception as exc:
                 print(f"[WARN] VLM indisponible ({exc}), fallback toy")
                 pred = toy_predict(target, mode="improved")

@@ -6,14 +6,11 @@
       <div class="auth-left-inner">
         <div class="brand">
           <div class="brand-dot"></div>
-          <span class="brand-name">Assistant Radiologue Virtuel</span>
+          <span class="brand-name">{{ t('login.brand') }}</span>
         </div>
         <div class="auth-pitch">
-          <h1>Analysez des radiographies<br />de façon responsable.</h1>
-          <p>
-            Un prototype pédagogique construit autour de la traçabilité,
-            de l'incertitude explicite et de la rigueur d'ingénierie.
-          </p>
+          <h1 v-html="t('login.tagline').replace('\n', '<br />')"></h1>
+          <p>{{ t('login.description') }}</p>
         </div>
         <div class="auth-meta">EFREI Paris · Filière Data &amp; IA · 2025-2026</div>
       </div>
@@ -23,31 +20,37 @@
     <div class="auth-right">
       <div class="auth-card">
 
+        <!-- Lang toggle -->
+        <button @click="toggleLocale" style="position:absolute;top:16px;right:16px;display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:#64748b;background:transparent;border:1px solid #e2e8f0;border-radius:8px;padding:5px 10px;cursor:pointer;">
+          <span class="material-symbols-outlined" style="font-size:14px;">translate</span>
+          {{ locale === 'fr' ? 'English' : 'Français' }}
+        </button>
+
         <!-- Toggle login / register -->
         <div class="auth-tabs">
           <button class="auth-tab" :class="{ active: tab === 'login' }" @click="tab = 'login'">
-            Se connecter
+            {{ t('login.tab_login') }}
           </button>
           <button class="auth-tab" :class="{ active: tab === 'register' }" @click="tab = 'register'">
-            Créer un compte
+            {{ t('login.tab_register') }}
           </button>
         </div>
 
         <!-- LOGIN -->
         <form v-if="tab === 'login'" class="auth-form" @submit.prevent="handleLogin">
           <div class="form-group">
-            <label class="form-label">Adresse e-mail</label>
+            <label class="form-label">{{ t('login.email') }}</label>
             <input
               v-model="loginForm.email"
               type="email"
               class="form-input"
-              placeholder="vous@exemple.com"
+              :placeholder="t('login.email_ph')"
               required
               autocomplete="email"
             />
           </div>
           <div class="form-group">
-            <label class="form-label">Mot de passe</label>
+            <label class="form-label">{{ t('login.password') }}</label>
             <div class="input-wrap">
               <input
                 v-model="loginForm.password"
@@ -73,36 +76,36 @@
 
           <button type="submit" class="btn-submit" :disabled="isLoading">
             <span v-if="isLoading" class="btn-spinner"></span>
-            <span v-else>Se connecter</span>
+            <span v-else>{{ t('login.btn_login') }}</span>
           </button>
         </form>
 
         <!-- REGISTER -->
         <form v-if="tab === 'register'" class="auth-form" @submit.prevent="handleRegister">
           <div class="form-group">
-            <label class="form-label">Nom complet</label>
+            <label class="form-label">{{ t('login.fullname') }}</label>
             <input
               v-model="registerForm.name"
               type="text"
               class="form-input"
-              placeholder="Prénom Nom"
+              :placeholder="t('login.fullname_ph')"
               required
               autocomplete="name"
             />
           </div>
           <div class="form-group">
-            <label class="form-label">Adresse e-mail</label>
+            <label class="form-label">{{ t('login.email') }}</label>
             <input
               v-model="registerForm.email"
               type="email"
               class="form-input"
-              placeholder="vous@exemple.com"
+              :placeholder="t('login.email_ph')"
               required
               autocomplete="email"
             />
           </div>
           <div class="form-group">
-            <label class="form-label">Mot de passe</label>
+            <label class="form-label">{{ t('login.password') }}</label>
             <div class="input-wrap">
               <input
                 v-model="registerForm.password"
@@ -124,7 +127,7 @@
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label">Confirmer le mot de passe</label>
+            <label class="form-label">{{ t('login.confirm_pwd') }}</label>
             <input
               v-model="registerForm.confirm"
               type="password"
@@ -140,12 +143,12 @@
 
           <button type="submit" class="btn-submit" :disabled="isLoading">
             <span v-if="isLoading" class="btn-spinner"></span>
-            <span v-else>Créer mon compte</span>
+            <span v-else>{{ t('login.btn_register') }}</span>
           </button>
         </form>
 
         <p class="auth-note">
-          Prototype pédagogique — usage non médical
+          {{ t('login.note') }}
         </p>
       </div>
     </div>
@@ -158,6 +161,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { auth } from '../store/auth.js'
+import { t, locale, toggleLocale } from '../store/locale.js'
 
 const router   = useRouter()
 const tab      = ref('login')
@@ -304,6 +308,7 @@ async function handleRegister() {
   padding: 40px 24px;
 }
 .auth-card {
+  position: relative;
   background: #ffffff;
   border: 1px solid #e5e2db;
   border-radius: 16px;

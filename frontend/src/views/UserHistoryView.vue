@@ -8,7 +8,7 @@
           <img :src="raviLogo" alt="RAVI" class="w-full h-full object-contain" />
         </div>
         <h1 class="page-title-font text-xl text-white font-extrabold tracking-tight">RAVI</h1>
-        <p class="text-[9px] uppercase tracking-[0.25em] text-slate-500 font-bold mt-0.5">Prototype Pédagogique</p>
+        <p class="text-[9px] uppercase tracking-[0.25em] text-slate-500 font-bold mt-0.5">{{ t('common.prototype') }}</p>
         <div class="w-full h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent mt-4"></div>
       </div>
 
@@ -16,27 +16,22 @@
         <router-link to="/"
           class="text-slate-400 hover:text-white rounded-xl px-4 py-3 flex items-center gap-3.5 hover:bg-white/5 transition-colors">
           <span class="material-symbols-outlined text-xl">radiology</span>
-          <span class="font-medium text-sm">Analyse RX Thorax</span>
+          <span class="font-medium text-sm">{{ t('nav.analysis') }}</span>
         </router-link>
         <router-link to="/history"
           class="rounded-xl px-4 py-3 flex items-center gap-3.5 border border-blue-500/20 bg-blue-600/10 text-blue-400">
           <span class="material-symbols-outlined text-xl" style="font-variation-settings:'FILL' 1">history</span>
-          <span class="font-semibold text-sm">Historique</span>
-        </router-link>
-        <router-link v-if="auth.isAdmin" to="/admin"
-          class="text-slate-400 hover:text-white rounded-xl px-4 py-3 flex items-center gap-3.5 hover:bg-white/5 transition-colors">
-          <span class="material-symbols-outlined text-xl">assessment</span>
-          <span class="font-medium text-sm">Métriques</span>
+          <span class="font-semibold text-sm">{{ t('nav.history') }}</span>
         </router-link>
         <router-link to="/guide"
           class="text-slate-400 hover:text-white rounded-xl px-4 py-3 flex items-center gap-3.5 hover:bg-white/5 transition-colors">
           <span class="material-symbols-outlined text-xl">menu_book</span>
-          <span class="font-medium text-sm">Guide d'utilisation</span>
+          <span class="font-medium text-sm">{{ t('nav.guide') }}</span>
         </router-link>
         <router-link to="/about"
           class="text-slate-400 hover:text-white rounded-xl px-4 py-3 flex items-center gap-3.5 hover:bg-white/5 transition-colors">
           <span class="material-symbols-outlined text-xl">info</span>
-          <span class="font-medium text-sm">À propos</span>
+          <span class="font-medium text-sm">{{ t('nav.about') }}</span>
         </router-link>
       </nav>
 
@@ -47,13 +42,23 @@
           </div>
           <div class="overflow-hidden">
             <p class="font-bold text-xs text-white truncate">{{ auth.user?.name ?? 'Projet EFREI' }}</p>
-            <p class="text-[9px] text-slate-500 font-semibold uppercase tracking-wider">Solution Delivery 2025-2026</p>
+            <p class="text-[9px] text-slate-500 font-semibold uppercase tracking-wider">{{ auth.isAdmin ? t('common.account_admin') : t('common.account_user') }}</p>
           </div>
         </div>
+        <router-link v-if="auth.isAdmin" to="/admin"
+          class="w-full flex items-center justify-center gap-2 mb-2 px-3 py-2 rounded-xl text-xs font-semibold text-violet-400 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/20 hover:border-violet-500/40 transition-all no-underline">
+          <span class="material-symbols-outlined text-base">admin_panel_settings</span>
+          {{ t('nav.admin_interface') }}
+        </router-link>
+        <button @click="toggleLocale"
+          class="w-full flex items-center justify-center gap-2 mb-1 px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 transition-all">
+          <span class="material-symbols-outlined text-base">translate</span>
+          {{ locale === 'fr' ? 'English' : 'Français' }}
+        </button>
         <button @click="logout"
           class="w-full flex items-center justify-center gap-2 mt-1 px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
           <span class="material-symbols-outlined text-base">logout</span>
-          Déconnexion
+          {{ t('common.logout') }}
         </button>
       </div>
     </aside>
@@ -65,12 +70,12 @@
       <header class="flex justify-between items-center px-8 h-16 glass-header sticky top-0 z-40 border-b border-outline-variant">
         <div class="flex items-center gap-3">
           <span class="material-symbols-outlined text-on-surface-variant">history</span>
-          <h2 class="page-title-font text-lg font-extrabold text-on-surface">Mes analyses</h2>
+          <h2 class="page-title-font text-lg font-extrabold text-on-surface">{{ t('history.title') }}</h2>
         </div>
         <router-link to="/"
           class="flex items-center gap-2 btn-primary-gradient text-white text-xs font-bold px-4 py-2 rounded-full hover:scale-[1.02] transition-all no-underline">
           <span class="material-symbols-outlined text-sm">add</span>
-          Nouvelle analyse
+          {{ t('history.new_analysis') }}
         </router-link>
       </header>
 
@@ -80,19 +85,19 @@
         <!-- Résumé rapide -->
         <div class="grid grid-cols-4 gap-4">
           <div class="bg-white rounded-2xl border border-outline-variant premium-shadow p-5">
-            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">Total</p>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">{{ t('history.total') }}</p>
             <p class="page-title-font text-3xl font-extrabold text-on-surface">{{ analyses.length }}</p>
           </div>
           <div class="bg-white rounded-2xl border border-outline-variant premium-shadow p-5">
-            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">Normal</p>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">{{ t('history.normal') }}</p>
             <p class="page-title-font text-3xl font-extrabold text-emerald-700">{{ countByClass('normal') }}</p>
           </div>
           <div class="bg-white rounded-2xl border border-outline-variant premium-shadow p-5">
-            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">Opacité</p>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">{{ t('history.opacity') }}</p>
             <p class="page-title-font text-3xl font-extrabold text-orange-700">{{ countByClass('suspected_opacity') }}</p>
           </div>
           <div class="bg-white rounded-2xl border border-outline-variant premium-shadow p-5">
-            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">Incertain</p>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">{{ t('history.uncertain') }}</p>
             <p class="page-title-font text-3xl font-extrabold text-amber-700">{{ countByClass('uncertain') }}</p>
           </div>
         </div>
@@ -101,18 +106,18 @@
         <div class="flex items-center gap-3">
           <span class="material-symbols-outlined text-sm text-on-surface-variant">filter_list</span>
           <select v-model="filter" class="filter-select">
-            <option value="">Toutes les classes</option>
-            <option value="normal">Normal</option>
-            <option value="suspected_opacity">Opacité suspectée</option>
-            <option value="uncertain">Incertain</option>
+            <option value="">{{ t('history.all_classes') }}</option>
+            <option value="normal">{{ t('class.normal') }}</option>
+            <option value="suspected_opacity">{{ t('class.suspected_opacity') }}</option>
+            <option value="uncertain">{{ t('class.uncertain') }}</option>
           </select>
           <select v-model="modeFilter" class="filter-select">
-            <option value="">Tous les modes</option>
+            <option value="">{{ t('history.all_modes') }}</option>
             <option value="baseline">Baseline</option>
-            <option value="improved">Amélioré</option>
+            <option value="improved">{{ t('home.mode_improved') }}</option>
           </select>
           <span class="text-xs text-on-surface-variant ml-auto">
-            {{ filteredAnalyses.length }} résultat{{ filteredAnalyses.length !== 1 ? 's' : '' }}
+            {{ filteredAnalyses.length }} {{ filteredAnalyses.length !== 1 ? t('history.results') : t('history.result') }}
           </span>
         </div>
 
@@ -191,22 +196,22 @@
                 <div class="grid grid-cols-2 gap-4">
 
                   <div class="flex flex-col gap-1">
-                    <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Qualité image</p>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">{{ t('history.lim_quality') }}</p>
                     <p class="text-sm text-on-surface leading-relaxed">{{ a.imageQuality }}</p>
                   </div>
 
                   <div class="flex flex-col gap-1">
-                    <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Justification</p>
-                    <p class="text-sm text-on-surface leading-relaxed">{{ a.justification }}</p>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">{{ t('history.lim_just') }}</p>
+                    <p class="text-sm text-on-surface leading-relaxed whitespace-pre-wrap">{{ tBackend(a.justification) }}</p>
                   </div>
 
                   <div class="col-span-2 flex flex-col gap-2">
-                    <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Observations visuelles</p>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">{{ t('history.lim_obs') }}</p>
                     <ul class="flex flex-col gap-1.5">
                       <li v-for="(o, i) in a.observations" :key="i"
                         class="flex items-start gap-2 text-sm text-on-surface">
                         <span class="material-symbols-outlined text-sm text-primary mt-0.5 flex-shrink-0">chevron_right</span>
-                        {{ o }}
+                        {{ tBackend(o) }}
                       </li>
                     </ul>
                   </div>
@@ -214,8 +219,8 @@
                   <div class="col-span-2 flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
                     <span class="material-symbols-outlined text-amber-600 text-sm mt-0.5 flex-shrink-0">warning</span>
                     <div>
-                      <p class="text-[10px] font-bold uppercase tracking-widest text-amber-700 mb-1">Limites</p>
-                      <p class="text-sm text-amber-900 leading-relaxed">{{ a.limitations }}</p>
+                      <p class="text-[10px] font-bold uppercase tracking-widest text-amber-700 mb-1">{{ t('history.lim_limits') }}</p>
+                      <p class="text-sm text-amber-900 leading-relaxed">{{ tBackend(a.limitations) }}</p>
                     </div>
                   </div>
 
@@ -242,6 +247,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { auth } from '../store/auth.js'
+import { t, locale, toggleLocale, tBackend } from '../store/locale.js'
 const raviLogo = '/ravi-logo.png'
 
 const router     = useRouter()
@@ -258,7 +264,7 @@ const userInitials = computed(() => {
 function logout() { auth.logout(); router.push('/login') }
 
 function classLabel(pred) {
-  return { normal: 'Normal', suspected_opacity: 'Opacité suspectée', uncertain: 'Incertain' }[pred] ?? pred
+  return { normal: t('class.normal'), suspected_opacity: t('class.suspected_opacity'), uncertain: t('class.uncertain') }[pred] ?? pred
 }
 function predClass(pred) {
   return { normal: 'text-emerald-700', suspected_opacity: 'text-orange-700', uncertain: 'text-amber-700' }[pred] ?? ''

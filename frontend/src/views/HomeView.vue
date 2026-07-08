@@ -8,7 +8,7 @@
           <img :src="raviLogo" alt="RAVI" class="w-full h-full object-contain" />
         </div>
         <h1 class="page-title-font text-xl text-white font-extrabold tracking-tight">RAVI</h1>
-        <p class="text-[9px] uppercase tracking-[0.25em] text-slate-500 font-bold mt-0.5">Prototype Pédagogique</p>
+        <p class="text-[9px] uppercase tracking-[0.25em] text-slate-500 font-bold mt-0.5">{{ t('common.prototype') }}</p>
         <div class="w-full h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent mt-4"></div>
       </div>
 
@@ -16,27 +16,22 @@
         <router-link to="/"
           class="rounded-xl px-4 py-3 flex items-center gap-3.5 border border-blue-500/20 bg-blue-600/10 text-blue-400">
           <span class="material-symbols-outlined text-xl" style="font-variation-settings:'FILL' 1">radiology</span>
-          <span class="font-semibold text-sm">Analyse RX Thorax</span>
+          <span class="font-semibold text-sm">{{ t('nav.analysis') }}</span>
         </router-link>
         <router-link to="/history"
           class="text-slate-400 hover:text-white rounded-xl px-4 py-3 flex items-center gap-3.5 hover:bg-white/5 transition-colors">
           <span class="material-symbols-outlined text-xl">history</span>
-          <span class="font-medium text-sm">Historique</span>
-        </router-link>
-        <router-link v-if="auth.isAdmin" to="/admin"
-          class="text-slate-400 hover:text-white rounded-xl px-4 py-3 flex items-center gap-3.5 hover:bg-white/5 transition-colors">
-          <span class="material-symbols-outlined text-xl">assessment</span>
-          <span class="font-medium text-sm">Métriques</span>
+          <span class="font-medium text-sm">{{ t('nav.history') }}</span>
         </router-link>
         <router-link to="/guide"
           class="text-slate-400 hover:text-white rounded-xl px-4 py-3 flex items-center gap-3.5 hover:bg-white/5 transition-colors">
           <span class="material-symbols-outlined text-xl">menu_book</span>
-          <span class="font-medium text-sm">Guide d'utilisation</span>
+          <span class="font-medium text-sm">{{ t('nav.guide') }}</span>
         </router-link>
         <router-link to="/about"
           class="text-slate-400 hover:text-white rounded-xl px-4 py-3 flex items-center gap-3.5 hover:bg-white/5 transition-colors">
           <span class="material-symbols-outlined text-xl">info</span>
-          <span class="font-medium text-sm">À propos</span>
+          <span class="font-medium text-sm">{{ t('nav.about') }}</span>
         </router-link>
       </nav>
 
@@ -47,13 +42,23 @@
           </div>
           <div class="overflow-hidden">
             <p class="font-bold text-xs text-white truncate">{{ auth.user?.name ?? 'Projet EFREI' }}</p>
-            <p class="text-[9px] text-slate-500 font-semibold uppercase tracking-wider">Solution Delivery 2025-2026</p>
+            <p class="text-[9px] text-slate-500 font-semibold uppercase tracking-wider">{{ auth.isAdmin ? t('common.account_admin') : t('common.account_user') }}</p>
           </div>
         </div>
+        <router-link v-if="auth.isAdmin" to="/admin"
+          class="w-full flex items-center justify-center gap-2 mb-2 px-3 py-2 rounded-xl text-xs font-semibold text-violet-400 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/20 hover:border-violet-500/40 transition-all no-underline">
+          <span class="material-symbols-outlined text-base">admin_panel_settings</span>
+          {{ t('nav.admin_interface') }}
+        </router-link>
+        <button @click="toggleLocale"
+          class="w-full flex items-center justify-center gap-2 mb-1 px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 transition-all">
+          <span class="material-symbols-outlined text-base">translate</span>
+          {{ locale === 'fr' ? 'English' : 'Français' }}
+        </button>
         <button @click="logout"
           class="w-full flex items-center justify-center gap-2 mt-1 px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
           <span class="material-symbols-outlined text-base">logout</span>
-          Déconnexion
+          {{ t('common.logout') }}
         </button>
       </div>
     </aside>
@@ -64,7 +69,7 @@
       <!-- Top Bar -->
       <header class="flex justify-between items-center px-[32px] h-16 w-full glass-header sticky top-0 z-40 border-b border-outline-variant">
         <div class="flex items-center gap-4">
-          <h2 class="page-title-font text-lg font-extrabold text-on-surface">Analyse Thoracique</h2>
+          <h2 class="page-title-font text-lg font-extrabold text-on-surface">{{ t('home.title') }}</h2>
         </div>
         <div class="flex items-center gap-4">
           <!-- Mode Toggle -->
@@ -79,7 +84,7 @@
               :class="currentMode === 'improved'
                 ? 'px-4 py-1.5 rounded-full text-[11px] font-bold transition-all bg-primary text-white'
                 : 'px-4 py-1.5 rounded-full text-[11px] font-bold transition-all text-on-surface-variant hover:bg-white'">
-              Improved
+              {{ t('home.mode_improved') }}
             </button>
           </div>
           <!-- Sélecteur modèle -->
@@ -91,7 +96,7 @@
           <!-- API Status -->
           <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-100">
             <span class="w-2 h-2 rounded-full bg-emerald-500 status-pulse"></span>
-            <span class="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">API Connectée</span>
+            <span class="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">{{ t('home.api_connected') }}</span>
           </div>
         </div>
       </header>
@@ -100,7 +105,7 @@
       <div class="mx-[32px] mt-4 mb-2">
         <div class="bg-[#fef3c7] text-[#92400e] px-6 py-3 flex items-center justify-center gap-3 w-full border border-[#fde68a] rounded-xl premium-shadow">
           <span class="material-symbols-outlined text-lg">warning</span>
-          <span class="font-bold text-xs tracking-wide">ATTENTION : Ceci est un prototype à but pédagogique. Les résultats présentés n'équivalent pas à un diagnostic médical. Nous vous prions de faire valider tout résultat par un professionnel de la santé.</span>
+          <span class="font-bold text-xs tracking-wide">{{ t('common.warning') }}</span>
         </div>
       </div>
 
@@ -121,15 +126,15 @@
             <div class="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center mb-6">
               <span class="material-symbols-outlined text-primary text-4xl">upload_file</span>
             </div>
-            <h3 class="page-title-font text-xl font-extrabold text-on-surface mb-2">Déposer une radiographie thoracique frontale</h3>
-            <p class="text-sm text-on-surface-variant mb-6">Formats acceptés : PNG, JPG, JPEG</p>
+            <h3 class="page-title-font text-xl font-extrabold text-on-surface mb-2">{{ t('home.drop_title') }}</h3>
+            <p class="text-sm text-on-surface-variant mb-6">{{ t('home.drop_formats') }}</p>
             <button class="btn-primary-gradient text-white font-bold px-8 py-3 rounded-full text-sm hover:scale-[1.02] active:scale-95 transition-all">
-              Parcourir les fichiers
+              {{ t('home.browse') }}
             </button>
           </div>
           <div class="mt-6 flex items-center gap-2 text-on-surface-variant">
             <span class="material-symbols-outlined text-sm">info</span>
-            <p class="text-xs">Utilisez les images synthétiques du dossier
+            <p class="text-xs">{{ t('home.test_hint') }}
               <code class="bg-slate-100 px-1.5 py-0.5 rounded text-[11px] font-mono">data/sample_images</code>
               pour tester le flux.
             </p>
@@ -142,12 +147,12 @@
             <span class="material-symbols-outlined text-primary text-4xl animate-spin">refresh</span>
           </div>
           <div class="text-center">
-            <p class="page-title-font text-lg font-extrabold text-on-surface">Analyse en cours...</p>
-            <p class="text-sm text-on-surface-variant mt-1">Le modèle analyse la radiographie. Cela peut prendre quelques secondes.</p>
+            <p class="page-title-font text-lg font-extrabold text-on-surface">{{ t('home.analyzing') }}</p>
+            <p class="text-sm text-on-surface-variant mt-1">{{ t('home.analyzing_hint') }}</p>
           </div>
           <div class="flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-100 rounded-full">
             <span class="w-2 h-2 rounded-full bg-blue-500 status-pulse"></span>
-            <span class="text-[11px] font-bold text-blue-700 uppercase tracking-wider">{{ currentModel }} actif</span>
+            <span class="text-[11px] font-bold text-blue-700 uppercase tracking-wider">{{ currentModel }} {{ t('home.active') }}</span>
           </div>
         </div>
 
@@ -156,10 +161,10 @@
           <div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center">
             <span class="material-symbols-outlined text-red-500 text-3xl">error</span>
           </div>
-          <p class="page-title-font text-base font-extrabold text-on-surface">Analyse échouée</p>
+          <p class="page-title-font text-base font-extrabold text-on-surface">{{ t('home.error_title') }}</p>
           <p class="text-sm text-slate-600 max-w-md text-center">{{ analyzeError }}</p>
           <button @click="resetUpload" class="btn-primary-gradient text-white font-bold px-6 py-2.5 rounded-full text-sm hover:scale-[1.02] transition-all">
-            Réessayer
+            {{ t('home.retry') }}
           </button>
         </div>
 
@@ -175,7 +180,7 @@
                 <p class="text-xs font-semibold text-on-surface-variant tracking-wide">{{ fileName }}</p>
                 <button @click="resetUpload" class="text-xs text-primary font-bold hover:underline flex items-center gap-1">
                   <span class="material-symbols-outlined text-sm">swap_horiz</span>
-                  Changer d'image
+                  {{ t('home.change_image') }}
                 </button>
               </div>
               <div class="flex-1 rounded-xl media-frame-inner relative overflow-hidden flex items-center justify-center border border-slate-800">
@@ -187,18 +192,18 @@
             <div class="w-[42%] p-6 flex flex-col gap-5 bg-slate-50/30">
               <h3 class="page-title-font text-base font-extrabold flex items-center gap-2">
                 <span class="material-symbols-outlined text-primary text-lg">analytics</span>
-                Résultats de l'analyse
+                {{ t('home.results_title') }}
               </h3>
 
               <!-- Qualité -->
               <div>
-                <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em] mb-2">Qualité de l'image</p>
+                <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em] mb-2">{{ t('home.image_quality') }}</p>
                 <span :class="qualityBadgeClass" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border" v-html="qualityBadgeHtml"></span>
               </div>
 
               <!-- Classe prédite -->
               <div :class="classBadgeClass" class="p-4 rounded-xl border-2 transition-all">
-                <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em] mb-2">Classe prédite</p>
+                <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em] mb-2">{{ t('home.predicted_class') }}</p>
                 <div class="flex items-center gap-3">
                   <span :class="classIconClass" class="material-symbols-outlined text-2xl">{{ classIcon }}</span>
                   <span :class="classLabelClass" class="page-title-font text-xl font-extrabold">{{ classText }}</span>
@@ -207,7 +212,7 @@
 
               <!-- Confiance -->
               <div>
-                <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em] mb-2">Indice de confiance</p>
+                <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em] mb-2">{{ t('home.confidence') }}</p>
                 <div class="flex items-center gap-3 mb-2">
                   <span class="page-title-font text-2xl font-black text-primary">{{ confidencePct }}%</span>
                 </div>
@@ -220,11 +225,11 @@
               <div>
                 <div class="flex items-center gap-2 mb-2">
                   <span class="material-symbols-outlined text-primary text-base">visibility</span>
-                  <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em]">Observations visuelles</p>
+                  <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em]">{{ t('home.observations') }}</p>
                 </div>
                 <ul class="space-y-1 text-[13px] text-on-surface-variant">
                   <li v-for="(obs, i) in currentResult.visual_evidence" :key="i" class="flex items-start gap-2">
-                    <span class="text-primary mt-0.5">•</span>{{ obs }}
+                    <span class="text-primary mt-0.5">•</span>{{ tBackend(obs) }}
                   </li>
                 </ul>
               </div>
@@ -233,10 +238,10 @@
               <div>
                 <div class="flex items-center gap-2 mb-2">
                   <span class="material-symbols-outlined text-primary text-base">description</span>
-                  <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em]">Justification</p>
+                  <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em]">{{ t('home.justification') }}</p>
                 </div>
-                <div class="bg-blue-50 border border-blue-100 rounded-xl p-4">
-                  <p class="text-[13px] text-slate-700 leading-relaxed">{{ currentResult.justification }}</p>
+                <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 max-h-64 overflow-y-auto">
+                  <p class="text-[13px] text-slate-700 leading-relaxed whitespace-pre-wrap">{{ currentResult.justification }}</p>
                 </div>
               </div>
 
@@ -244,12 +249,12 @@
               <div>
                 <div class="flex items-center gap-2 mb-2">
                   <span class="material-symbols-outlined text-amber-500 text-base">report_problem</span>
-                  <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em]">Limites identifiées</p>
+                  <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em]">{{ t('home.limits') }}</p>
                 </div>
                 <div class="flex flex-wrap gap-2">
                   <span v-for="(lim, i) in currentResult.limitations" :key="i"
                     class="inline-flex items-center gap-1 px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-[11px] font-semibold border border-slate-200">
-                    <span class="material-symbols-outlined text-amber-500 text-xs">bolt</span>{{ lim }}
+                    <span class="material-symbols-outlined text-amber-500 text-xs">bolt</span>{{ tBackend(lim) }}
                   </span>
                 </div>
               </div>
@@ -259,27 +264,27 @@
                 <summary class="list-none px-4 py-3 cursor-pointer flex justify-between items-center hover:bg-slate-50 transition-colors">
                   <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-slate-400 text-base">terminal</span>
-                    <span class="font-bold text-[10px] text-slate-500 uppercase tracking-widest">Informations techniques</span>
+                    <span class="font-bold text-[10px] text-slate-500 uppercase tracking-widest">{{ t('home.tech_info') }}</span>
                   </div>
                   <span class="material-symbols-outlined transition-transform duration-300 group-open:rotate-180 text-slate-400 text-lg">expand_more</span>
                 </summary>
                 <div class="px-4 pb-4 pt-1 space-y-2">
                   <div class="flex justify-between border-b border-slate-100 py-2">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase">Modèle</span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase">{{ t('home.model') }}</span>
                     <span class="text-[10px] font-mono font-bold text-primary">{{ currentResult.model_name }}</span>
                   </div>
                   <div class="flex justify-between border-b border-slate-100 py-2">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase">Version prompt</span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase">{{ t('home.prompt_version') }}</span>
                     <span class="text-[10px] font-mono font-bold text-slate-600">{{ currentResult.prompt_version }}</span>
                   </div>
                   <div class="flex justify-between border-b border-slate-100 py-2">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase">Latence</span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase">{{ t('home.latency') }}</span>
                     <span class="text-[10px] font-mono font-bold text-emerald-600">{{ currentResult.latency_ms }} ms</span>
                   </div>
                   <button @click="showJson = true"
                     class="mt-2 w-full bg-white border border-outline-variant text-[#475569] font-bold py-2 rounded-lg flex items-center justify-center gap-2 text-[11px] hover:bg-slate-50 transition-all" style="border-width:1.5px">
                     <span class="material-symbols-outlined text-base">code</span>
-                    Voir le JSON brut
+                    {{ t('home.view_json') }}
                   </button>
                 </div>
               </details>
@@ -291,7 +296,7 @@
             <div class="px-6 py-3 border-b border-outline-variant bg-slate-50/80 flex items-center justify-between">
               <h3 class="page-title-font text-sm font-extrabold flex items-center gap-2">
                 <span class="material-symbols-outlined text-primary text-lg">history</span>
-                Historique des analyses récentes
+                {{ t('home.recent_history') }}
               </h3>
               <span class="text-[10px] text-on-surface-variant font-bold">{{ history.length }} analyse{{ history.length > 1 ? 's' : '' }}</span>
             </div>
@@ -299,32 +304,32 @@
               <table class="w-full text-left">
                 <thead>
                   <tr class="border-b border-outline-variant bg-slate-50/50">
-                    <th class="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Horodatage</th>
-                    <th class="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Image</th>
-                    <th class="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Classe</th>
-                    <th class="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Confiance</th>
-                    <th class="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Qualité</th>
-                    <th class="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Modèle</th>
+                    <th class="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ t('home.col_timestamp') }}</th>
+                    <th class="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ t('home.col_image') }}</th>
+                    <th class="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ t('home.col_class') }}</th>
+                    <th class="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ t('home.col_confidence') }}</th>
+                    <th class="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ t('home.col_quality') }}</th>
+                    <th class="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ t('home.col_model') }}</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-if="history.length === 0">
-                    <td colspan="6" class="px-6 py-8 text-center text-sm text-on-surface-variant">Aucune analyse effectuée pour le moment.</td>
+                    <td colspan="6" class="px-6 py-8 text-center text-sm text-on-surface-variant">{{ t('home.no_analysis') }}</td>
                   </tr>
                   <tr v-for="h in history" :key="h.ts + h.filename"
                     class="border-b border-outline-variant hover:bg-slate-50/50 transition-colors">
                     <td class="px-6 py-3 text-[11px] text-slate-600 font-mono">{{ h.ts }}</td>
                     <td class="px-6 py-3 text-[11px] text-on-surface font-semibold truncate max-w-[180px]">{{ h.filename }}</td>
                     <td class="px-6 py-3">
-                      <span v-if="h.predicted_class === 'normal'" class="px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-full text-[10px] font-bold border border-emerald-100">Normal</span>
-                      <span v-else-if="h.predicted_class === 'suspected_opacity'" class="px-2 py-0.5 bg-amber-50 text-amber-700 rounded-full text-[10px] font-bold border border-amber-100">Opacité suspectée</span>
-                      <span v-else class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full text-[10px] font-bold border border-slate-200">Incertain</span>
+                      <span v-if="h.predicted_class === 'normal'" class="px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-full text-[10px] font-bold border border-emerald-100">{{ t('class.normal') }}</span>
+                      <span v-else-if="h.predicted_class === 'suspected_opacity'" class="px-2 py-0.5 bg-amber-50 text-amber-700 rounded-full text-[10px] font-bold border border-amber-100">{{ t('class.suspected_opacity') }}</span>
+                      <span v-else class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full text-[10px] font-bold border border-slate-200">{{ t('class.uncertain') }}</span>
                     </td>
                     <td class="px-6 py-3 text-[11px] font-bold text-on-surface">{{ (h.confidence * 100).toFixed(1) }}%</td>
                     <td class="px-6 py-3">
-                      <span v-if="h.image_quality === 'good'" class="text-emerald-600 text-[11px] font-semibold">Bonne</span>
-                      <span v-else-if="h.image_quality === 'limited'" class="text-amber-600 text-[11px] font-semibold">Limitée</span>
-                      <span v-else class="text-red-600 text-[11px] font-semibold">Insuffisante</span>
+                      <span v-if="h.image_quality === 'good'" class="text-emerald-600 text-[11px] font-semibold">{{ t('quality.good') }}</span>
+                      <span v-else-if="h.image_quality === 'limited'" class="text-amber-600 text-[11px] font-semibold">{{ t('quality.limited') }}</span>
+                      <span v-else class="text-red-600 text-[11px] font-semibold">{{ t('quality.poor') }}</span>
                     </td>
                     <td class="px-6 py-3 text-[10px] font-mono text-slate-500">{{ h.model_name }}</td>
                   </tr>
@@ -336,14 +341,8 @@
       </div>
 
       <!-- Footer -->
-      <footer class="w-full py-4 mt-auto border-t border-outline-variant bg-white/50 flex flex-col md:flex-row justify-between items-center px-[32px] gap-3">
-        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">EFREI — Solution Delivery — Filière Data — 2025-2026</span>
-        <div class="flex items-center gap-6">
-          <a class="text-[9px] font-bold text-slate-400 hover:text-primary transition-all uppercase tracking-widest" href="#">Documentation</a>
-          <a class="text-[9px] font-bold text-slate-400 hover:text-primary transition-all uppercase tracking-widest" href="#">Architecture</a>
-          <a class="text-[9px] font-bold text-slate-400 hover:text-primary transition-all uppercase tracking-widest" href="#">Protocole d'évaluation</a>
-        </div>
-        <span class="text-[9px] text-slate-400 font-semibold">Ce prototype n'est pas un dispositif médical.</span>
+      <footer class="w-full py-4 mt-auto border-t border-outline-variant bg-white/50 flex items-center justify-center px-[32px]">
+        <span class="text-[9px] text-slate-400 font-semibold">{{ t('common.not_medical') }}</span>
       </footer>
     </main>
   </div>
@@ -355,7 +354,7 @@
       @click.self="showJson = false">
       <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 max-h-[80vh] flex flex-col">
         <div class="flex items-center justify-between px-6 py-4 border-b border-outline-variant">
-          <h3 class="page-title-font font-extrabold text-base">Sortie JSON brute</h3>
+          <h3 class="page-title-font font-extrabold text-base">{{ t('home.json_title') }}</h3>
           <button @click="showJson = false"
             class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center transition-all">
             <span class="material-symbols-outlined text-lg">close</span>
@@ -372,6 +371,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { auth } from '../store/auth.js'
+import { t, locale, toggleLocale, tBackend } from '../store/locale.js'
 const raviLogo = '/ravi-logo.png'
 
 const router = useRouter()
@@ -449,6 +449,7 @@ async function runAnalysis(file) {
     form.append('image', file)
     form.append('mode', currentMode.value === 'baseline' ? 'toy' : 'improved')
     form.append('model_key', currentModel.value)
+    form.append('lang', locale.value)
 
     const { data } = await axios.post('/api/analyses/predict', form, {
       timeout: 300_000,
@@ -506,9 +507,9 @@ const qualityBadgeClass = computed(() => {
 })
 const qualityBadgeHtml = computed(() => {
   const q = currentResult.value?.image_quality
-  if (q === 'good')    return '<span class="material-symbols-outlined text-sm">check_circle</span> Bonne'
-  if (q === 'limited') return '<span class="material-symbols-outlined text-sm">warning</span> Limitée'
-  return '<span class="material-symbols-outlined text-sm">error</span> Insuffisante'
+  if (q === 'good')    return `<span class="material-symbols-outlined text-sm">check_circle</span> ${t('quality.good')}`
+  if (q === 'limited') return `<span class="material-symbols-outlined text-sm">warning</span> ${t('quality.limited')}`
+  return `<span class="material-symbols-outlined text-sm">error</span> ${t('quality.poor')}`
 })
 const classBadgeClass = computed(() => {
   const p = currentResult.value?.predicted_class
@@ -530,9 +531,9 @@ const classIconClass = computed(() => {
 })
 const classText = computed(() => {
   const p = currentResult.value?.predicted_class
-  if (p === 'normal')            return 'Normal'
-  if (p === 'suspected_opacity') return 'Opacité suspectée'
-  return 'Incertain'
+  if (p === 'normal')            return t('class.normal')
+  if (p === 'suspected_opacity') return t('class.suspected_opacity')
+  return t('class.uncertain')
 })
 const classLabelClass = computed(() => {
   const p = currentResult.value?.predicted_class

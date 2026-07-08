@@ -36,6 +36,7 @@ router.post('/predict', requireAuth, (req, res, next) => {
 
   const mode      = req.body.mode      || 'toy'
   const model_key = req.body.model_key || 'medgemma_4b_pt'
+  const lang      = req.body.lang      || 'fr'
   const filePath  = req.file.path
   const filename  = req.file.originalname
 
@@ -45,7 +46,7 @@ router.post('/predict', requireAuth, (req, res, next) => {
     form.append('file', fs.createReadStream(filePath), filename)
 
     const fastapiRes = await axios.post(
-      `${FASTAPI_URL}/predict?mode=${mode}&model_key=${model_key}`,
+      `${FASTAPI_URL}/predict?mode=${mode}&model_key=${model_key}&lang=${lang}`,
       form,
       { headers: form.getHeaders(), timeout: 300_000 }
     )
