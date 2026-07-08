@@ -45,11 +45,6 @@
             <p class="text-[9px] text-slate-500 font-semibold uppercase tracking-wider">{{ auth.isAdmin ? t('common.account_admin') : t('common.account_user') }}</p>
           </div>
         </div>
-        <router-link v-if="auth.isAdmin" to="/admin"
-          class="w-full flex items-center justify-center gap-2 mb-2 px-3 py-2 rounded-xl text-xs font-semibold text-violet-400 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/20 hover:border-violet-500/40 transition-all no-underline">
-          <span class="material-symbols-outlined text-base">admin_panel_settings</span>
-          {{ t('nav.admin_interface') }}
-        </router-link>
         <button @click="toggleLocale"
           class="w-full flex items-center justify-center gap-2 mb-1 px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 transition-all">
           <span class="material-symbols-outlined text-base">translate</span>
@@ -113,7 +108,7 @@
           </select>
           <select v-model="modeFilter" class="filter-select">
             <option value="">{{ t('history.all_modes') }}</option>
-            <option value="baseline">Baseline</option>
+            <option value="baseline">{{ t('home.mode_baseline') }}</option>
             <option value="improved">{{ t('home.mode_improved') }}</option>
           </select>
           <span class="text-xs text-on-surface-variant ml-auto">
@@ -235,7 +230,7 @@
 
       <!-- Footer -->
       <footer class="px-8 py-4 border-t border-outline-variant text-xs text-on-surface-variant text-center">
-        Projet personnel · EFREI Paris · 2025-2026
+        EFREI Paris · Filière Data & IA · 2025-2026
       </footer>
 
     </main>
@@ -323,7 +318,7 @@ const filteredAnalyses = computed(() => {
   border: 1.5px solid #e2e8f0;
   border-radius: 8px;
   font-size: 13px;
-  font-family: system-ui, sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
   color: #0f172a;
   background: white;
   outline: none;

@@ -45,11 +45,6 @@
             <p class="text-[9px] text-slate-500 font-semibold uppercase tracking-wider">{{ auth.isAdmin ? t('common.account_admin') : t('common.account_user') }}</p>
           </div>
         </div>
-        <router-link v-if="auth.isAdmin" to="/admin"
-          class="w-full flex items-center justify-center gap-2 mb-2 px-3 py-2 rounded-xl text-xs font-semibold text-violet-400 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/20 hover:border-violet-500/40 transition-all no-underline">
-          <span class="material-symbols-outlined text-base">admin_panel_settings</span>
-          {{ t('nav.admin_interface') }}
-        </router-link>
         <button @click="toggleLocale"
           class="w-full flex items-center justify-center gap-2 mb-1 px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 transition-all">
           <span class="material-symbols-outlined text-base">translate</span>
@@ -72,27 +67,6 @@
           <h2 class="page-title-font text-lg font-extrabold text-on-surface">{{ t('home.title') }}</h2>
         </div>
         <div class="flex items-center gap-4">
-          <!-- Mode Toggle -->
-          <div class="flex items-center gap-2 bg-surface-container-low rounded-full p-1 border border-outline-variant">
-            <button @click="setMode('baseline')"
-              :class="currentMode === 'baseline'
-                ? 'px-4 py-1.5 rounded-full text-[11px] font-bold transition-all bg-primary text-white'
-                : 'px-4 py-1.5 rounded-full text-[11px] font-bold transition-all text-on-surface-variant hover:bg-white'">
-              Baseline
-            </button>
-            <button @click="setMode('improved')"
-              :class="currentMode === 'improved'
-                ? 'px-4 py-1.5 rounded-full text-[11px] font-bold transition-all bg-primary text-white'
-                : 'px-4 py-1.5 rounded-full text-[11px] font-bold transition-all text-on-surface-variant hover:bg-white'">
-              {{ t('home.mode_improved') }}
-            </button>
-          </div>
-          <!-- Sélecteur modèle -->
-          <select v-model="currentModel"
-            class="text-[11px] font-bold text-slate-600 border border-outline-variant rounded-full px-3 py-1.5 bg-white outline-none cursor-pointer">
-            <option value="medgemma_4b_pt">MedGemma 4B PT</option>
-            <option value="gemma_4_E4B">Gemma 4E4B</option>
-          </select>
           <!-- API Status -->
           <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-100">
             <span class="w-2 h-2 rounded-full bg-emerald-500 status-pulse"></span>
@@ -133,11 +107,8 @@
             </button>
           </div>
           <div class="mt-6 flex items-center gap-2 text-on-surface-variant">
-            <span class="material-symbols-outlined text-sm">info</span>
-            <p class="text-xs">{{ t('home.test_hint') }}
-              <code class="bg-slate-100 px-1.5 py-0.5 rounded text-[11px] font-mono">data/sample_images</code>
-              pour tester le flux.
-            </p>
+            <span class="material-symbols-outlined text-sm">lock</span>
+            <p class="text-xs">{{ t('home.privacy_hint') }}</p>
           </div>
         </div>
 
@@ -149,10 +120,6 @@
           <div class="text-center">
             <p class="page-title-font text-lg font-extrabold text-on-surface">{{ t('home.analyzing') }}</p>
             <p class="text-sm text-on-surface-variant mt-1">{{ t('home.analyzing_hint') }}</p>
-          </div>
-          <div class="flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-100 rounded-full">
-            <span class="w-2 h-2 rounded-full bg-blue-500 status-pulse"></span>
-            <span class="text-[11px] font-bold text-blue-700 uppercase tracking-wider">{{ currentModel }} {{ t('home.active') }}</span>
           </div>
         </div>
 
@@ -245,17 +212,11 @@
                 </div>
               </div>
 
-              <!-- Limites -->
-              <div>
-                <div class="flex items-center gap-2 mb-2">
-                  <span class="material-symbols-outlined text-amber-500 text-base">report_problem</span>
-                  <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em]">{{ t('home.limits') }}</p>
-                </div>
-                <div class="flex flex-wrap gap-2">
-                  <span v-for="(lim, i) in currentResult.limitations" :key="i"
-                    class="inline-flex items-center gap-1 px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-[11px] font-semibold border border-slate-200">
-                    <span class="material-symbols-outlined text-amber-500 text-xs">bolt</span>{{ tBackend(lim) }}
-                  </span>
+              <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+                <span class="material-symbols-outlined text-amber-600 text-lg mt-0.5 flex-shrink-0">health_and_safety</span>
+                <div>
+                  <p class="text-[10px] font-bold text-amber-700 uppercase tracking-[0.1em] mb-1">{{ t('home.safety_title') }}</p>
+                  <p class="text-[13px] text-amber-900 leading-relaxed">{{ t('home.safety_text') }}</p>
                 </div>
               </div>
 
@@ -280,6 +241,10 @@
                   <div class="flex justify-between border-b border-slate-100 py-2">
                     <span class="text-[10px] font-bold text-slate-400 uppercase">{{ t('home.latency') }}</span>
                     <span class="text-[10px] font-mono font-bold text-emerald-600">{{ currentResult.latency_ms }} ms</span>
+                  </div>
+                  <div v-if="currentResult.limitations?.length" class="flex justify-between gap-4 border-b border-slate-100 py-2">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase flex-shrink-0">{{ t('home.limits') }}</span>
+                    <span class="text-[10px] text-slate-600 text-right leading-relaxed">{{ currentResult.limitations.map(tBackend).join(' - ') }}</span>
                   </div>
                   <button @click="showJson = true"
                     class="mt-2 w-full bg-white border border-outline-variant text-[#475569] font-bold py-2 rounded-lg flex items-center justify-center gap-2 text-[11px] hover:bg-slate-50 transition-all" style="border-width:1.5px">
@@ -364,6 +329,63 @@
       </div>
     </div>
   </Teleport>
+
+  <!-- Terms of Use Modal -->
+  <Teleport to="body">
+    <div v-if="showTerms"
+      class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh]">
+
+        <!-- Header -->
+        <div class="flex items-center gap-3 px-6 py-5 border-b border-outline-variant">
+          <div class="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-amber-600 text-xl">gavel</span>
+          </div>
+          <div>
+            <h3 class="page-title-font font-extrabold text-base text-on-surface">{{ t('terms.title') }}</h3>
+            <p class="text-[11px] text-on-surface-variant mt-0.5">{{ t('terms.subtitle') }}</p>
+          </div>
+        </div>
+
+        <!-- Content scrollable -->
+        <div class="overflow-y-auto flex-1 px-6 py-5 space-y-5">
+          <div v-for="n in ['s1','s2','s3','s4','s5','s6','s7','s8','s9']" :key="n">
+            <p class="text-[12px] font-bold text-on-surface mb-1">{{ t('terms.' + n + '_title') }}</p>
+            <p class="text-[12px] text-on-surface-variant leading-relaxed whitespace-pre-line">{{ t('terms.' + n + '_body') }}</p>
+          </div>
+          <div class="border-t border-slate-200 pt-4">
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">{{ t('terms.refs_title') }}</p>
+            <p class="text-[11px] text-slate-400 leading-relaxed whitespace-pre-line">{{ t('terms.refs_body') }}</p>
+          </div>
+        </div>
+
+        <!-- Checkbox + buttons -->
+        <div class="px-6 py-5 border-t border-outline-variant space-y-4 bg-slate-50 rounded-b-2xl">
+          <label class="flex items-start gap-3 cursor-pointer group">
+            <input type="checkbox" v-model="termsChecked"
+              class="mt-0.5 w-4 h-4 accent-primary flex-shrink-0 cursor-pointer" />
+            <span class="text-[12px] font-semibold text-on-surface leading-relaxed group-hover:text-primary transition-colors">
+              {{ t('terms.checkbox') }}
+            </span>
+          </label>
+          <div class="flex gap-3">
+            <button @click="cancelTerms"
+              class="flex-1 px-4 py-2.5 rounded-xl text-[12px] font-semibold text-slate-500 bg-white border border-slate-200 hover:bg-slate-100 transition-all">
+              {{ t('terms.cancel') }}
+            </button>
+            <button @click="confirmTerms" :disabled="!termsChecked"
+              class="flex-1 px-4 py-2.5 rounded-xl text-[12px] font-semibold transition-all"
+              :class="termsChecked
+                ? 'bg-primary text-white hover:opacity-90 cursor-pointer'
+                : 'bg-slate-100 text-slate-400 cursor-not-allowed'">
+              {{ t('terms.confirm') }}
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </Teleport>
 </template>
 
 <script setup>
@@ -385,11 +407,17 @@ const isAnalyzing   = ref(false)
 const analyzeError  = ref('')
 const fileName      = ref('')
 const previewUrl    = ref('')
-const currentMode   = ref('baseline')
-const currentModel  = ref('medgemma_4b_pt')
 const currentResult = ref(null)
 const history       = ref([])
 const showJson      = ref(false)
+const showTerms     = ref(false)
+const termsChecked  = ref(false)
+const pendingFile   = ref(null)
+
+function shouldUseMockAnalysis() {
+  const params = new URLSearchParams(window.location.search)
+  return import.meta.env.VITE_USE_MOCK_ANALYSIS === 'true' || params.get('mock') === '1' || localStorage.getItem('arvi_mock_analysis') === 'true'
+}
 
 // ── Auth ──
 const userInitials = computed(() => {
@@ -398,8 +426,6 @@ const userInitials = computed(() => {
 })
 function logout() { auth.logout(); router.push('/login') }
 
-// ── Mode ──
-function setMode(mode) { currentMode.value = mode }
 
 // ── Upload ──
 function onFileChange(e) {
@@ -421,11 +447,27 @@ function processFile(file) {
   fileName.value    = file.name
   const reader = new FileReader()
   reader.onload = (e) => {
-    previewUrl.value = e.target.result
-    hasResults.value = true
-    runAnalysis(file)
+    previewUrl.value   = e.target.result
+    pendingFile.value  = file
+    termsChecked.value = false
+    showTerms.value    = true
   }
   reader.readAsDataURL(file)
+}
+
+function confirmTerms() {
+  if (!termsChecked.value) return
+  showTerms.value  = false
+  hasResults.value = true
+  runAnalysis(pendingFile.value)
+  pendingFile.value = null
+}
+
+function cancelTerms() {
+  showTerms.value    = false
+  termsChecked.value = false
+  pendingFile.value  = null
+  resetUpload()
 }
 
 function resetUpload() {
@@ -439,16 +481,86 @@ function resetUpload() {
 }
 
 // ── Analyse via API → FastAPI → MedGemma ──
+function mockAnalysisResult(file) {
+  const lowerName = file.name.toLowerCase()
+  const forcedUncertain = lowerName.includes('incertain') || lowerName.includes('uncertain') || lowerName.includes('flou')
+  const forcedOpacity = lowerName.includes('pneumonie') || lowerName.includes('pneumonia') || lowerName.includes('opacity') || lowerName.includes('opacite')
+  const predictedClass = forcedUncertain ? 'uncertain' : forcedOpacity ? 'suspected_opacity' : 'normal'
+  const isFr = locale.value === 'fr'
+
+  const contentByClass = {
+    normal: {
+      confidence: 0.86,
+      image_quality: 'good',
+      visual_evidence: isFr
+        ? ['Champs pulmonaires globalement symetriques.', 'Aucune opacite focale evidente sur cette simulation.', 'Silhouette cardiaque sans elargissement marque.']
+        : ['Lung fields appear globally symmetric.', 'No obvious focal opacity in this simulation.', 'Cardiac silhouette shows no marked enlargement.'],
+      justification: isFr
+        ? "La lecture proposée ne met pas en évidence d'opacité focale. Les champs pulmonaires paraissent globalement symétriques, avec une qualité d'image suffisante pour une analyse structurée."
+        : 'The assisted reading does not highlight an obvious focal opacity. The lung fields appear globally symmetric, with sufficient image quality for a structured analysis.',
+    },
+    suspected_opacity: {
+      confidence: 0.78,
+      image_quality: 'good',
+      visual_evidence: isFr
+        ? ['Opacite pulmonaire focale suspectee dans un champ pulmonaire.', 'Asymetrie visuelle entre les deux cotes.', 'Qualite suffisante pour produire une reponse structuree.']
+        : ['Focal pulmonary opacity suspected in one lung field.', 'Visual asymmetry between both sides.', 'Image quality is sufficient for a structured response.'],
+      justification: isFr
+        ? "La lecture proposée signale une opacité focale suspecte. Ce résultat doit être interprété comme une aide à la lecture et confirmé par un professionnel de santé."
+        : 'The assisted reading highlights a suspected focal opacity. This result should be treated as reading support and confirmed by a healthcare professional.',
+    },
+    uncertain: {
+      confidence: 0.48,
+      image_quality: 'limited',
+      visual_evidence: isFr
+        ? ['Qualite ou contraste limite dans cette simulation.', 'Signes visuels insuffisants pour conclure.', 'Classe incertaine activee comme garde-fou.']
+        : ['Limited quality or contrast in this simulation.', 'Visual signs are insufficient to conclude.', 'Uncertain class is activated as a safety guardrail.'],
+      justification: isFr
+        ? "La lecture proposée reste incertaine car les signes visibles ou la qualité d'image ne permettent pas une conclusion fiable. Une validation humaine est nécessaire."
+        : 'The assisted reading remains uncertain because visible signs or image quality do not support a reliable conclusion. Human review is required.',
+    },
+  }
+
+  const selected = contentByClass[predictedClass]
+
+  return {
+    image_quality: selected.image_quality,
+    predicted_class: predictedClass,
+    confidence: selected.confidence,
+    threshold: 0.7,
+    visual_evidence: selected.visual_evidence,
+    justification: selected.justification,
+    limitations: isFr
+      ? ['Analyse assistée, non diagnostique.', 'Validation humaine requise.']
+      : ['Assisted analysis, non-diagnostic.', 'Human review required.'],
+    warning: isFr
+      ? 'Prototype pedagogique, sans valeur diagnostique.'
+      : 'Educational prototype, not a diagnostic output.',
+    model_name: 'MedGemma - simulation locale',
+    prompt_version: 'local-ui-preview',
+    latency_ms: 820,
+    mode: 'improved',
+  }
+}
+
 async function runAnalysis(file) {
   isAnalyzing.value  = true
   analyzeError.value = ''
   currentResult.value = null
 
   try {
+    if (shouldUseMockAnalysis()) {
+      await new Promise(resolve => setTimeout(resolve, 700))
+      const data = mockAnalysisResult(file)
+      currentResult.value = data
+      addToHistory(file.name, data)
+      return
+    }
+
     const form = new FormData()
     form.append('image', file)
-    form.append('mode', currentMode.value === 'baseline' ? 'toy' : 'improved')
-    form.append('model_key', currentModel.value)
+    form.append('mode', 'improved')
+    form.append('model_key', 'medgemma_4b_pt')
     form.append('lang', locale.value)
 
     const { data } = await axios.post('/api/analyses/predict', form, {

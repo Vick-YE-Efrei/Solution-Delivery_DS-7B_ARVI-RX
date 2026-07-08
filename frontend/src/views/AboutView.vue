@@ -45,11 +45,6 @@
             <p class="text-[9px] text-slate-500 font-semibold uppercase tracking-wider">{{ auth.isAdmin ? t('common.account_admin') : t('common.account_user') }}</p>
           </div>
         </div>
-        <router-link v-if="auth.isAdmin" to="/admin"
-          class="w-full flex items-center justify-center gap-2 mb-2 px-3 py-2 rounded-xl text-xs font-semibold text-violet-400 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/20 hover:border-violet-500/40 transition-all no-underline">
-          <span class="material-symbols-outlined text-base">admin_panel_settings</span>
-          {{ t('nav.admin_interface') }}
-        </router-link>
         <button @click="toggleLocale"
           class="w-full flex items-center justify-center gap-2 mb-1 px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 transition-all">
           <span class="material-symbols-outlined text-base">translate</span>

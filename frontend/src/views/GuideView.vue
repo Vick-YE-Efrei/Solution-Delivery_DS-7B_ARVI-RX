@@ -45,11 +45,6 @@
             <p class="text-[9px] text-slate-500 font-semibold uppercase tracking-wider">{{ auth.isAdmin ? t('common.account_admin') : t('common.account_user') }}</p>
           </div>
         </div>
-        <router-link v-if="auth.isAdmin" to="/admin"
-          class="w-full flex items-center justify-center gap-2 mb-2 px-3 py-2 rounded-xl text-xs font-semibold text-violet-400 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/20 hover:border-violet-500/40 transition-all no-underline">
-          <span class="material-symbols-outlined text-base">admin_panel_settings</span>
-          {{ t('nav.admin_interface') }}
-        </router-link>
         <button @click="toggleLocale"
           class="w-full flex items-center justify-center gap-2 mb-1 px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 transition-all">
           <span class="material-symbols-outlined text-base">translate</span>
@@ -96,7 +91,7 @@
 
         <!-- Step panel -->
         <transition :name="direction === 'forward' ? 'slide-left' : 'slide-right'" mode="out-in">
-          <div :key="currentStep" class="flex-1 px-8 py-8 max-w-3xl">
+          <div :key="currentStep" class="flex-1 w-full max-w-5xl mx-auto px-8 py-8">
 
             <!-- Step header -->
             <div class="flex items-center gap-4 mb-6">
@@ -121,17 +116,11 @@
               {{ steps[currentStep].description }}
             </p>
 
-            <!-- Interactive content -->
             <div class="space-y-3 mb-6">
               <div v-for="(item, i) in steps[currentStep].items" :key="i"
-                class="group flex items-start gap-4 p-4 rounded-2xl border cursor-pointer transition-all duration-200"
-                :class="selectedItems[currentStep] === i
-                  ? 'border-primary/40 bg-primary/5 shadow-sm'
-                  : 'border-outline-variant bg-white hover:border-primary/20 hover:bg-slate-50'"
-                @click="selectItem(i)">
+                class="flex items-start gap-4 p-4 rounded-2xl border border-outline-variant bg-white shadow-sm">
 
-                <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors"
-                  :class="selectedItems[currentStep] === i ? 'bg-primary text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-primary/10 group-hover:text-primary'">
+                <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 bg-primary/10 text-primary">
                   <span class="material-symbols-outlined text-sm">{{ item.icon }}</span>
                 </div>
 
@@ -139,11 +128,6 @@
                   <p class="text-sm font-bold text-on-surface">{{ item.label }}</p>
                   <p class="text-xs text-on-surface-variant leading-relaxed mt-0.5">{{ item.detail }}</p>
                 </div>
-
-                <span class="material-symbols-outlined text-sm transition-colors flex-shrink-0 mt-1"
-                  :class="selectedItems[currentStep] === i ? 'text-primary' : 'text-slate-300'">
-                  {{ selectedItems[currentStep] === i ? 'check_circle' : 'radio_button_unchecked' }}
-                </span>
               </div>
             </div>
 
@@ -227,9 +211,6 @@ const userInitials = computed(() => {
 
 const currentStep = ref(0)
 const direction   = ref('forward')
-const selectedItems = ref({})
-
-function selectItem(i) { selectedItems.value[currentStep.value] = i }
 
 function next() {
   if (currentStep.value < steps.value.length - 1) {
@@ -270,45 +251,25 @@ const stepsFr = [
     tip: 'Entrez votre email et mot de passe sur la page de connexion. Si c\'est votre première utilisation, contactez l\'administrateur pour obtenir vos identifiants.',
   },
   {
-    short: 'Mode',
-    title: 'Choisir le mode d\'analyse',
+    short: 'Analyse',
+    title: 'Une analyse automatique',
     icon: 'tune',
-    color: '#8b5cf6',
-    description: 'RAVI propose deux modes d\'analyse selon vos besoins et les ressources disponibles. Sélectionnez le mode en haut de la page d\'analyse.',
+    color: '#3b82f6',
+    description: 'RaVI lance automatiquement une analyse complète dès qu\'une radiographie est déposée, sans réglage à faire.',
     items: [
-      {
-        icon: 'speed',
-        label: 'Mode Baseline',
-        detail: 'Résultat instantané basé sur le nom du fichier. Idéal pour tester le pipeline sans attente. Ne mobilise pas le modèle IA.',
-      },
       {
         icon: 'psychology',
-        label: 'Mode Amélioré (Improved)',
-        detail: 'Analyse réelle par MedGemma 4B PT fine-tuné sur données RSNA. Requiert un GPU NVIDIA. Première analyse ~1-2 minutes (chargement du modèle), les suivantes sont plus rapides.',
-      },
-    ],
-    tip: 'Pour une démonstration rapide, utilisez le mode Baseline. Pour une analyse réelle avec le modèle IA, choisissez Amélioré.',
-    warning: 'Le mode Amélioré est un prototype pédagogique. Le résultat ne constitue en aucun cas un avis médical.',
-  },
-  {
-    short: 'Modèle',
-    title: 'Choisir le modèle',
-    icon: 'model_training',
-    color: '#10b981',
-    description: 'En mode Amélioré, vous pouvez sélectionner le modèle VLM à utiliser via le sélecteur en haut à droite de la page.',
-    items: [
-      {
-        icon: 'medical_information',
-        label: 'MedGemma 4B PT',
-        detail: 'Modèle médical de Google pré-entraîné sur des données médicales multimodales, fine-tuné avec des adaptateurs LoRA sur des radiographies thoraciques RSNA. Recommandé.',
+        label: 'Moteur médical intégré',
+        detail: 'L\'image est analysée par MedGemma, un modèle vision-langage entraîné sur des données médicales et affiné sur des radiographies thoraciques.',
       },
       {
-        icon: 'smart_toy',
-        label: 'Gemma 4E4B',
-        detail: 'Modèle généraliste de Google fine-tuné avec LoRA sur des données chest X-ray. Alternative expérimentale.',
+        icon: 'timer',
+        label: 'Temps d\'analyse',
+        detail: 'Première analyse ~1-2 minutes le temps du chargement, les suivantes sont plus rapides.',
       },
     ],
-    tip: 'MedGemma 4B PT est recommandé car il a été pré-entraîné sur des données médicales, ce qui améliore la qualité des descriptions radiologiques générées.',
+    tip: 'Aucune configuration requise : déposez une image, RaVI s\'occupe du reste.',
+    warning: 'RaVI est un prototype pédagogique. Le résultat ne constitue en aucun cas un avis médical.',
   },
   {
     short: 'Upload',
@@ -415,45 +376,25 @@ const stepsEn = [
     tip: 'Enter your email and password on the login page. If it\'s your first time, contact the administrator for your credentials.',
   },
   {
-    short: 'Mode',
-    title: 'Choose the analysis mode',
+    short: 'Analysis',
+    title: 'Fully automatic analysis',
     icon: 'tune',
-    color: '#8b5cf6',
-    description: 'RAVI offers two analysis modes depending on your needs and available resources. Select the mode at the top of the analysis page.',
+    color: '#3b82f6',
+    description: 'RaVI automatically runs a full analysis as soon as an X-ray is dropped, no setup required.',
     items: [
-      {
-        icon: 'speed',
-        label: 'Baseline Mode',
-        detail: 'Instant result based on the filename. Ideal for testing the pipeline without waiting. Does not use the AI model.',
-      },
       {
         icon: 'psychology',
-        label: 'Improved Mode',
-        detail: 'Real analysis by MedGemma 4B PT fine-tuned on RSNA data. Requires an NVIDIA GPU. First analysis ~1-2 minutes (model loading), subsequent ones are faster.',
-      },
-    ],
-    tip: 'For a quick demo, use Baseline Mode. For real AI analysis, choose Improved.',
-    warning: 'Improved Mode is an educational prototype. The result is not a medical opinion in any way.',
-  },
-  {
-    short: 'Model',
-    title: 'Choose the model',
-    icon: 'model_training',
-    color: '#10b981',
-    description: 'In Improved mode, you can select the VLM model to use via the selector at the top right of the page.',
-    items: [
-      {
-        icon: 'medical_information',
-        label: 'MedGemma 4B PT',
-        detail: 'Google\'s medical model pre-trained on multimodal medical data, fine-tuned with LoRA adapters on RSNA chest X-rays. Recommended.',
+        label: 'Built-in medical engine',
+        detail: 'The image is analyzed by MedGemma, a vision-language model trained on medical data and fine-tuned on chest X-rays.',
       },
       {
-        icon: 'smart_toy',
-        label: 'Gemma 4E4B',
-        detail: 'Google\'s general-purpose model fine-tuned with LoRA on chest X-ray data. Experimental alternative.',
+        icon: 'timer',
+        label: 'Analysis time',
+        detail: 'The first analysis takes ~1-2 minutes while the model loads; subsequent ones are faster.',
       },
     ],
-    tip: 'MedGemma 4B PT is recommended because it was pre-trained on medical data, improving the quality of the generated radiological descriptions.',
+    tip: 'No configuration needed: drop an image, RaVI handles the rest.',
+    warning: 'RaVI is an educational prototype. The result is not a medical opinion in any way.',
   },
   {
     short: 'Upload',
