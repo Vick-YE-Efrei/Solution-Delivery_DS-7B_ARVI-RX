@@ -8,7 +8,7 @@
           <img :src="raviLogo" alt="RAVI" class="w-full h-full object-contain" />
         </div>
         <h1 class="page-title-font text-xl text-white font-extrabold tracking-tight">RAVI</h1>
-        <p class="text-[9px] uppercase tracking-[0.25em] text-slate-500 font-bold mt-0.5">Prototype Pédagogique</p>
+        <p class="text-[9px] uppercase tracking-[0.25em] text-slate-500 font-bold mt-0.5">{{ t('common.prototype') }}</p>
         <div class="w-full h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent mt-4"></div>
       </div>
 
@@ -16,27 +16,22 @@
         <router-link to="/"
           class="text-slate-400 hover:text-white rounded-xl px-4 py-3 flex items-center gap-3.5 hover:bg-white/5 transition-colors">
           <span class="material-symbols-outlined text-xl">radiology</span>
-          <span class="font-medium text-sm">Analyse RX Thorax</span>
+          <span class="font-medium text-sm">{{ t('nav.analysis') }}</span>
         </router-link>
         <router-link to="/history"
           class="text-slate-400 hover:text-white rounded-xl px-4 py-3 flex items-center gap-3.5 hover:bg-white/5 transition-colors">
           <span class="material-symbols-outlined text-xl">history</span>
-          <span class="font-medium text-sm">Historique</span>
-        </router-link>
-        <router-link v-if="auth.isAdmin" to="/admin"
-          class="text-slate-400 hover:text-white rounded-xl px-4 py-3 flex items-center gap-3.5 hover:bg-white/5 transition-colors">
-          <span class="material-symbols-outlined text-xl">assessment</span>
-          <span class="font-medium text-sm">Métriques</span>
+          <span class="font-medium text-sm">{{ t('nav.history') }}</span>
         </router-link>
         <router-link to="/guide"
           class="rounded-xl px-4 py-3 flex items-center gap-3.5 border border-blue-500/20 bg-blue-600/10 text-blue-400">
           <span class="material-symbols-outlined text-xl" style="font-variation-settings:'FILL' 1">menu_book</span>
-          <span class="font-semibold text-sm">Guide d'utilisation</span>
+          <span class="font-semibold text-sm">{{ t('nav.guide') }}</span>
         </router-link>
         <router-link to="/about"
           class="text-slate-400 hover:text-white rounded-xl px-4 py-3 flex items-center gap-3.5 hover:bg-white/5 transition-colors">
           <span class="material-symbols-outlined text-xl">info</span>
-          <span class="font-medium text-sm">À propos</span>
+          <span class="font-medium text-sm">{{ t('nav.about') }}</span>
         </router-link>
       </nav>
 
@@ -47,13 +42,18 @@
           </div>
           <div class="overflow-hidden">
             <p class="font-bold text-xs text-white truncate">{{ auth.user?.name ?? 'Projet EFREI' }}</p>
-            <p class="text-[9px] text-slate-500 font-semibold uppercase tracking-wider">Solution Delivery 2025-2026</p>
+            <p class="text-[9px] text-slate-500 font-semibold uppercase tracking-wider">{{ auth.isAdmin ? t('common.account_admin') : t('common.account_user') }}</p>
           </div>
         </div>
+        <button @click="toggleLocale"
+          class="w-full flex items-center justify-center gap-2 mb-1 px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 transition-all">
+          <span class="material-symbols-outlined text-base">translate</span>
+          {{ locale === 'fr' ? 'English' : 'Français' }}
+        </button>
         <button @click="logout"
           class="w-full flex items-center justify-center gap-2 mt-1 px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
           <span class="material-symbols-outlined text-base">logout</span>
-          Déconnexion
+          {{ t('common.logout') }}
         </button>
       </div>
     </aside>
@@ -65,10 +65,10 @@
       <header class="flex items-center justify-between px-8 h-16 glass-header sticky top-0 z-40 border-b border-outline-variant">
         <div class="flex items-center gap-3">
           <span class="material-symbols-outlined text-on-surface-variant">menu_book</span>
-          <h2 class="page-title-font text-lg font-extrabold text-on-surface">Guide d'utilisation</h2>
+          <h2 class="page-title-font text-lg font-extrabold text-on-surface">{{ t('guide.title') }}</h2>
         </div>
         <div class="flex items-center gap-2 text-xs text-on-surface-variant font-medium">
-          <span>Étape {{ currentStep + 1 }} / {{ steps.length }}</span>
+          <span>{{ t('guide.step_label') }} {{ currentStep + 1 }} / {{ steps.length }}</span>
           <div class="flex gap-1 ml-2">
             <div v-for="(_, i) in steps" :key="i"
               class="h-1.5 rounded-full transition-all duration-300 cursor-pointer"
@@ -91,7 +91,7 @@
 
         <!-- Step panel -->
         <transition :name="direction === 'forward' ? 'slide-left' : 'slide-right'" mode="out-in">
-          <div :key="currentStep" class="flex-1 px-8 py-8 max-w-3xl">
+          <div :key="currentStep" class="flex-1 w-full max-w-5xl mx-auto px-8 py-8">
 
             <!-- Step header -->
             <div class="flex items-center gap-4 mb-6">
@@ -103,7 +103,7 @@
               </div>
               <div>
                 <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
-                  Étape {{ currentStep + 1 }}
+                  {{ t('guide.step_label') }} {{ currentStep + 1 }}
                 </p>
                 <h1 class="page-title-font text-2xl font-extrabold text-on-surface">
                   {{ steps[currentStep].title }}
@@ -116,17 +116,11 @@
               {{ steps[currentStep].description }}
             </p>
 
-            <!-- Interactive content -->
             <div class="space-y-3 mb-6">
               <div v-for="(item, i) in steps[currentStep].items" :key="i"
-                class="group flex items-start gap-4 p-4 rounded-2xl border cursor-pointer transition-all duration-200"
-                :class="selectedItems[currentStep] === i
-                  ? 'border-primary/40 bg-primary/5 shadow-sm'
-                  : 'border-outline-variant bg-white hover:border-primary/20 hover:bg-slate-50'"
-                @click="selectItem(i)">
+                class="flex items-start gap-4 p-4 rounded-2xl border border-outline-variant bg-white shadow-sm">
 
-                <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors"
-                  :class="selectedItems[currentStep] === i ? 'bg-primary text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-primary/10 group-hover:text-primary'">
+                <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 bg-primary/10 text-primary">
                   <span class="material-symbols-outlined text-sm">{{ item.icon }}</span>
                 </div>
 
@@ -134,11 +128,6 @@
                   <p class="text-sm font-bold text-on-surface">{{ item.label }}</p>
                   <p class="text-xs text-on-surface-variant leading-relaxed mt-0.5">{{ item.detail }}</p>
                 </div>
-
-                <span class="material-symbols-outlined text-sm transition-colors flex-shrink-0 mt-1"
-                  :class="selectedItems[currentStep] === i ? 'text-primary' : 'text-slate-300'">
-                  {{ selectedItems[currentStep] === i ? 'check_circle' : 'radio_button_unchecked' }}
-                </span>
               </div>
             </div>
 
@@ -147,7 +136,7 @@
               class="flex items-start gap-3 p-4 rounded-2xl bg-amber-50 border border-amber-200">
               <span class="material-symbols-outlined text-amber-600 text-lg flex-shrink-0 mt-0.5">lightbulb</span>
               <div>
-                <p class="text-[10px] font-bold uppercase tracking-wider text-amber-700 mb-1">Conseil</p>
+                <p class="text-[10px] font-bold uppercase tracking-wider text-amber-700 mb-1">{{ t('guide.conseil') }}</p>
                 <p class="text-xs text-amber-900 leading-relaxed">{{ steps[currentStep].tip }}</p>
               </div>
             </div>
@@ -183,19 +172,19 @@
             <button v-if="currentStep > 0" @click="prev"
               class="flex items-center gap-2 px-5 py-2.5 rounded-full border border-outline-variant text-sm font-bold text-on-surface hover:bg-slate-50 transition-all">
               <span class="material-symbols-outlined text-sm">arrow_back</span>
-              Précédent
+              {{ t('guide.prev') }}
             </button>
 
             <button v-if="currentStep < steps.length - 1" @click="next"
               class="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold text-white transition-all btn-primary-gradient hover:scale-[1.02]">
-              Suivant
+              {{ t('guide.next') }}
               <span class="material-symbols-outlined text-sm">arrow_forward</span>
             </button>
 
             <router-link v-else to="/"
               class="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold text-white btn-primary-gradient hover:scale-[1.02] no-underline transition-all">
               <span class="material-symbols-outlined text-sm">radiology</span>
-              Commencer l'analyse
+              {{ t('guide.start') }}
             </router-link>
           </div>
         </div>
@@ -209,6 +198,7 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { auth } from '../store/auth.js'
+import { t, locale, toggleLocale } from '../store/locale.js'
 const raviLogo = '/ravi-logo.png'
 
 const router = useRouter()
@@ -221,12 +211,9 @@ const userInitials = computed(() => {
 
 const currentStep = ref(0)
 const direction   = ref('forward')
-const selectedItems = ref({})
-
-function selectItem(i) { selectedItems.value[currentStep.value] = i }
 
 function next() {
-  if (currentStep.value < steps.length - 1) {
+  if (currentStep.value < steps.value.length - 1) {
     direction.value = 'forward'
     currentStep.value++
   }
@@ -242,7 +229,7 @@ function goTo(i) {
   currentStep.value = i
 }
 
-const steps = [
+const stepsFr = [
   {
     short: 'Connexion',
     title: 'Se connecter à la plateforme',
@@ -264,45 +251,25 @@ const steps = [
     tip: 'Entrez votre email et mot de passe sur la page de connexion. Si c\'est votre première utilisation, contactez l\'administrateur pour obtenir vos identifiants.',
   },
   {
-    short: 'Mode',
-    title: 'Choisir le mode d\'analyse',
+    short: 'Analyse',
+    title: 'Une analyse automatique',
     icon: 'tune',
-    color: '#8b5cf6',
-    description: 'RAVI propose deux modes d\'analyse selon vos besoins et les ressources disponibles. Sélectionnez le mode en haut de la page d\'analyse.',
+    color: '#3b82f6',
+    description: 'RaVI lance automatiquement une analyse complète dès qu\'une radiographie est déposée, sans réglage à faire.',
     items: [
-      {
-        icon: 'speed',
-        label: 'Mode Baseline',
-        detail: 'Résultat instantané basé sur le nom du fichier. Idéal pour tester le pipeline sans attente. Ne mobilise pas le modèle IA.',
-      },
       {
         icon: 'psychology',
-        label: 'Mode Amélioré (Improved)',
-        detail: 'Analyse réelle par MedGemma 4B PT fine-tuné sur données RSNA. Requiert un GPU NVIDIA. Première analyse ~1-2 minutes (chargement du modèle), les suivantes sont plus rapides.',
-      },
-    ],
-    tip: 'Pour une démonstration rapide, utilisez le mode Baseline. Pour une analyse réelle avec le modèle IA, choisissez Amélioré.',
-    warning: 'Le mode Amélioré est un prototype pédagogique. Le résultat ne constitue en aucun cas un avis médical.',
-  },
-  {
-    short: 'Modèle',
-    title: 'Choisir le modèle',
-    icon: 'model_training',
-    color: '#10b981',
-    description: 'En mode Amélioré, vous pouvez sélectionner le modèle VLM à utiliser via le sélecteur en haut à droite de la page.',
-    items: [
-      {
-        icon: 'medical_information',
-        label: 'MedGemma 4B PT',
-        detail: 'Modèle médical de Google pré-entraîné sur des données médicales multimodales, fine-tuné avec des adaptateurs LoRA sur des radiographies thoraciques RSNA. Recommandé.',
+        label: 'Moteur médical intégré',
+        detail: 'L\'image est analysée par MedGemma, un modèle vision-langage entraîné sur des données médicales et affiné sur des radiographies thoraciques.',
       },
       {
-        icon: 'smart_toy',
-        label: 'Gemma 4E4B',
-        detail: 'Modèle généraliste de Google fine-tuné avec LoRA sur des données chest X-ray. Alternative expérimentale.',
+        icon: 'timer',
+        label: 'Temps d\'analyse',
+        detail: 'Première analyse ~1-2 minutes le temps du chargement, les suivantes sont plus rapides.',
       },
     ],
-    tip: 'MedGemma 4B PT est recommandé car il a été pré-entraîné sur des données médicales, ce qui améliore la qualité des descriptions radiologiques générées.',
+    tip: 'Aucune configuration requise : déposez une image, RaVI s\'occupe du reste.',
+    warning: 'RaVI est un prototype pédagogique. Le résultat ne constitue en aucun cas un avis médical.',
   },
   {
     short: 'Upload',
@@ -386,6 +353,133 @@ const steps = [
     tip: 'L\'historique est personnel — chaque utilisateur ne voit que ses propres analyses. L\'administrateur peut voir toutes les analyses depuis le tableau de bord.',
   },
 ]
+
+const stepsEn = [
+  {
+    short: 'Login',
+    title: 'Sign in to the platform',
+    icon: 'login',
+    color: '#3b82f6',
+    description: 'Before using RAVI, you need to authenticate with your account. The platform has two types of accounts with different access levels.',
+    items: [
+      {
+        icon: 'manage_accounts',
+        label: 'Administrator Account',
+        detail: 'Full access: X-ray analysis, history, dashboard with real metrics, user management, and model performance.',
+      },
+      {
+        icon: 'person',
+        label: 'User Account',
+        detail: 'Standard access: X-ray analysis and viewing your own analysis history.',
+      },
+    ],
+    tip: 'Enter your email and password on the login page. If it\'s your first time, contact the administrator for your credentials.',
+  },
+  {
+    short: 'Analysis',
+    title: 'Fully automatic analysis',
+    icon: 'tune',
+    color: '#3b82f6',
+    description: 'RaVI automatically runs a full analysis as soon as an X-ray is dropped, no setup required.',
+    items: [
+      {
+        icon: 'psychology',
+        label: 'Built-in medical engine',
+        detail: 'The image is analyzed by MedGemma, a vision-language model trained on medical data and fine-tuned on chest X-rays.',
+      },
+      {
+        icon: 'timer',
+        label: 'Analysis time',
+        detail: 'The first analysis takes ~1-2 minutes while the model loads; subsequent ones are faster.',
+      },
+    ],
+    tip: 'No configuration needed: drop an image, RaVI handles the rest.',
+    warning: 'RaVI is an educational prototype. The result is not a medical opinion in any way.',
+  },
+  {
+    short: 'Upload',
+    title: 'Upload an X-ray',
+    icon: 'upload_file',
+    color: '#f59e0b',
+    description: 'Drag and drop or click the upload area to select your frontal chest X-ray image.',
+    items: [
+      {
+        icon: 'image',
+        label: 'Accepted formats',
+        detail: 'PNG, JPG, JPEG. Maximum size: 20 MB. The image must be a frontal chest X-ray (PA or AP).',
+      },
+      {
+        icon: 'drag_pan',
+        label: 'Drag and drop',
+        detail: 'Drag your file directly from the file explorer to the drop zone. Analysis starts automatically.',
+      },
+      {
+        icon: 'folder_open',
+        label: 'Manual selection',
+        detail: 'Click the upload area to open the file explorer and select your image.',
+      },
+    ],
+    tip: 'Analysis starts automatically as soon as the image is dropped. You will see a loading indicator during processing.',
+  },
+  {
+    short: 'Results',
+    title: 'Read the results',
+    icon: 'lab_research',
+    color: '#ef4444',
+    description: 'Once the analysis is complete, results appear in the right panel. Here is how to interpret each element.',
+    items: [
+      {
+        icon: 'category',
+        label: 'Predicted class',
+        detail: 'Normal (healthy lungs), Suspected Opacity (consolidation or effusion detected), or Uncertain (ambiguous description — this is a safety net, not an error).',
+      },
+      {
+        icon: 'percent',
+        label: 'Confidence index',
+        detail: '70% if a clear discriminating term is detected, 50% if the description is ambiguous. This is heuristic confidence, not probabilistic.',
+      },
+      {
+        icon: 'visibility',
+        label: 'Visual observations',
+        detail: 'Terms detected in the model-generated description and the raw text of the radiological description.',
+      },
+      {
+        icon: 'summarize',
+        label: 'Justification and limitations',
+        detail: 'The classification method used and the limitations to consider when interpreting the result.',
+      },
+    ],
+    tip: 'Click "Technical Information" at the bottom of the panel to see details about the model used, prompt version, and latency.',
+    warning: 'These results are experimental and not clinically validated. Never use them for a real diagnosis.',
+  },
+  {
+    short: 'History',
+    title: 'View history',
+    icon: 'history',
+    color: '#06b6d4',
+    description: 'All your analyses are automatically saved and accessible on the History page via the sidebar.',
+    items: [
+      {
+        icon: 'filter_list',
+        label: 'Filter analyses',
+        detail: 'Filter by predicted class (Normal, Opacity, Uncertain) or by analysis mode (Baseline / Improved) to quickly find an analysis.',
+      },
+      {
+        icon: 'expand_more',
+        label: 'Analysis detail',
+        detail: 'Click a row to display the full detail: image quality, justification, visual observations, and identified limitations.',
+      },
+      {
+        icon: 'bar_chart',
+        label: 'Quick summary',
+        detail: 'Counters at the top of the page show the total analyses, number of normal results, opacities, and uncertain ones.',
+      },
+    ],
+    tip: 'History is personal — each user only sees their own analyses. The administrator can see all analyses from the dashboard.',
+  },
+]
+
+const steps = computed(() => locale.value === 'fr' ? stepsFr : stepsEn)
 </script>
 
 <style scoped>

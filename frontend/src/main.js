@@ -35,6 +35,7 @@ router.beforeEach((to) => {
   if (to.meta.requiresAuth && !auth.isLoggedIn) return '/login'
   if (to.meta.requiresAdmin && !auth.isAdmin)   return '/'
   if (to.path === '/login' && auth.isLoggedIn)  return auth.isAdmin ? '/admin' : '/'
+  if (auth.isLoggedIn && auth.isAdmin && to.path !== '/admin') return '/admin'
 })
 
 createApp(App).use(router).mount('#app')

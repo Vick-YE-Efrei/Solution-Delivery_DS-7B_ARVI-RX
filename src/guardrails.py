@@ -4,7 +4,7 @@ from typing import Any
 
 ALLOWED_CLASSES = {"normal", "suspected_opacity", "uncertain"}
 REQUIRED_KEYS = {"image_quality", "predicted_class", "confidence", "visual_evidence", "justification", "limitations", "warning"}
-WARNING_TEXT = "Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise."
+WARNING_TEXT = "ATTENTION : Ceci est un prototype à but pédagogique. Les résultats présentés n'équivalent pas à un diagnostic médical. Nous vous prions de faire valider tout résultat par un professionnel de la santé."
 
 
 def validate_prediction(pred: dict[str, Any]):
@@ -53,7 +53,7 @@ def apply_safety_guardrails(pred: dict[str, Any]):
     if not valid:
         pred["predicted_class"] = "uncertain"
         pred["confidence"] = min(float(pred.get("confidence", 0.0) or 0.0), 0.5)
-        pred.setdefault("limitations", []).append("guardrail triggered: invalid output schema")
+        pred.setdefault("limitations", []).append("garde-fou déclenché : schéma de sortie invalide")
     if pred.get("image_quality") in {"limited", "poor"} and float(pred.get("confidence", 0)) < 0.6:
         pred["predicted_class"] = "uncertain"
     pred["warning"] = WARNING_TEXT

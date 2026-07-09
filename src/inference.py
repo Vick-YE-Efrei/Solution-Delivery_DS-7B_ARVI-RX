@@ -8,10 +8,11 @@ from PIL import Image
 import torch
 from transformers import AutoProcessor, AutoModelForImageTextToText, BitsAndBytesConfig
 from peft import PeftModel
+from deep_translator import GoogleTranslator
 
 from .preprocessing import basic_quality_flag
 
-WARNING = "Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise."
+WARNING = "ATTENTION : Ceci est un prototype à but pédagogique. Les résultats présentés n'équivalent pas à un diagnostic médical. Nous vous prions de faire valider tout résultat par un professionnel de la santé."
 
 _ROOT = Path(__file__).resolve().parents[1]
 
@@ -21,7 +22,18 @@ _ROOT = Path(__file__).resolve().parents[1]
 _processor_cache: dict[str, Any] = {}
 _model_cache: dict[str, Any] = {}
 
+<<<<<<< HEAD
 # Classification par mots-clés, même logique que dans le notebook d'inférence.
+=======
+def _translate_to_french(text: str) -> str:
+    try:
+        return GoogleTranslator(source="en", target="fr").translate(text[:4999])
+    except Exception as e:
+        print(f"[WARN] Traduction échouée : {e}")
+        return text
+
+# ── Keyword classification (same logic as the inference notebook) ──────────
+>>>>>>> project_with_front
 _OPACITY_KW = [
     "opacity", "opacities", "opacified", "opacification",
     "consolidation", "consolidations", "pneumonia", "infiltrate",
@@ -107,18 +119,18 @@ def toy_predict(image_path: str | Path, mode: str = "baseline"):
     if "suspected_opacity" in name:
         pred          = "suspected_opacity"
         conf          = 0.78 if mode == "baseline" else 0.72
-        evidence      = ["synthetic opacity-like area visible in the lung field"]
-        justification = "The synthetic image contains a localized brighter region compatible with the toy opacity class."
+        evidence      = ["zone d'opacité synthétique détectée dans le champ pulmonaire"]
+        justification = "L'image synthétique contient une région plus lumineuse localisée compatible avec la classe opacité."
     elif "normal" in name:
         pred          = "normal"
         conf          = 0.72 if mode == "baseline" else 0.68
-        evidence      = ["no synthetic opacity marker detected"]
-        justification = "The synthetic image does not contain the opacity marker used by the toy generator."
+        evidence      = ["aucun marqueur d'opacité synthétique détecté"]
+        justification = "L'image synthétique ne contient pas de marqueur d'opacité — poumons normaux."
     else:
         pred          = "uncertain"
         conf          = 0.52
-        evidence      = ["limited synthetic image quality"]
-        justification = "The image is treated as limited quality in the toy catalog."
+        evidence      = ["qualité d'image synthétique insuffisante pour conclure"]
+        justification = "L'image ne correspond à aucune catégorie du catalogue synthétique."
 
     return {
         "image_quality":   quality,
@@ -126,7 +138,7 @@ def toy_predict(image_path: str | Path, mode: str = "baseline"):
         "confidence":      round(float(conf), 3),
         "visual_evidence": evidence,
         "justification":   justification,
-        "limitations":     ["synthetic toy image", "no clinical context", "not a validated medical model"],
+        "limitations":     ["image synthétique de test", "aucun contexte clinique", "modèle non validé médicalement"],
         "warning":         WARNING,
         "model_name":      f"toy-rule-{mode}",
         "prompt_version":  f"{mode}_v1",
@@ -190,6 +202,7 @@ def vlm_predict_medgemma(
     image_path: str | Path,
     model_key: str = "medgemma_4b_pt",
     lora_path: str | None = None,
+    lang: str = "fr",
 ):
     """Inférence réelle avec un VLM (Gemma/MedGemma) : décrit l'image puis classe le texte.
 
@@ -240,26 +253,33 @@ def vlm_predict_medgemma(
     generated = outputs[0][inputs["input_ids"].shape[1]:]
     raw_text  = processor.decode(generated, skip_special_tokens=True)
 
+    # Classification sur le texte anglais original (mots-clés en anglais)
     pred, conf, evidence = _classify_from_text(raw_text)
-    evidence.append(raw_text.strip()[:300])
 
     lora_used = lora_path and Path(lora_path).exists()
+    if lang == "fr":
+        justification = _translate_to_french(raw_text.strip())
+        limitations = [
+            "modèle de base (pt) non instruction-tuned" if not lora_used else "adaptateurs LoRA expérimentaux",
+            "classification par mots-clés, non calibrée",
+            "confiance heuristique, non probabiliste",
+            "pas de contexte clinique",
+        ]
+    else:
+        justification = raw_text.strip()
+        limitations = [
+            "base model (pt), not instruction-tuned" if not lora_used else "experimental LoRA adapters",
+            "keyword classification, non-calibrated",
+            "heuristic confidence, non-probabilistic",
+            "no clinical context",
+        ]
     return {
         "image_quality":   basic_quality_flag(image_path),
         "predicted_class": pred,
         "confidence":      round(float(conf), 3),
         "visual_evidence": evidence,
-        "justification":   (
-            "Classe déduite par mots-clés depuis la description libre générée "
-            f"par {model_key}{'+ LoRA' if lora_used else ' (base)'}. "
-            "Résultat expérimental, non clinique."
-        ),
-        "limitations":     [
-            "modèle de base (pt) non instruction-tuned" if not lora_used else "adaptateurs LoRA expérimentaux",
-            "classification par mots-clés, non calibrée",
-            "confiance heuristique, non probabiliste",
-            "pas de contexte clinique",
-        ],
+        "justification":   justification,
+        "limitations":     limitations,
         "warning":         WARNING,
         "model_name":      model_key + ("+lora" if lora_used else "-base"),
         "prompt_version":  "findings_v2",

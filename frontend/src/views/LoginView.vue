@@ -5,15 +5,12 @@
     <div class="auth-left">
       <div class="auth-left-inner">
         <div class="brand">
-          <img src="/ravi-logo.png" alt="Logo RaVI" class="brand-logo" />
-          <span class="brand-name">RaVI</span>
+          <img src="/ravi-logo.png" alt="RaVI" class="brand-logo" />
+          <span class="brand-name">{{ t('login.brand') }}</span>
         </div>
         <div class="auth-pitch">
-          <h1>RaVI analyse les radiographies<br />de façon responsable.</h1>
-          <p>
-            Un prototype pédagogique construit autour de la traçabilité,
-            de l'incertitude explicite et de la rigueur d'ingénierie.
-          </p>
+          <h1>{{ t('login.tagline') }}</h1>
+          <p>{{ t('login.description') }}</p>
         </div>
         <div class="auth-meta">EFREI Paris · Filière Data &amp; IA · 2025-2026</div>
       </div>
@@ -21,33 +18,38 @@
 
     <!-- Colonne droite : formulaire -->
     <div class="auth-right">
+      <button class="auth-lang-btn" @click="toggleLocale">
+        <span class="material-symbols-outlined">translate</span>
+        {{ locale === 'fr' ? 'English' : 'Français' }}
+      </button>
+
       <div class="auth-card">
 
         <!-- Toggle login / register -->
         <div class="auth-tabs">
           <button class="auth-tab" :class="{ active: tab === 'login' }" @click="tab = 'login'">
-            Se connecter
+            {{ t('login.tab_login') }}
           </button>
           <button class="auth-tab" :class="{ active: tab === 'register' }" @click="tab = 'register'">
-            Créer un compte
+            {{ t('login.tab_register') }}
           </button>
         </div>
 
         <!-- LOGIN -->
         <form v-if="tab === 'login'" class="auth-form" @submit.prevent="handleLogin">
           <div class="form-group">
-            <label class="form-label">Adresse e-mail</label>
+            <label class="form-label">{{ t('login.email') }}</label>
             <input
               v-model="loginForm.email"
               type="email"
               class="form-input"
-              placeholder="vous@exemple.com"
+              :placeholder="t('login.email_ph')"
               required
               autocomplete="email"
             />
           </div>
           <div class="form-group">
-            <label class="form-label">Mot de passe</label>
+            <label class="form-label">{{ t('login.password') }}</label>
             <div class="input-wrap">
               <input
                 v-model="loginForm.password"
@@ -73,36 +75,36 @@
 
           <button type="submit" class="btn-submit" :disabled="isLoading">
             <span v-if="isLoading" class="btn-spinner"></span>
-            <span v-else>Se connecter</span>
+            <span v-else>{{ t('login.btn_login') }}</span>
           </button>
         </form>
 
         <!-- REGISTER -->
         <form v-if="tab === 'register'" class="auth-form" @submit.prevent="handleRegister">
           <div class="form-group">
-            <label class="form-label">Nom complet</label>
+            <label class="form-label">{{ t('login.fullname') }}</label>
             <input
               v-model="registerForm.name"
               type="text"
               class="form-input"
-              placeholder="Prénom Nom"
+              :placeholder="t('login.fullname_ph')"
               required
               autocomplete="name"
             />
           </div>
           <div class="form-group">
-            <label class="form-label">Adresse e-mail</label>
+            <label class="form-label">{{ t('login.email') }}</label>
             <input
               v-model="registerForm.email"
               type="email"
               class="form-input"
-              placeholder="vous@exemple.com"
+              :placeholder="t('login.email_ph')"
               required
               autocomplete="email"
             />
           </div>
           <div class="form-group">
-            <label class="form-label">Mot de passe</label>
+            <label class="form-label">{{ t('login.password') }}</label>
             <div class="input-wrap">
               <input
                 v-model="registerForm.password"
@@ -124,7 +126,7 @@
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label">Confirmer le mot de passe</label>
+            <label class="form-label">{{ t('login.confirm_pwd') }}</label>
             <input
               v-model="registerForm.confirm"
               type="password"
@@ -140,12 +142,12 @@
 
           <button type="submit" class="btn-submit" :disabled="isLoading">
             <span v-if="isLoading" class="btn-spinner"></span>
-            <span v-else>Créer mon compte</span>
+            <span v-else>{{ t('login.btn_register') }}</span>
           </button>
         </form>
 
         <p class="auth-note">
-          Prototype pédagogique — usage non médical
+          {{ t('login.note') }}
         </p>
       </div>
     </div>
@@ -158,6 +160,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { auth } from '../store/auth.js'
+import { t, locale, toggleLocale } from '../store/locale.js'
 
 const router   = useRouter()
 const tab      = ref('login')
@@ -255,18 +258,16 @@ async function handleRegister() {
   gap: 10px;
 }
 .brand-logo {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
+  width: 48px; height: 48px;
+  border-radius: 10px;
   background: #ffffff;
   object-fit: contain;
-  padding: 3px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+  padding: 4px;
   flex-shrink: 0;
 }
 .brand-name {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 20px;
+  font-weight: 700;
   color: #e5e7eb;
   letter-spacing: -0.01em;
 }
@@ -279,18 +280,19 @@ async function handleRegister() {
 }
 .auth-pitch h1 {
   font-family: 'Manrope', sans-serif;
-  font-size: 34px;
-  font-weight: 700;
+  font-size: 44px;
+  font-weight: 800;
   color: #f9fafb;
-  line-height: 1.25;
+  line-height: 1.14;
   letter-spacing: -0.02em;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
+  max-width: 460px;
 }
 .auth-pitch p {
-  font-size: 15px;
-  color: #9ca3af;
-  line-height: 1.8;
-  max-width: 340px;
+  font-size: 15.5px;
+  color: #cbd5e1;
+  line-height: 1.75;
+  max-width: 390px;
 }
 .auth-meta {
   font-size: 12px;
@@ -305,8 +307,36 @@ async function handleRegister() {
   align-items: center;
   justify-content: center;
   padding: 40px 24px;
+  position: relative;
+}
+.auth-lang-btn {
+  position: absolute;
+  top: 28px;
+  right: 32px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid #dbe3ef;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+  transition: border-color 0.15s, color 0.15s, box-shadow 0.15s;
+}
+.auth-lang-btn:hover {
+  border-color: #93c5fd;
+  color: #2563eb;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+}
+.auth-lang-btn .material-symbols-outlined {
+  font-size: 15px;
 }
 .auth-card {
+  position: relative;
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 16px;
@@ -421,7 +451,8 @@ async function handleRegister() {
 .btn-submit {
   width: 100%;
   padding: 13px;
-  background: #0f172a;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
   color: white;
   border: none;
   border-radius: 8px;
@@ -436,7 +467,7 @@ async function handleRegister() {
   margin-top: 4px;
 }
 .btn-submit:hover:not(:disabled) {
-  background: #1e293b;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   box-shadow: 0 4px 14px rgba(0,0,0,0.2);
   transform: translateY(-1px);
 }
@@ -466,8 +497,12 @@ async function handleRegister() {
   .auth-layout { flex-direction: column; }
   .auth-left { width: 100%; min-height: 220px; }
   .auth-left-inner { padding: 28px 24px; }
-  .auth-pitch h1 { font-size: 24px; }
-  .auth-pitch p { display: none; }
+  .auth-pitch h1 { font-size: 26px; }
+  .auth-pitch p { display: block; font-size: 13px; }
   .auth-card { padding: 28px 20px; }
+  .auth-lang-btn {
+    top: 16px;
+    right: 16px;
+  }
 }
 </style>

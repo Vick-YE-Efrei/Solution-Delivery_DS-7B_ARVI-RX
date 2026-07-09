@@ -72,15 +72,8 @@ async def predict(
     file: UploadFile = File(...),
     mode: str = Query(default="toy", description="toy | baseline | improved"),
     model_key: str = Query(default="medgemma_4b_pt", description="gemma_4_E4B | medgemma_4b_pt"),
+    lang: str = Query(default="fr", description="fr | en"),
 ):
-    """Reçoit une image, la sauvegarde, et renvoie une prédiction avec ses garde-fous.
-
-    mode="toy"/"baseline" utilise le prédicteur jouet déterministe (rapide, pas de
-    modèle à charger). Tout autre mode ("improved") tente l'inférence VLM réelle
-    (MedGemma/Gemma + LoRA) ; si le modèle n'est pas disponible localement (pas de
-    GPU, poids manquants...), on retombe automatiquement sur le prédicteur jouet
-    plutôt que de faire planter la requête.
-    """
     UPLOAD_DIR.mkdir(exist_ok=True)
     filename  = Path(file.filename or "image.png").name
     suffix    = Path(filename).suffix or ".png"
@@ -97,7 +90,7 @@ async def predict(
         else:
             try:
                 lora_path = LORA_PATH_GEMMA if model_key == "gemma_4_E4B" else LORA_PATH_MEDGEMMA
-                pred = vlm_predict_medgemma(target, model_key=model_key, lora_path=lora_path)
+                pred = vlm_predict_medgemma(target, model_key=model_key, lora_path=lora_path, lang=lang)
             except Exception as exc:
                 # Le VLM peut échouer pour plein de raisons (pas de GPU, poids absents,
                 # token HuggingFace manquant...) : on ne bloque pas l'utilisateur pour autant.
