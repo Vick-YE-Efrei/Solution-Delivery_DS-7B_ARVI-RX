@@ -1,10 +1,5 @@
 # Assistant radiologue virtuel responsable
 
-> **Auteur :** Badr Tajini  
-> **Solution Delivery - Filière Data**  
-> **École :** EFREI  
-> **Année académique :** 2025-2026
-
 ## Contexte
 
 Prototype pédagogique d'IA médicale multimodale pour apprendre à construire une chaîne **prudente, traçable et évaluée** autour d'une radiographie thoracique frontale.
